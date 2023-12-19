@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">IDPhotoMaster</string>
+    <string name="empty" />
+    <string name="no_connection">There is no internet connection :/</string>
+</resources>
