@@ -24,7 +24,7 @@ class LoginViewModel @Inject constructor(
 
     fun onLoginClick() {
         viewModelScope.launch {
-            validateAuthUseCase.invoke(currentState.userName, currentState.password)
+            validateAuthUseCase.invoke(currentState.mail, currentState.password)
                 .onEach { result ->
                     when (result) {
                         Resource.Loading -> {
@@ -37,7 +37,7 @@ class LoginViewModel @Inject constructor(
 
                         is Resource.Success -> {
                             updateState { copy(loading = false) }
-                            onLogin(currentState.userName, currentState.password)
+                            onLogin(currentState.mail, currentState.password)
                         }
                     }
                 }.launchIn(this)
@@ -69,14 +69,21 @@ class LoginViewModel @Inject constructor(
         }
     }
 
+    fun onMailChange(mail: String) {
+        updateState { copy(mail = mail, mailErrorMessage = null) }
+    }
+
+    fun onPasswordChange(password: String) {
+        updateState { copy(password = password, passwordErrorMessage = null) }
+    }
 }
 
 data class LoginViewState(
     val loading: Boolean = false,
-    val userName: String = "",
+    val mail: String = "",
     val password: String = "",
     val passwordErrorMessage: Int? = null,
-    val usernameErrorMessage: Int? = null
+    val mailErrorMessage: Int? = null
 ) : IViewState
 
 
