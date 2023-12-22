@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
@@ -44,18 +46,26 @@ import com.idphoto.idphotomaster.feature.login.contents.LoginScreenContent
 import com.idphoto.idphotomaster.feature.login.contents.SignupScreenContent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.text.style.TextAlign
+import com.idphoto.idphotomaster.app.MainViewModel
 
 @Composable
 fun LoginScreen(
     navigateToHome: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: LoginViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel
 ) {
     val viewState by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(key1 = viewModel.uiEvents) {
         viewModel.uiEvents.collect { event ->
             when (event) {
                 LoginViewEvents.NavigateToHome -> navigateToHome.invoke()
+                is LoginViewEvents.GeneralException -> mainViewModel.showCustomDialog(
+                    title = "Error occured :/",
+                    message = event.message,
+                    confirmText = "ok"
+                )
             }
         }
     }
@@ -113,13 +123,15 @@ fun ScreenContent(
         modifier = modifier.fillMaxSize(),
         topBar = {},
     ) { padding ->
+        val scrollState = rememberScrollState()
         Column(
             modifier = modifier
                 .background(BackgroundColor)
                 .padding(padding)
                 .padding(LocalDim.current.pageMargin)
                 .fillMaxSize()
-                .imePadding(),
+                .imePadding()
+                .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Image(
@@ -139,8 +151,10 @@ fun ScreenContent(
             )
             Spacer(modifier = Modifier.height(20.dp))
             Text(
+                modifier = modifier.padding(horizontal = 40.dp),
                 text = stringResource(descriptionTextId.intValue),
-                style = TextStyle(fontWeight = FontWeight.Normal)
+                style = TextStyle(fontWeight = FontWeight.Normal),
+                textAlign = TextAlign.Center
             )
             if (viewState.pageState == PageState.LOGIN) {
                 LoginScreenContent(

@@ -17,6 +17,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -65,7 +66,7 @@ fun LoginScreenContent(
             keyboardActions = KeyboardActions { keyboardController?.hide() }
         )
         Text(
-            text = "Şifremi unuttum",
+            text = stringResource(id = R.string.forgot_password),
             style = TextStyle(color = LightGrey, fontSize = 12.sp),
             modifier = Modifier
                 .fillMaxWidth()

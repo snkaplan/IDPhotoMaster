@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.navOptions
+import com.idphoto.idphotomaster.app.MainViewModel
 import com.idphoto.idphotomaster.feature.home.homeScreen
 import com.idphoto.idphotomaster.feature.home.navigateToHome
 import com.idphoto.idphotomaster.feature.login.LoginNavigationRoute
@@ -17,7 +18,8 @@ import com.idphoto.idphotomaster.feature.splash.splashScreen
 fun AppNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    startDestination: String = SplashNavigationRoute
+    startDestination: String = SplashNavigationRoute,
+    mainViewModel: MainViewModel
 ) {
     NavHost(
         modifier = modifier,
@@ -51,8 +53,8 @@ fun AppNavHost(
                     popUpTo(LoginNavigationRoute) {
                         inclusive = true
                     }
-                },
+                }
             )
-        })
+        }, mainViewModel = mainViewModel)
     }
 }

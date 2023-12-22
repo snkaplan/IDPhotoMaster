@@ -7,6 +7,8 @@
     <string name="password_hint">Şifre</string>
     <string name="password_hint_again">Şifre Tekrar</string>
     <string name="password_error">Şifreni kontrol et lütfen</string>
+    <string name="password_length_error">Şifre minimum 6 karakter olmalıdır</string>
+    <string name="password_not_matching_error">Şifreler aynı olmalıdır!</string>
     <string name="login_title">Hoşgeldin</string>
     <string name="login_description">Şipşak fotoğrafın vücut bulmuş hali :D</string>
     <string name="signup_title">Kayıt Ol</string>
@@ -16,5 +18,8 @@
     <string name="dont_have_an_account">Henüz hesabın yok mu? </string>
     <string name="have_an_account">Zaten hesabın var mı? </string>
     <string name="name">İsim</string>
+    <string name="name_empty_error">İsim alanı boş olamaz</string>
+    <string name="lastname_empty_error">Soyadı alanı boş olamaz</string>
     <string name="surname">Soyisim</string>
+    <string name="forgot_password">Şifremi unuttum</string>
 </resources>

@@ -1,11 +1,18 @@
 package com.idphoto.idphotomaster.feature.login
 
 import androidx.lifecycle.viewModelScope
+import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.common.BaseViewModel
 import com.idphoto.idphotomaster.core.common.IViewEvents
 import com.idphoto.idphotomaster.core.common.IViewState
 import com.idphoto.idphotomaster.core.common.Resource
 import com.idphoto.idphotomaster.core.common.asResource
+import com.idphoto.idphotomaster.core.domain.exceptions.LastNameRequiredException
+import com.idphoto.idphotomaster.core.domain.exceptions.MailRequiredException
+import com.idphoto.idphotomaster.core.domain.exceptions.NameRequiredException
+import com.idphoto.idphotomaster.core.domain.exceptions.PasswordLengthException
+import com.idphoto.idphotomaster.core.domain.exceptions.PasswordRequiredException
+import com.idphoto.idphotomaster.core.domain.exceptions.PasswordsNotMatchingException
 import com.idphoto.idphotomaster.core.domain.usecase.login.LoginUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.login.SignupUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.login.ValidateAuthUseCase
@@ -36,7 +43,9 @@ class LoginViewModel @Inject constructor(
                         }
 
                         is Resource.Error -> {
-                            updateState { copy(loading = false) }
+                            result.exception?.let { handleError(it) } ?: run {
+                                updateState { copy(loading = false) }
+                            }
                         }
 
                         is Resource.Success -> {
@@ -59,7 +68,9 @@ class LoginViewModel @Inject constructor(
                         }
 
                         is Resource.Error -> {
-                            updateState { copy(loading = false) }
+                            result.exception?.let { handleError(it) } ?: run {
+                                updateState { copy(loading = false) }
+                            }
                         }
 
                         is Resource.Success -> {
@@ -88,21 +99,28 @@ class LoginViewModel @Inject constructor(
                     }
 
                     is Resource.Error -> {
-                        updateState { copy(loading = false) }
+                        result.exception?.let { handleError(it) } ?: run {
+                            updateState { copy(loading = false) }
+                        }
                     }
 
                     is Resource.Success -> {
                         updateState { copy(loading = false) }
-                        onLogin(currentState.mail, currentState.password)
+                        onSignup()
                     }
                 }
             }.launchIn(this)
         }
     }
 
-    fun onSignup(name: String, lastName: String, mail: String, password: String) {
+    private fun onSignup() {
         viewModelScope.launch {
-            signupUseCase(name, lastName, mail, password)
+            signupUseCase(
+                currentState.name,
+                currentState.lastName,
+                currentState.mail,
+                currentState.password
+            )
                 .asResource()
                 .onEach { result ->
                     when (result) {
@@ -111,7 +129,9 @@ class LoginViewModel @Inject constructor(
                         }
 
                         is Resource.Error -> {
-                            updateState { copy(loading = false) }
+                            result.exception?.let { handleError(it) } ?: run {
+                                updateState { copy(loading = false) }
+                            }
                         }
 
                         is Resource.Success -> {
@@ -148,6 +168,59 @@ class LoginViewModel @Inject constructor(
     fun onPageStateChange(newPageState: PageState) {
         updateState { LoginViewState(pageState = newPageState) }
     }
+
+    private fun handleError(th: Throwable) {
+        when (th) {
+            is NameRequiredException -> {
+                updateState { copy(loading = false, nameErrorMessage = R.string.name_empty_error) }
+            }
+
+            is LastNameRequiredException -> {
+                updateState {
+                    copy(
+                        loading = false,
+                        lastNameErrorMessage = R.string.lastname_empty_error
+                    )
+                }
+            }
+
+            is MailRequiredException -> {
+                updateState { copy(loading = false, mailErrorMessage = R.string.mail_error) }
+            }
+
+            is PasswordRequiredException -> {
+                updateState {
+                    copy(
+                        loading = false,
+                        passwordErrorMessage = R.string.password_error
+                    )
+                }
+            }
+
+            is PasswordLengthException -> {
+                updateState {
+                    copy(
+                        loading = false,
+                        passwordErrorMessage = R.string.password_length_error
+                    )
+                }
+            }
+
+            is PasswordsNotMatchingException -> {
+                updateState {
+                    copy(
+                        loading = false,
+                        passwordErrorMessage = R.string.password_not_matching_error
+                    )
+                }
+            }
+
+            else -> {
+                updateState { copy(loading = false) }
+                fireEvent(LoginViewEvents.GeneralException(th.localizedMessage))
+            }
+        }
+    }
 }
 
 data class LoginViewState(
@@ -166,6 +239,7 @@ data class LoginViewState(
 
 sealed class LoginViewEvents : IViewEvents {
     data object NavigateToHome : LoginViewEvents()
+    data class GeneralException(val message: String?) : LoginViewEvents()
 }
 
 enum class PageState {

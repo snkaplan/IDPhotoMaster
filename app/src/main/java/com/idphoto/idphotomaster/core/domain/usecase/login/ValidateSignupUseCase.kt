@@ -22,14 +22,14 @@ class ValidateSignupUseCase @Inject constructor() {
         passwordAgain: String
     ): Flow<Resource<Unit>> {
         return flow {
-            if (mail.isEmpty()) {
-                throw MailRequiredException()
-            }
             if (name.isEmpty()) {
                 throw NameRequiredException()
             }
             if (lastName.isEmpty()) {
                 throw LastNameRequiredException()
+            }
+            if (mail.isEmpty()) {
+                throw MailRequiredException()
             }
             if (password.isEmpty() || passwordAgain.isEmpty()) {
                 throw PasswordRequiredException()

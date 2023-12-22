@@ -26,6 +26,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import com.idphoto.idphotomaster.R
+import com.idphoto.idphotomaster.app.MainViewModel
 import com.idphoto.idphotomaster.app.navigation.AppNavHost
 import com.idphoto.idphotomaster.app.navigation.TopLevelDestinations
 import com.idphoto.idphotomaster.core.data.util.NetworkMonitor
@@ -43,6 +44,7 @@ fun AppWrapper(
     appState: MainAppState = rememberAppState(
         networkMonitor = networkMonitor,
     ),
+    mainViewModel: MainViewModel
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val isOffline by appState.isOffline.collectAsStateWithLifecycle()
@@ -78,7 +80,7 @@ fun AppWrapper(
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) {
         AppNavHost(
-            navController = appState.navController,
+            navController = appState.navController, mainViewModel = mainViewModel
         )
     }
 }
