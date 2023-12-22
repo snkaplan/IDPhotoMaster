@@ -5,5 +5,16 @@
     <string name="mail_hint">Mail Adresi</string>
     <string name="mail_error">Mail adresini kontrol et lütfen</string>
     <string name="password_hint">Şifre</string>
+    <string name="password_hint_again">Şifre Tekrar</string>
     <string name="password_error">Şifreni kontrol et lütfen</string>
+    <string name="login_title">Hoşgeldin</string>
+    <string name="login_description">Şipşak fotoğrafın vücut bulmuş hali :D</string>
+    <string name="signup_title">Kayıt Ol</string>
+    <string name="signup_description">Sana özel bir deneyim oluşturabilmemiz için kayıt olman gerekiyor.</string>
+    <string name="login">Giriş Yap</string>
+    <string name="signup">Hesap Oluştur</string>
+    <string name="dont_have_an_account">Henüz hesabın yok mu? </string>
+    <string name="have_an_account">Zaten hesabın var mı? </string>
+    <string name="name">İsim</string>
+    <string name="surname">Soyisim</string>
 </resources>

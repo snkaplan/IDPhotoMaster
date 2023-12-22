@@ -1,4 +1,4 @@
-package com.idphoto.idphotomaster.core.domain.login
+package com.idphoto.idphotomaster.core.domain.model
 
 data class LoginResult(
     val userId: String = "",
