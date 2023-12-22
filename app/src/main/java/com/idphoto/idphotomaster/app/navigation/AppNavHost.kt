@@ -13,6 +13,9 @@ import com.idphoto.idphotomaster.feature.login.loginScreen
 import com.idphoto.idphotomaster.feature.login.navigateLogin
 import com.idphoto.idphotomaster.feature.splash.SplashNavigationRoute
 import com.idphoto.idphotomaster.feature.splash.splashScreen
+import com.idphoto.idphotomaster.feature.tutorial.TutorialNavigationRoute
+import com.idphoto.idphotomaster.feature.tutorial.navigateToTutorial
+import com.idphoto.idphotomaster.feature.tutorial.tutorialScreen
 
 @Composable
 fun AppNavHost(
@@ -44,6 +47,15 @@ fun AppNavHost(
                         }
                     },
                 )
+            },
+            navigateToTutorial = {
+                navController.navigateToTutorial(
+                    navOptions = navOptions {
+                        popUpTo(SplashNavigationRoute) {
+                            inclusive = true
+                        }
+                    },
+                )
             }
         )
         homeScreen()
@@ -56,5 +68,22 @@ fun AppNavHost(
                 }
             )
         }, mainViewModel = mainViewModel)
+        tutorialScreen(navigateToLogin = {
+            navController.navigateLogin(
+                navOptions = navOptions {
+                    popUpTo(SplashNavigationRoute) {
+                        inclusive = true
+                    }
+                },
+            )
+        }, navigateToHome = {
+            navController.navigateToHome(
+                navOptions = navOptions {
+                    popUpTo(TutorialNavigationRoute) {
+                        inclusive = true
+                    }
+                }
+            )
+        })
     }
 }

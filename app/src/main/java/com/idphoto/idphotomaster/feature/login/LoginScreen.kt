@@ -151,7 +151,7 @@ fun ScreenContent(
             )
             Spacer(modifier = Modifier.height(20.dp))
             Text(
-                modifier = modifier.padding(horizontal = 40.dp),
+                modifier = Modifier.padding(horizontal = 40.dp),
                 text = stringResource(descriptionTextId.intValue),
                 style = TextStyle(fontWeight = FontWeight.Normal),
                 textAlign = TextAlign.Center

@@ -22,4 +22,13 @@
     <string name="lastname_empty_error">Soyadı alanı boş olamaz</string>
     <string name="surname">Soyisim</string>
     <string name="forgot_password">Şifremi unuttum</string>
+    <string name="tutorial_biometric_title">Biometrik</string>
+    <string name="tutorial_biometric_description">Biometrik standartlara uygun\nfotoğraf çek.</string>
+    <string name="tutorial_edit_bg_title">Arkaplanı Kaldır\nDüzenle!</string>
+    <string name="tutorial_edit_bg_description">Arkaplanı kaldır ve renkleriyle\nistediğin gibi oyna</string>
+    <string name="skip">Geç</string>
+    <string name="next">İleri</string>
+    <string name="start">Başla</string>
+
+    Arkaplanı Kaldır Düzenle!
 </resources>

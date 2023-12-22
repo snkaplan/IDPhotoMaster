@@ -12,6 +12,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 fun SplashScreen(
     navigateToLogin: () -> Unit,
     navigateToHome: () -> Unit,
+    navigateToTutorial: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SplashViewModel = hiltViewModel()
 ) {
@@ -21,6 +22,7 @@ fun SplashScreen(
             when (event) {
                 SplashViewEvents.NavigateToHome -> navigateToHome.invoke()
                 SplashViewEvents.NavigateToLogin -> navigateToLogin.invoke()
+                SplashViewEvents.NavigateToTutorial -> navigateToTutorial.invoke()
             }
         }
     }

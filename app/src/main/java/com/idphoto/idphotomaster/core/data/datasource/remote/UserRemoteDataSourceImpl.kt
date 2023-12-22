@@ -1,4 +1,4 @@
-package com.idphoto.idphotomaster.core.data.datasource
+package com.idphoto.idphotomaster.core.data.datasource.remote
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser

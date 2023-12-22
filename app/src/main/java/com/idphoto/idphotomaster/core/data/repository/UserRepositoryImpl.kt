@@ -2,7 +2,7 @@ package com.idphoto.idphotomaster.core.data.repository
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.idphoto.idphotomaster.core.data.datasource.UserRemoteDataSource
+import com.idphoto.idphotomaster.core.data.datasource.remote.UserRemoteDataSource
 import com.idphoto.idphotomaster.core.domain.model.User
 import javax.inject.Inject
 
