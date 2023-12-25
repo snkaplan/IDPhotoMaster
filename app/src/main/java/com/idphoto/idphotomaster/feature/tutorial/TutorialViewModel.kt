@@ -7,37 +7,16 @@ import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.common.BaseViewModel
 import com.idphoto.idphotomaster.core.common.IViewEvents
 import com.idphoto.idphotomaster.core.common.IViewState
-import com.idphoto.idphotomaster.core.data.datasource.local.LocalDataStore
-import com.idphoto.idphotomaster.core.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class TutorialViewModel @Inject constructor(
-    private val localDataStore: LocalDataStore,
-    private val userRepository: UserRepository
-) : BaseViewModel<TutorialViewState, TutorialViewEvents>() {
+class TutorialViewModel @Inject constructor() :
+    BaseViewModel<TutorialViewState, TutorialViewEvents>() {
     override fun createInitialState(): TutorialViewState = TutorialViewState()
 
-    init {
-        viewModelScope.launch {
-            delay(1000)
-            //checkUserStatusAndNavigate()
-        }
-    }
-
     fun onSkipClicked() {
-        checkUserStatusAndNavigate()
-    }
-
-    private fun checkUserStatusAndNavigate() {
-        if (userRepository.currentUser != null) {
-            fireEvent(TutorialViewEvents.NavigateToHome)
-        } else {
-            fireEvent(TutorialViewEvents.NavigateToLogin)
-        }
+        fireEvent(TutorialViewEvents.NavigateToHome)
     }
 }
 
@@ -58,7 +37,6 @@ data class TutorialViewState(
 ) : IViewState
 
 sealed class TutorialViewEvents : IViewEvents {
-    data object NavigateToLogin : TutorialViewEvents()
     data object NavigateToHome : TutorialViewEvents()
 }
 

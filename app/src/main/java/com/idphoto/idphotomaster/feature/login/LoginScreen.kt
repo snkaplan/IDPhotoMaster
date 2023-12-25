@@ -54,14 +54,14 @@ fun LoginScreen(
     navigateToHome: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = hiltViewModel(),
-    mainViewModel: MainViewModel
+    mainViewModel: MainViewModel? = null
 ) {
     val viewState by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(key1 = viewModel.uiEvents) {
         viewModel.uiEvents.collect { event ->
             when (event) {
                 LoginViewEvents.NavigateToHome -> navigateToHome.invoke()
-                is LoginViewEvents.GeneralException -> mainViewModel.showCustomDialog(
+                is LoginViewEvents.GeneralException -> mainViewModel?.showCustomDialog(
                     title = "Error occured :/",
                     message = event.message,
                     confirmText = "ok"
@@ -77,7 +77,6 @@ fun LoginScreen(
         onStateChange = viewModel::onPageStateChange,
         onNameValueChange = viewModel::onNameChange,
         onLastnameValueChange = viewModel::onLastnameChange,
-        onPasswordAgainValueChange = viewModel::onPasswordAgainChange,
         onAction = if (viewState.pageState == PageState.LOGIN) viewModel::onLoginClick else viewModel::onSignupClick
     )
 }
@@ -90,7 +89,6 @@ fun ScreenContent(
     onStateChange: (PageState) -> Unit,
     onNameValueChange: (String) -> Unit,
     onLastnameValueChange: (String) -> Unit,
-    onPasswordAgainValueChange: (String) -> Unit,
     onAction: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -168,8 +166,7 @@ fun ScreenContent(
                     onMailValueChange,
                     onPasswordValueChange,
                     onNameValueChange,
-                    onLastnameValueChange,
-                    onPasswordAgainValueChange
+                    onLastnameValueChange
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))

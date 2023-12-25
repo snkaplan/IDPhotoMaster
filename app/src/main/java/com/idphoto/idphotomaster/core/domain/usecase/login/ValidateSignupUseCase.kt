@@ -8,7 +8,6 @@ import com.idphoto.idphotomaster.core.domain.exceptions.MailRequiredException
 import com.idphoto.idphotomaster.core.domain.exceptions.NameRequiredException
 import com.idphoto.idphotomaster.core.domain.exceptions.PasswordLengthException
 import com.idphoto.idphotomaster.core.domain.exceptions.PasswordRequiredException
-import com.idphoto.idphotomaster.core.domain.exceptions.PasswordsNotMatchingException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -18,8 +17,7 @@ class ValidateSignupUseCase @Inject constructor() {
         name: String,
         lastName: String,
         mail: String,
-        password: String,
-        passwordAgain: String
+        password: String
     ): Flow<Resource<Unit>> {
         return flow {
             if (name.isEmpty()) {
@@ -31,14 +29,11 @@ class ValidateSignupUseCase @Inject constructor() {
             if (mail.isEmpty()) {
                 throw MailRequiredException()
             }
-            if (password.isEmpty() || passwordAgain.isEmpty()) {
+            if (password.isEmpty()) {
                 throw PasswordRequiredException()
             }
             if (password.length < MinPasswordLength) {
                 throw PasswordLengthException()
-            }
-            if (password != passwordAgain) {
-                throw PasswordsNotMatchingException()
             }
             emit(Unit)
         }.asResource()

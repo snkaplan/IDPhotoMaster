@@ -24,8 +24,7 @@ fun SignupScreenContent(
     onMailValueChange: (String) -> Unit,
     onPasswordValueChange: (String) -> Unit,
     onNameValeChange: (String) -> Unit,
-    onLastnameValueChange: (String) -> Unit,
-    onPasswordAgainValueChange: (String) -> Unit
+    onLastnameValueChange: (String) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -63,14 +62,6 @@ fun SignupScreenContent(
             errorMessageRes = viewState.passwordErrorMessage,
             onValueChange = onPasswordValueChange,
             placeholder = R.string.password_hint,
-            enabled = viewState.loading.not(),
-            keyboardActions = downAction
-        )
-        PasswordTextField(
-            value = viewState.passwordAgain,
-            errorMessageRes = viewState.passwordErrorMessage,
-            onValueChange = onPasswordAgainValueChange,
-            placeholder = R.string.password_hint_again,
             enabled = viewState.loading.not(),
             keyboardActions = KeyboardActions { keyboardController?.hide() }
         )

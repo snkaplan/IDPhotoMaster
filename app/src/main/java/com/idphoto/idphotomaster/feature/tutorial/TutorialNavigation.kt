@@ -7,9 +7,9 @@ import androidx.navigation.compose.composable
 
 const val TutorialNavigationRoute = "tutorial_route"
 
-fun NavGraphBuilder.tutorialScreen(navigateToLogin: () -> Unit, navigateToHome: () -> Unit) {
+fun NavGraphBuilder.tutorialScreen(navigateToHome: () -> Unit) {
     composable(TutorialNavigationRoute) {
-        TutorialScreen(navigateToLogin = navigateToLogin, navigateToHome = navigateToHome)
+        TutorialScreen(navigateToHome = navigateToHome)
     }
 }
 

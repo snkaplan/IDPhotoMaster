@@ -5,10 +5,8 @@
     <string name="mail_hint">Mail Adresi</string>
     <string name="mail_error">Mail adresini kontrol et lütfen</string>
     <string name="password_hint">Şifre</string>
-    <string name="password_hint_again">Şifre Tekrar</string>
     <string name="password_error">Şifreni kontrol et lütfen</string>
     <string name="password_length_error">Şifre minimum 6 karakter olmalıdır</string>
-    <string name="password_not_matching_error">Şifreler aynı olmalıdır!</string>
     <string name="login_title">Hoşgeldin</string>
     <string name="login_description">Şipşak fotoğrafın vücut bulmuş hali :D</string>
     <string name="signup_title">Kayıt Ol</string>
@@ -29,6 +27,4 @@
     <string name="skip">Geç</string>
     <string name="next">İleri</string>
     <string name="start">Başla</string>
-
-    Arkaplanı Kaldır Düzenle!
 </resources>

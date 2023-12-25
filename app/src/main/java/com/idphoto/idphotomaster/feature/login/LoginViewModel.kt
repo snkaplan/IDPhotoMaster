@@ -12,7 +12,6 @@ import com.idphoto.idphotomaster.core.domain.exceptions.MailRequiredException
 import com.idphoto.idphotomaster.core.domain.exceptions.NameRequiredException
 import com.idphoto.idphotomaster.core.domain.exceptions.PasswordLengthException
 import com.idphoto.idphotomaster.core.domain.exceptions.PasswordRequiredException
-import com.idphoto.idphotomaster.core.domain.exceptions.PasswordsNotMatchingException
 import com.idphoto.idphotomaster.core.domain.usecase.login.LoginUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.login.SignupUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.login.ValidateAuthUseCase
@@ -90,8 +89,7 @@ class LoginViewModel @Inject constructor(
                 currentState.name,
                 currentState.lastName,
                 currentState.mail,
-                currentState.password,
-                currentState.passwordAgain
+                currentState.password
             ).onEach { result ->
                 when (result) {
                     Resource.Loading -> {
@@ -161,10 +159,6 @@ class LoginViewModel @Inject constructor(
         updateState { copy(lastName = lastName, lastNameErrorMessage = null) }
     }
 
-    fun onPasswordAgainChange(password: String) {
-        updateState { copy(passwordAgain = password, passwordErrorMessage = null) }
-    }
-
     fun onPageStateChange(newPageState: PageState) {
         updateState { LoginViewState(pageState = newPageState) }
     }
@@ -206,15 +200,6 @@ class LoginViewModel @Inject constructor(
                 }
             }
 
-            is PasswordsNotMatchingException -> {
-                updateState {
-                    copy(
-                        loading = false,
-                        passwordErrorMessage = R.string.password_not_matching_error
-                    )
-                }
-            }
-
             else -> {
                 updateState { copy(loading = false) }
                 fireEvent(LoginViewEvents.GeneralException(th.localizedMessage))
@@ -229,7 +214,6 @@ data class LoginViewState(
     val name: String = "",
     val lastName: String = "",
     val password: String = "",
-    val passwordAgain: String = "",
     val passwordErrorMessage: Int? = null,
     val mailErrorMessage: Int? = null,
     val nameErrorMessage: Int? = null,

@@ -15,7 +15,6 @@ import javax.inject.Inject
 @HiltViewModel
 class SplashViewModel @Inject constructor(
     private val localDataStore: LocalDataStore,
-    private val userRepository: UserRepository
 ) : BaseViewModel<SplashViewState, SplashViewEvents>() {
     override fun createInitialState(): SplashViewState = SplashViewState()
 
@@ -25,12 +24,7 @@ class SplashViewModel @Inject constructor(
                 updateState { copy(isUserSawTutorial = it) }
                 delay(1000)
                 if (currentState.isUserSawTutorial) {
-                    val event = if (userRepository.currentUser != null) {
-                        SplashViewEvents.NavigateToHome
-                    } else {
-                        SplashViewEvents.NavigateToLogin
-                    }
-                    fireEvent(event)
+                    fireEvent(SplashViewEvents.NavigateToHome)
                 } else {
                     fireEvent(SplashViewEvents.NavigateToTutorial)
                 }
@@ -45,6 +39,5 @@ data class SplashViewState(val loading: Boolean = false, val isUserSawTutorial: 
 
 sealed class SplashViewEvents : IViewEvents {
     data object NavigateToHome : SplashViewEvents()
-    data object NavigateToLogin : SplashViewEvents()
     data object NavigateToTutorial : SplashViewEvents()
 }

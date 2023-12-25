@@ -30,15 +30,6 @@ fun AppNavHost(
         startDestination = startDestination
     ) {
         splashScreen(
-            navigateToLogin = {
-                navController.navigateLogin(
-                    navOptions = navOptions {
-                        popUpTo(SplashNavigationRoute) {
-                            inclusive = true
-                        }
-                    },
-                )
-            },
             navigateToHome = {
                 navController.navigateToHome(
                     navOptions = navOptions {
@@ -68,15 +59,7 @@ fun AppNavHost(
                 }
             )
         }, mainViewModel = mainViewModel)
-        tutorialScreen(navigateToLogin = {
-            navController.navigateLogin(
-                navOptions = navOptions {
-                    popUpTo(SplashNavigationRoute) {
-                        inclusive = true
-                    }
-                },
-            )
-        }, navigateToHome = {
+        tutorialScreen(navigateToHome = {
             navController.navigateToHome(
                 navOptions = navOptions {
                     popUpTo(TutorialNavigationRoute) {

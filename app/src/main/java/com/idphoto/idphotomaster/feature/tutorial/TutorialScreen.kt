@@ -43,7 +43,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun TutorialScreen(
-    navigateToLogin: () -> Unit,
     navigateToHome: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: TutorialViewModel = hiltViewModel()
@@ -53,7 +52,6 @@ fun TutorialScreen(
         viewModel.uiEvents.collect { event ->
             when (event) {
                 TutorialViewEvents.NavigateToHome -> navigateToHome.invoke()
-                TutorialViewEvents.NavigateToLogin -> navigateToLogin.invoke()
             }
         }
     }
