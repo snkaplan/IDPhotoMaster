@@ -27,4 +27,6 @@
     <string name="skip">Geç</string>
     <string name="next">İleri</string>
     <string name="start">Başla</string>
+    <string name="camera_permission">Fotoğraf çekebilmek için kamera erişimine izin vermelisin</string>
+    <string name="give_permission">İzin Ver</string>
 </resources>

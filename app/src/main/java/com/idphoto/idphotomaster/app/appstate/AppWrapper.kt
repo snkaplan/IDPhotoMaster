@@ -1,6 +1,7 @@
 package com.idphoto.idphotomaster.app.appstate
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -15,13 +16,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -35,6 +33,7 @@ import com.idphoto.idphotomaster.core.systemdesign.animation.slideOut
 import com.idphoto.idphotomaster.core.systemdesign.components.AppScaffold
 import com.idphoto.idphotomaster.core.systemdesign.components.TitleMedium
 import com.idphoto.idphotomaster.core.systemdesign.icon.Icon
+import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -80,7 +79,9 @@ fun AppWrapper(
         snackbarHost = { SnackbarHost(snackbarHostState) },
     ) {
         AppNavHost(
-            navController = appState.navController, mainViewModel = mainViewModel
+            modifier = Modifier.padding(it),
+            navController = appState.navController,
+            mainViewModel = mainViewModel
         )
     }
 }
@@ -111,7 +112,7 @@ internal fun AppNavBar(
     onNavigateToDestination: (TopLevelDestinations) -> Unit,
     currentDestination: NavDestination?,
 ) {
-    NavigationBar(containerColor = Color.White, modifier = Modifier.shadow(elevation = 3.dp)) {
+    NavigationBar(containerColor = BackgroundColor) {
         destinations.forEach { destination ->
             val selected = currentDestination.isTopLevelDestinationInHierarchy(destination)
             NavigationBarItem(

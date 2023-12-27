@@ -102,4 +102,15 @@ dependencies {
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+    val camerax_version = "1.3.1"
+    val accompanist_version = "0.32.0"
+    implementation("androidx.camera:camera-camera2:$camerax_version")
+    implementation("androidx.camera:camera-lifecycle:$camerax_version")
+    implementation("androidx.camera:camera-view:$camerax_version")
+    implementation("androidx.camera:camera-extensions:$camerax_version")
+
+    //// ACCOMPANIST ////
+    implementation("com.google.accompanist:accompanist-permissions:$accompanist_version")
+
 }

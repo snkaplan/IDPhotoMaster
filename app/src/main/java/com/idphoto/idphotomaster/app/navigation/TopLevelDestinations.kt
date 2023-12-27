@@ -13,8 +13,8 @@ enum class TopLevelDestinations(
 ) {
     HOME(
         route = HomeNavigationRoute,
-        selectedIcon = Icon.ImageVectorIcon(AppIcons.Home),
-        unselectedIcon = Icon.ImageVectorIcon(AppIcons.HomeOutlined),
+        selectedIcon = Icon.ImageVectorIcon(AppIcons.Camera),
+        unselectedIcon = Icon.ImageVectorIcon(AppIcons.CameraOutlined),
         titleTextId = R.string.empty,
     )
 }
