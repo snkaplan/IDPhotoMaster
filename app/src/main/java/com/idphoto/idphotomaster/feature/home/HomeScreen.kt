@@ -15,7 +15,7 @@ import com.idphoto.idphotomaster.feature.home.nopermission.NoCameraPermissionScr
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
+fun HomeScreen(navigateToEditPhoto: (String) -> Unit, viewModel: HomeViewModel = hiltViewModel()) {
     val viewState by viewModel.uiState.collectAsStateWithLifecycle()
     val cameraPermissionState: PermissionState =
         rememberPermissionState(permission = Manifest.permission.CAMERA)
@@ -31,6 +31,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
     ScreenContent(
         viewState = viewState,
         hasPermission = cameraPermissionState.status.isGranted,
+        navigateToEditPhoto = navigateToEditPhoto,
         onRequestPermission = cameraPermissionState::launchPermissionRequest
     )
 }
@@ -39,10 +40,11 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
 private fun ScreenContent(
     viewState: HomeViewState,
     hasPermission: Boolean,
+    navigateToEditPhoto: (String) -> Unit,
     onRequestPermission: () -> Unit
 ) {
     if (hasPermission) {
-        CameraScreen()
+        CameraScreen(navigateToEditPhoto)
     } else {
         NoCameraPermissionScreen(onRequestPermission)
     }

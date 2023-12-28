@@ -14,22 +14,22 @@ import androidx.camera.view.LifecycleCameraController
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Camera
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
@@ -49,8 +49,18 @@ import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 import java.util.concurrent.Executor
 
 @Composable
-fun CameraScreen(viewModel: CameraViewModel = hiltViewModel()) {
+fun CameraScreen(
+    navigateToEditPhoto: (String) -> Unit,
+    viewModel: CameraViewModel = hiltViewModel()
+) {
     val cameraState: CameraViewState by viewModel.uiState.collectAsStateWithLifecycle()
+    LaunchedEffect(key1 = viewModel.uiEvents) {
+        viewModel.uiEvents.collect { event ->
+            when (event) {
+                is CameraViewEvents.NavigateToEditPhoto -> navigateToEditPhoto.invoke(event.capturedImageUri.toString())
+            }
+        }
+    }
     CameraContent(
         onPhotoCaptured = viewModel::storePhotoInGallery,
         lastCapturedPhoto = cameraState.capturedImage
@@ -70,19 +80,6 @@ private fun CameraContent(
     AppScaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {},
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                modifier = Modifier.padding(bottom = 100.dp),
-                text = { Text(text = "Take photo") },
-                onClick = { capturePhoto(context, cameraController, onPhotoCaptured) },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Camera,
-                        contentDescription = "Camera capture icon"
-                    )
-                }
-            )
-        }
     ) { padding ->
         Box(
             modifier = Modifier
@@ -106,11 +103,22 @@ private fun CameraContent(
                     }
                 }
             )
+            Surface(
+                shape = CircleShape, modifier = Modifier
+                    .padding(20.dp)
+                    .size(60.dp)
+                    .align(Alignment.BottomCenter)
+                    .clickable {
+                        capturePhoto(context, cameraController, onPhotoCaptured)
+                    }, color = androidx.compose.ui.graphics.Color.White
+            ) {
+            }
 
             if (lastCapturedPhoto != null) {
                 LastPhotoPreview(
                     modifier = Modifier.align(alignment = BottomStart),
-                    lastCapturedPhoto = lastCapturedPhoto
+                    lastCapturedPhoto = lastCapturedPhoto,
+                    onPhotoCaptured
                 )
             }
         }
@@ -141,14 +149,18 @@ private fun capturePhoto(
 @Composable
 private fun LastPhotoPreview(
     modifier: Modifier = Modifier,
-    lastCapturedPhoto: Bitmap
+    lastCapturedPhoto: Bitmap,
+    onPhotoCaptured: (Bitmap) -> Unit
 ) {
     val capturedPhoto: ImageBitmap =
         remember(lastCapturedPhoto.hashCode()) { lastCapturedPhoto.asImageBitmap() }
     Card(
         modifier = modifier
             .size(128.dp)
-            .padding(16.dp),
+            .padding(16.dp)
+            .clickable {
+                onPhotoCaptured.invoke(lastCapturedPhoto)
+            },
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp),
         shape = MaterialTheme.shapes.large
     ) {

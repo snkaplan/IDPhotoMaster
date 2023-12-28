@@ -1,7 +1,7 @@
-package com.idphoto.idphotomaster.feature.home.camera
+package com.idphoto.idphotomaster.feature.editphoto
 
 import android.graphics.Bitmap
-import android.net.Uri
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.idphoto.idphotomaster.core.common.BaseViewModel
 import com.idphoto.idphotomaster.core.common.IViewEvents
@@ -10,7 +10,7 @@ import com.idphoto.idphotomaster.core.common.Resource
 import com.idphoto.idphotomaster.core.common.asResource
 import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
 import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
-import com.idphoto.idphotomaster.core.domain.usecase.home.SavePhotoToGalleryUseCase
+import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromGalleryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.launchIn
@@ -19,15 +19,22 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CameraViewModel @Inject constructor(
-    private val savePhotoToGalleryUseCase: SavePhotoToGalleryUseCase,
+class EditPhotoViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
+    private val readImageFromGalleryUseCase: ReadImageFromGalleryUseCase,
     @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher
-) : BaseViewModel<CameraViewState, CameraViewEvents>() {
-    override fun createInitialState(): CameraViewState = CameraViewState()
+) :
+    BaseViewModel<EditPhotoViewState, EditPhotoViewEvent>() {
+    private val photoArgs: EditPhotoArgs = EditPhotoArgs(savedStateHandle)
+    override fun createInitialState(): EditPhotoViewState = EditPhotoViewState()
 
-    fun storePhotoInGallery(bitmap: Bitmap) {
+    init {
+        readImageAndUpdateState(photoArgs.photoPath)
+    }
+
+    private fun readImageAndUpdateState(photoPath: String) {
         viewModelScope.launch(ioDispatcher) {
-            savePhotoToGalleryUseCase(bitmap).asResource()
+            readImageFromGalleryUseCase(photoPath).asResource()
                 .onEach { result ->
                     when (result) {
                         Resource.Loading -> {
@@ -41,30 +48,21 @@ class CameraViewModel @Inject constructor(
                         is Resource.Success -> {
                             updateState {
                                 copy(
-                                    loading = false,
-                                    capturedImageUri = result.data,
-                                    capturedImage = bitmap
+                                    lastCapturedPhotoPath = photoArgs.photoPath,
+                                    lastCapturedPhoto = result.data
                                 )
                             }
-                            fireEvent(CameraViewEvents.NavigateToEditPhoto(result.data))
                         }
                     }
                 }.launchIn(this)
         }
     }
-
-    override fun onCleared() {
-        uiState.value.capturedImage?.recycle()
-        super.onCleared()
-    }
 }
 
-data class CameraViewState(
+data class EditPhotoViewState(
     val loading: Boolean = false,
-    val capturedImageUri: Uri? = null,
-    val capturedImage: Bitmap? = null
+    val lastCapturedPhotoPath: String? = null,
+    val lastCapturedPhoto: Bitmap? = null
 ) : IViewState
 
-sealed interface CameraViewEvents : IViewEvents {
-    data class NavigateToEditPhoto(val capturedImageUri: Uri) : CameraViewEvents
-}
+sealed class EditPhotoViewEvent : IViewEvents {}
