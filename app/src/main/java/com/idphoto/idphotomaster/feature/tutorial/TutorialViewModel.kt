@@ -7,16 +7,22 @@ import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.common.BaseViewModel
 import com.idphoto.idphotomaster.core.common.IViewEvents
 import com.idphoto.idphotomaster.core.common.IViewState
+import com.idphoto.idphotomaster.core.data.datasource.local.LocalDataStore
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class TutorialViewModel @Inject constructor() :
-    BaseViewModel<TutorialViewState, TutorialViewEvents>() {
+class TutorialViewModel @Inject constructor(
+    private val localDataStore: LocalDataStore,
+) : BaseViewModel<TutorialViewState, TutorialViewEvents>() {
     override fun createInitialState(): TutorialViewState = TutorialViewState()
 
     fun onSkipClicked() {
-        fireEvent(TutorialViewEvents.NavigateToHome)
+        viewModelScope.launch {
+            localDataStore.setUserSawTutorial(true)
+            fireEvent(TutorialViewEvents.NavigateToHome)
+        }
     }
 }
 

@@ -29,4 +29,10 @@
     <string name="start">Başla</string>
     <string name="camera_permission">Fotoğraf çekebilmek için kamera erişimine izin vermelisin</string>
     <string name="give_permission">İzin Ver</string>
+    <string name="continue_text">DEVAM ET</string>
+    <string name="save_changes">DÜZENLEMEYİ KAYDET</string>
+    <string name="sharpness">Keskinlik</string>
+    <string name="brightness">Parlaklık</string>
+    <string name="heat">Sıcaklık</string>
+    <string name="remove_background">Arkaplanı kaldır</string>
 </resources>
