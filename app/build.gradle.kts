@@ -114,4 +114,6 @@ dependencies {
     implementation("com.google.accompanist:accompanist-permissions:$accompanist_version")
     implementation("jp.co.cyberagent.android:gpuimage:2.1.0")
 
+    implementation("com.github.GhayasAhmad:auto-background-remover:1.0.3")
+
 }

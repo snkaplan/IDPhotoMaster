@@ -23,6 +23,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
@@ -81,7 +82,8 @@ fun EditPhotoScreen(
             onBackClick = onBackClick,
             onBrightnessChanged = viewModel::onBrightnessChanged,
             onSharpnessChanged = viewModel::onSharpnessChanged,
-            onHeatChanged = viewModel::onHeatChanged
+            onHeatChanged = viewModel::onHeatChanged,
+            onRemoveBackground = viewModel::onRemoveBackground
         )
     }
 }
@@ -93,7 +95,8 @@ private fun ScreenContent(
     onBackClick: () -> Unit,
     onBrightnessChanged: (brightness: Float) -> Unit,
     onSharpnessChanged: (brightness: Float) -> Unit,
-    onHeatChanged: (brightness: Float) -> Unit
+    onHeatChanged: (brightness: Float) -> Unit,
+    onRemoveBackground: (remove: Boolean) -> Unit
 ) {
     AppScaffold(
         modifier = modifier.fillMaxSize(),
@@ -110,42 +113,53 @@ private fun ScreenContent(
                 .fillMaxSize()
                 .background(Color.White)
                 .padding(padding)
-                .imePadding()
-                .verticalScroll(scrollState),
+                .imePadding(),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            viewState.updatedPhoto?.let { safePhoto ->
-                PhotoView(bitmap = viewState.updatedPhoto.asImageBitmap())
-                Spacer(modifier = Modifier.height(15.dp))
-                DrawLineWithDot(
-                    modifier = Modifier
-                        .fillMaxWidth(0.5f)
-                )
-                Spacer(modifier = Modifier.height(15.dp))
-                EditField(
-                    viewState.brightness,
-                    viewState.sharpness,
-                    viewState.heat,
-                    {
-                        onBrightnessChanged.invoke(it)
-                    },
-                    {
-                        onSharpnessChanged.invoke(it)
-                    },
-                    {
-                        onHeatChanged(it)
-                    }
-                )
-                Spacer(modifier = Modifier.height(15.dp))
-                ScreenButton(text = stringResource(id = R.string.continue_text)) {
-
-                }
-                Spacer(modifier = Modifier.height(15.dp))
-                ScreenButton(text = stringResource(id = R.string.save_changes)) {
-
-                }
+            if (viewState.loading) {
+                LinearProgressIndicator(color = Blue)
                 Spacer(modifier = Modifier.height(10.dp))
+            }
+            Column(
+                modifier = Modifier.verticalScroll(scrollState),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                viewState.updatedPhoto?.let { safePhoto ->
+                    PhotoView(bitmap = safePhoto.asImageBitmap())
+                    Spacer(modifier = Modifier.height(15.dp))
+                    DrawLineWithDot(
+                        modifier = Modifier
+                            .fillMaxWidth(0.5f)
+                    )
+                    Spacer(modifier = Modifier.height(15.dp))
+                    EditField(
+                        viewState.brightness,
+                        viewState.sharpness,
+                        viewState.heat,
+                        viewState.loading,
+                        {
+                            onBrightnessChanged.invoke(it)
+                        },
+                        {
+                            onSharpnessChanged.invoke(it)
+                        },
+                        {
+                            onHeatChanged(it)
+                        },
+                        onRemoveBackground
+                    )
+                    Spacer(modifier = Modifier.height(15.dp))
+                    ScreenButton(text = stringResource(id = R.string.continue_text)) {
+
+                    }
+                    Spacer(modifier = Modifier.height(15.dp))
+                    ScreenButton(text = stringResource(id = R.string.save_changes)) {
+
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                }
             }
         }
     }
@@ -174,9 +188,11 @@ fun EditField(
     brightness: Float,
     contrast: Float,
     heat: Float,
+    loading: Boolean,
     onBrightnessChanged: (brightness: Float) -> Unit,
     onSharpnessChanged: (contrast: Float) -> Unit,
     onHeatChanged: (heat: Float) -> Unit,
+    onRemoveBackground: (remove: Boolean) -> Unit
 ) {
     var checked by remember { mutableStateOf(false) }
     Card(
@@ -187,9 +203,9 @@ fun EditField(
         shape = RoundedCornerShape(15.dp)
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
-            EditItem(stringResource(id = R.string.sharpness), contrast, 0f, 4f, onSharpnessChanged)
-            EditItem(stringResource(id = R.string.brightness), brightness, -1f, 1f, onBrightnessChanged)
-            EditItem(stringResource(id = R.string.heat), heat, 4000f, 7000f, onHeatChanged)
+            EditItem(stringResource(id = R.string.sharpness), loading, contrast, 0f, 4f, onSharpnessChanged)
+            EditItem(stringResource(id = R.string.brightness), loading, brightness, -1f, 1f, onBrightnessChanged)
+            EditItem(stringResource(id = R.string.heat), loading, heat, 4000f, 7000f, onHeatChanged)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -199,9 +215,11 @@ fun EditField(
             ) {
                 Text(text = stringResource(id = R.string.remove_background))
                 Switch(
+                    enabled = loading.not(),
                     checked = checked,
                     onCheckedChange = {
                         checked = it
+                        onRemoveBackground.invoke(checked)
                     },
                     colors = SwitchDefaults.colors(checkedTrackColor = Color.Green)
                 )
@@ -214,6 +232,7 @@ fun EditField(
 @Composable
 fun EditItem(
     itemTitle: String,
+    loading: Boolean,
     initialValue: Float,
     minValue: Float,
     maxValue: Float,
@@ -227,6 +246,7 @@ fun EditItem(
     ) {
         Text(text = itemTitle)
         Slider(
+            enabled = loading.not(),
             value = sliderPosition,
             valueRange = minValue..maxValue,
             onValueChange = {
