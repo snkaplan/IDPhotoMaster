@@ -3,7 +3,6 @@ package com.idphoto.idphotomaster.core.common.extension
 import android.graphics.Bitmap
 import android.graphics.Matrix
 
-
 /**
  * The rotationDegrees parameter is the rotation in degrees clockwise from the original orientation.
  */

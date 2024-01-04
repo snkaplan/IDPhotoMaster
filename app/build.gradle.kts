@@ -112,5 +112,6 @@ dependencies {
 
     //// ACCOMPANIST ////
     implementation("com.google.accompanist:accompanist-permissions:$accompanist_version")
+    implementation("jp.co.cyberagent.android:gpuimage:2.1.0")
 
 }

@@ -1,6 +1,5 @@
 package com.idphoto.idphotomaster.feature.editphoto
 
-import android.graphics.Bitmap
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -43,10 +42,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -66,23 +65,35 @@ fun EditPhotoScreen(
     viewModel: EditPhotoViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
 ) {
-    val splashUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val viewState by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(key1 = viewModel.uiEvents) {
         viewModel.uiEvents.collect { event ->
+            when (event) {
+                EditPhotoViewEvent.PhotoReadCompleted -> viewModel.initImage(context)
+            }
         }
     }
-    ScreenContent(
-        viewState = splashUiState,
-        modifier = modifier.fillMaxSize(),
-        onBackClick = onBackClick
-    )
+    viewState.updatedPhoto?.let {
+        ScreenContent(
+            viewState = viewState,
+            modifier = modifier.fillMaxSize(),
+            onBackClick = onBackClick,
+            onBrightnessChanged = viewModel::onBrightnessChanged,
+            onSharpnessChanged = viewModel::onSharpnessChanged,
+            onHeatChanged = viewModel::onHeatChanged
+        )
+    }
 }
 
 @Composable
 private fun ScreenContent(
     viewState: EditPhotoViewState,
     modifier: Modifier,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    onBrightnessChanged: (brightness: Float) -> Unit,
+    onSharpnessChanged: (brightness: Float) -> Unit,
+    onHeatChanged: (brightness: Float) -> Unit
 ) {
     AppScaffold(
         modifier = modifier.fillMaxSize(),
@@ -104,15 +115,28 @@ private fun ScreenContent(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            viewState.lastCapturedPhoto?.let { safePhoto ->
-                PhotoView(lastCapturedPhoto = safePhoto)
+            viewState.updatedPhoto?.let { safePhoto ->
+                PhotoView(bitmap = viewState.updatedPhoto.asImageBitmap())
                 Spacer(modifier = Modifier.height(15.dp))
                 DrawLineWithDot(
                     modifier = Modifier
                         .fillMaxWidth(0.5f)
                 )
                 Spacer(modifier = Modifier.height(15.dp))
-                EditField()
+                EditField(
+                    viewState.brightness,
+                    viewState.sharpness,
+                    viewState.heat,
+                    {
+                        onBrightnessChanged.invoke(it)
+                    },
+                    {
+                        onSharpnessChanged.invoke(it)
+                    },
+                    {
+                        onHeatChanged(it)
+                    }
+                )
                 Spacer(modifier = Modifier.height(15.dp))
                 ScreenButton(text = stringResource(id = R.string.continue_text)) {
 
@@ -130,26 +154,30 @@ private fun ScreenContent(
 @Composable
 fun PhotoView(
     modifier: Modifier = Modifier,
-    lastCapturedPhoto: Bitmap
+    bitmap: ImageBitmap
 ) {
-    val capturedPhoto: ImageBitmap =
-        remember(lastCapturedPhoto.hashCode()) { lastCapturedPhoto.asImageBitmap() }
     Column(
         modifier = modifier
             .fillMaxWidth(0.75f)
             .height(350.dp)
     ) {
         Image(
-            bitmap = capturedPhoto,
+            bitmap = bitmap,
             contentDescription = "Last captured photo",
             contentScale = ContentScale.Crop
         )
     }
 }
 
-@Preview
 @Composable
-fun EditField() {
+fun EditField(
+    brightness: Float,
+    contrast: Float,
+    heat: Float,
+    onBrightnessChanged: (brightness: Float) -> Unit,
+    onSharpnessChanged: (contrast: Float) -> Unit,
+    onHeatChanged: (heat: Float) -> Unit,
+) {
     var checked by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
@@ -159,9 +187,9 @@ fun EditField() {
         shape = RoundedCornerShape(15.dp)
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
-            EditItem(stringResource(id = R.string.sharpness))
-            EditItem(stringResource(id = R.string.brightness))
-            EditItem(stringResource(id = R.string.heat))
+            EditItem(stringResource(id = R.string.sharpness), contrast, 0f, 4f, onSharpnessChanged)
+            EditItem(stringResource(id = R.string.brightness), brightness, -1f, 1f, onBrightnessChanged)
+            EditItem(stringResource(id = R.string.heat), heat, 4000f, 7000f, onHeatChanged)
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -184,8 +212,14 @@ fun EditField() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditItem(itemTitle: String) {
-    var sliderPosition by remember { mutableFloatStateOf(0.1f) }
+fun EditItem(
+    itemTitle: String,
+    initialValue: Float,
+    minValue: Float,
+    maxValue: Float,
+    onChange: (newValue: Float) -> Unit
+) {
+    var sliderPosition by remember { mutableFloatStateOf(initialValue) }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -194,7 +228,13 @@ fun EditItem(itemTitle: String) {
         Text(text = itemTitle)
         Slider(
             value = sliderPosition,
-            onValueChange = { sliderPosition = it },
+            valueRange = minValue..maxValue,
+            onValueChange = {
+                sliderPosition = it
+            },
+            onValueChangeFinished = {
+                onChange(sliderPosition)
+            },
             colors = SliderDefaults.colors(
                 thumbColor = Color.Black,
                 activeTrackColor = Color.Black,
