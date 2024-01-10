@@ -11,9 +11,8 @@ import com.idphoto.idphotomaster.core.common.Resource
 import com.idphoto.idphotomaster.core.common.asResource
 import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
 import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
+import com.idphoto.idphotomaster.core.data.util.ImageSegmentationHelper
 import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromGalleryUseCase
-import com.slowmac.autobackgroundremover.BackgroundRemover
-import com.slowmac.autobackgroundremover.OnBackgroundChangeListener
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jp.co.cyberagent.android.gpuimage.GPUImage
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageBrightnessFilter
@@ -123,29 +122,17 @@ class EditPhotoViewModel @Inject constructor(
                 uiState.value.updatedPhoto?.let { safePhoto ->
                     updateState { copy(loading = true) }
                     val lastPhoto = safePhoto.copy(safePhoto.config, safePhoto.isMutable)
-                    BackgroundRemover.bitmapForProcessing(
-                        safePhoto,
-                        false,
-                        object : OnBackgroundChangeListener {
-                            override fun onSuccess(bitmap: Bitmap) {
-                                val gpuImage = uiState.value.gpuImage
-                                gpuImage?.setImage(bitmap)
-                                updateState {
-                                    copy(
-                                        updatedPhoto = gpuImage?.bitmapWithFilterApplied,
-                                        lastUpdatedPhotoWithBackground = lastPhoto,
-                                        gpuImage = gpuImage,
-                                        loading = false
-                                    )
-                                }
-                            }
-
-                            override fun onFailed(exception: Exception) {
-                                updateState { copy(loading = false) }
-                                //exception
-                            }
-                        }
-                    )
+                    val output = ImageSegmentationHelper.getResult(safePhoto)
+                    val gpuImage = uiState.value.gpuImage
+                    gpuImage?.setImage(output)
+                    updateState {
+                        copy(
+                            updatedPhoto = gpuImage?.bitmapWithFilterApplied,
+                            lastUpdatedPhotoWithBackground = lastPhoto,
+                            gpuImage = gpuImage,
+                            loading = false
+                        )
+                    }
                 }
             } else {
                 val gpuImage = uiState.value.gpuImage
