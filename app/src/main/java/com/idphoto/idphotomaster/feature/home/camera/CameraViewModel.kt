@@ -10,7 +10,7 @@ import com.idphoto.idphotomaster.core.common.Resource
 import com.idphoto.idphotomaster.core.common.asResource
 import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
 import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
-import com.idphoto.idphotomaster.core.domain.usecase.home.SavePhotoToGalleryUseCase
+import com.idphoto.idphotomaster.core.domain.usecase.home.SaveImageToTempFile
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.launchIn
@@ -20,14 +20,14 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CameraViewModel @Inject constructor(
-    private val savePhotoToGalleryUseCase: SavePhotoToGalleryUseCase,
+    private val saveImageToTempFile: SaveImageToTempFile,
     @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher
 ) : BaseViewModel<CameraViewState, CameraViewEvents>() {
     override fun createInitialState(): CameraViewState = CameraViewState()
 
     fun storePhotoInGallery(bitmap: Bitmap) {
         viewModelScope.launch(ioDispatcher) {
-            savePhotoToGalleryUseCase(bitmap).asResource()
+            saveImageToTempFile(bitmap).asResource()
                 .onEach { result ->
                     when (result) {
                         Resource.Loading -> {

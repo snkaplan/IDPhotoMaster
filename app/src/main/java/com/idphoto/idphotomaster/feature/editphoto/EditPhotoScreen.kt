@@ -83,7 +83,8 @@ fun EditPhotoScreen(
             onBrightnessChanged = viewModel::onBrightnessChanged,
             onSharpnessChanged = viewModel::onSharpnessChanged,
             onHeatChanged = viewModel::onHeatChanged,
-            onRemoveBackground = viewModel::onRemoveBackground
+            onRemoveBackground = viewModel::onRemoveBackground,
+            onSaveImage = viewModel::storePhotoInGallery
         )
     }
 }
@@ -96,7 +97,8 @@ private fun ScreenContent(
     onBrightnessChanged: (brightness: Float) -> Unit,
     onSharpnessChanged: (brightness: Float) -> Unit,
     onHeatChanged: (brightness: Float) -> Unit,
-    onRemoveBackground: (remove: Boolean) -> Unit
+    onRemoveBackground: (remove: Boolean) -> Unit,
+    onSaveImage: () -> Unit
 ) {
     AppScaffold(
         modifier = modifier.fillMaxSize(),
@@ -155,9 +157,7 @@ private fun ScreenContent(
 
                     }
                     Spacer(modifier = Modifier.height(15.dp))
-                    ScreenButton(text = stringResource(id = R.string.save_changes)) {
-
-                    }
+                    ScreenButton(text = stringResource(id = R.string.save_changes), onAction = onSaveImage)
                     Spacer(modifier = Modifier.height(10.dp))
                 }
             }

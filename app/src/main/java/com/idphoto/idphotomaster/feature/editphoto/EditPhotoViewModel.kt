@@ -13,6 +13,7 @@ import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
 import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
 import com.idphoto.idphotomaster.core.data.util.ImageSegmentationHelper
 import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromGalleryUseCase
+import com.idphoto.idphotomaster.core.domain.usecase.home.SavePhotoToGalleryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jp.co.cyberagent.android.gpuimage.GPUImage
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageBrightnessFilter
@@ -28,7 +29,8 @@ import javax.inject.Inject
 class EditPhotoViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val readImageFromGalleryUseCase: ReadImageFromGalleryUseCase,
-    @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher
+    @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
+    private val savePhotoToGalleryUseCase: SavePhotoToGalleryUseCase,
 ) :
     BaseViewModel<EditPhotoViewState, EditPhotoViewEvent>() {
     private val photoArgs: EditPhotoArgs = EditPhotoArgs(savedStateHandle)
@@ -144,6 +146,31 @@ class EditPhotoViewModel @Inject constructor(
                         gpuImage = gpuImage
                     )
                 }
+            }
+        }
+    }
+
+    fun storePhotoInGallery() {
+        viewModelScope.launch(ioDispatcher) {
+            uiState.value.updatedPhoto?.let {
+                savePhotoToGalleryUseCase(it).asResource()
+                    .onEach { result ->
+                        when (result) {
+                            Resource.Loading -> {
+                                updateState { copy(loading = true) }
+                            }
+
+                            is Resource.Error -> {
+                                updateState { copy(loading = false) }
+                            }
+
+                            is Resource.Success -> {
+                                updateState {
+                                    copy(loading = false)
+                                }
+                            }
+                        }
+                    }.launchIn(this)
             }
         }
     }
