@@ -72,6 +72,7 @@ fun EditPhotoScreen(
         viewModel.uiEvents.collect { event ->
             when (event) {
                 EditPhotoViewEvent.PhotoReadCompleted -> viewModel.initImage(context)
+                EditPhotoViewEvent.ResetImage -> viewModel.initImage(context)
             }
         }
     }

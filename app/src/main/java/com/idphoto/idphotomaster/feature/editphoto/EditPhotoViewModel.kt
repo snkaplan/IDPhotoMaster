@@ -11,12 +11,14 @@ import com.idphoto.idphotomaster.core.common.Resource
 import com.idphoto.idphotomaster.core.common.asResource
 import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
 import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
+import com.idphoto.idphotomaster.core.common.extension.applyFilters
 import com.idphoto.idphotomaster.core.data.util.ImageSegmentationHelper
 import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromGalleryUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.home.SavePhotoToGalleryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jp.co.cyberagent.android.gpuimage.GPUImage
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageBrightnessFilter
+import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilterGroup
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageSharpenFilter
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageWhiteBalanceFilter
 import kotlinx.coroutines.CoroutineDispatcher
@@ -31,8 +33,8 @@ class EditPhotoViewModel @Inject constructor(
     private val readImageFromGalleryUseCase: ReadImageFromGalleryUseCase,
     @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
     private val savePhotoToGalleryUseCase: SavePhotoToGalleryUseCase,
-) :
-    BaseViewModel<EditPhotoViewState, EditPhotoViewEvent>() {
+) : BaseViewModel<EditPhotoViewState, EditPhotoViewEvent>() {
+
     private val photoArgs: EditPhotoArgs = EditPhotoArgs(savedStateHandle)
     override fun createInitialState(): EditPhotoViewState = EditPhotoViewState()
 
@@ -54,10 +56,10 @@ class EditPhotoViewModel @Inject constructor(
                         }
 
                         is Resource.Success -> {
-                            val converted: Bitmap = result.data.copy(Bitmap.Config.ARGB_8888, false)
+                            val converted: Bitmap = result.data.copy(Bitmap.Config.ARGB_8888, result.data.isMutable)
                             updateState {
                                 copy(
-                                    lastCapturedPhotoPath = photoArgs.photoPath,
+                                    initialPhotoPath = photoPath,
                                     initialPhoto = converted,
                                     loading = false
                                 )
@@ -72,13 +74,11 @@ class EditPhotoViewModel @Inject constructor(
     fun onBrightnessChanged(brightness: Float) {
         uiState.value.gpuImage?.let { safeImage ->
             viewModelScope.launch(ioDispatcher) {
-                safeImage.setFilter(GPUImageBrightnessFilter(brightness))
-                val bitmap = safeImage.bitmapWithFilterApplied
+                safeImage.setFilter(getFilters(brightness = brightness))
                 updateState {
                     copy(
                         brightness = brightness,
-                        updatedPhoto = bitmap,
-                        lastUpdatedPhotoWithBackground = bitmap
+                        updatedPhoto = safeImage.bitmapWithFilterApplied
                     )
                 }
             }
@@ -88,13 +88,11 @@ class EditPhotoViewModel @Inject constructor(
     fun onSharpnessChanged(sharpness: Float) {
         uiState.value.gpuImage?.let { safeImage ->
             viewModelScope.launch(ioDispatcher) {
-                safeImage.setFilter(GPUImageSharpenFilter(sharpness))
-                val bitmap = safeImage.bitmapWithFilterApplied
+                safeImage.setFilter(getFilters(sharpness = sharpness))
                 updateState {
                     copy(
                         sharpness = sharpness,
-                        updatedPhoto = bitmap,
-                        lastUpdatedPhotoWithBackground = bitmap
+                        updatedPhoto = safeImage.bitmapWithFilterApplied
                     )
                 }
             }
@@ -104,18 +102,38 @@ class EditPhotoViewModel @Inject constructor(
     fun onHeatChanged(heat: Float) {
         uiState.value.gpuImage?.let { safeImage ->
             viewModelScope.launch(ioDispatcher) {
-                safeImage.setFilter(GPUImageWhiteBalanceFilter(heat, 0f))
-                val bitmap = safeImage.bitmapWithFilterApplied
-                updateState { copy(heat = heat, updatedPhoto = bitmap, lastUpdatedPhotoWithBackground = bitmap) }
+                safeImage.setFilter(getFilters(heat = heat))
+                updateState {
+                    copy(
+                        heat = heat,
+                        updatedPhoto = safeImage.bitmapWithFilterApplied
+                    )
+                }
             }
         }
     }
 
-    fun initImage(current: Context) {
-        val gpuImage = GPUImage(current)
-        gpuImage.setImage(uiState.value.initialPhoto)
-        val bitmap = gpuImage.bitmapWithFilterApplied
-        updateState { copy(updatedPhoto = bitmap, lastUpdatedPhotoWithBackground = bitmap, gpuImage = gpuImage) }
+    fun initImage(context: Context) {
+        viewModelScope.launch(ioDispatcher) {
+            val gpuImage = GPUImage(context)
+            gpuImage.setImage(uiState.value.initialPhoto)
+            gpuImage.applyFilters(getFilters())
+            val bitmap = gpuImage.bitmapWithFilterApplied
+            updateState { copy(updatedPhoto = bitmap, gpuImage = gpuImage) }
+        }
+    }
+
+    private fun getFilters(
+        heat: Float = uiState.value.heat,
+        sharpness: Float = uiState.value.sharpness,
+        brightness: Float = uiState.value.brightness
+    ): GPUImageFilterGroup {
+        val filters = listOf(
+            GPUImageWhiteBalanceFilter(heat, 0f),
+            GPUImageSharpenFilter(sharpness),
+            GPUImageBrightnessFilter(brightness)
+        )
+        return GPUImageFilterGroup(filters)
     }
 
     fun onRemoveBackground(remove: Boolean) {
@@ -123,29 +141,19 @@ class EditPhotoViewModel @Inject constructor(
             if (remove) {
                 uiState.value.updatedPhoto?.let { safePhoto ->
                     updateState { copy(loading = true) }
-                    val lastPhoto = safePhoto.copy(safePhoto.config, safePhoto.isMutable)
                     val output = ImageSegmentationHelper.getResult(safePhoto)
                     val gpuImage = uiState.value.gpuImage
                     gpuImage?.setImage(output)
                     updateState {
                         copy(
                             updatedPhoto = gpuImage?.bitmapWithFilterApplied,
-                            lastUpdatedPhotoWithBackground = lastPhoto,
                             gpuImage = gpuImage,
                             loading = false
                         )
                     }
                 }
             } else {
-                val gpuImage = uiState.value.gpuImage
-                gpuImage?.setImage(uiState.value.lastUpdatedPhotoWithBackground)
-                updateState {
-                    copy(
-                        updatedPhoto = lastUpdatedPhotoWithBackground,
-                        lastUpdatedPhotoWithBackground = lastUpdatedPhotoWithBackground,
-                        gpuImage = gpuImage
-                    )
-                }
+                fireEvent(EditPhotoViewEvent.ResetImage)
             }
         }
     }
@@ -178,10 +186,9 @@ class EditPhotoViewModel @Inject constructor(
 
 data class EditPhotoViewState(
     val loading: Boolean = false,
-    val lastCapturedPhotoPath: String? = null,
+    val initialPhotoPath: String? = null,
     val gpuImage: GPUImage? = null,
     val updatedPhoto: Bitmap? = null,
-    val lastUpdatedPhotoWithBackground: Bitmap? = null,
     val initialPhoto: Bitmap? = null,
     val sharpness: Float = 1f,
     val brightness: Float = 0f,
@@ -190,4 +197,5 @@ data class EditPhotoViewState(
 
 sealed interface EditPhotoViewEvent : IViewEvents {
     data object PhotoReadCompleted : EditPhotoViewEvent
+    data object ResetImage : EditPhotoViewEvent
 }
