@@ -25,14 +25,14 @@ internal class BasketArgs(val selectedPhotoPath: String) {
             )
 }
 
-fun NavGraphBuilder.basketScreen(onBackClick: () -> Unit) {
+fun NavGraphBuilder.basketScreen(onBackClick: () -> Unit, navigateToLogin: () -> Unit) {
     composable(
         route = "$BasketNavigationRoute/{$basketPhotoPathArg}",
         arguments = listOf(
             navArgument(basketPhotoPathArg) { type = NavType.StringType },
         ),
     ) {
-        BasketScreen(onBackClick = onBackClick)
+        BasketScreen(onBackClick = onBackClick, navigateToLogin = navigateToLogin)
     }
 }
 

@@ -6,12 +6,15 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.navOptions
 import com.idphoto.idphotomaster.app.MainViewModel
+import com.idphoto.idphotomaster.feature.basket.basketScreen
+import com.idphoto.idphotomaster.feature.basket.navigateToBasket
 import com.idphoto.idphotomaster.feature.editphoto.editPhotoScreen
 import com.idphoto.idphotomaster.feature.editphoto.navigateToEditPhoto
 import com.idphoto.idphotomaster.feature.home.homeScreen
 import com.idphoto.idphotomaster.feature.home.navigateToHome
 import com.idphoto.idphotomaster.feature.login.LoginNavigationRoute
 import com.idphoto.idphotomaster.feature.login.loginScreen
+import com.idphoto.idphotomaster.feature.login.navigateLogin
 import com.idphoto.idphotomaster.feature.splash.SplashNavigationRoute
 import com.idphoto.idphotomaster.feature.splash.splashScreen
 import com.idphoto.idphotomaster.feature.tutorial.TutorialNavigationRoute
@@ -53,15 +56,10 @@ fun AppNavHost(
         homeScreen(navigateToEditPhoto = {
             navController.navigateToEditPhoto(capturedImagePath = it)
         })
-        loginScreen(navigateToHome = {
-            navController.navigateToHome(
-                navOptions = navOptions {
-                    popUpTo(LoginNavigationRoute) {
-                        inclusive = true
-                    }
-                }
-            )
-        }, mainViewModel = mainViewModel)
+        loginScreen(
+            onBackClick = navController::popBackStack,
+            mainViewModel = mainViewModel
+        )
         tutorialScreen(navigateToHome = {
             navController.navigateToHome(
                 navOptions = navOptions {
@@ -71,6 +69,11 @@ fun AppNavHost(
                 }
             )
         })
-        editPhotoScreen(navController::popBackStack)
+        editPhotoScreen(navController::popBackStack) {
+            navController.navigateToBasket(capturedImagePath = it)
+        }
+        basketScreen(navController::popBackStack, navigateToLogin = {
+            navController.navigateLogin()
+        })
     }
 }

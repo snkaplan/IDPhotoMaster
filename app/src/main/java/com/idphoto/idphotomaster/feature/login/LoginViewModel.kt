@@ -76,7 +76,7 @@ class LoginViewModel @Inject constructor(
                             updateState {
                                 copy(loading = false)
                             }
-                            fireEvent(LoginViewEvents.NavigateToHome)
+                            fireEvent(LoginViewEvents.LoginSuccessful)
                         }
                     }
                 }.launchIn(this)
@@ -136,7 +136,7 @@ class LoginViewModel @Inject constructor(
                             updateState {
                                 copy(loading = false)
                             }
-                            fireEvent(LoginViewEvents.NavigateToHome)
+                            fireEvent(LoginViewEvents.LoginSuccessful)
                         }
                     }
                 }.launchIn(this)
@@ -222,7 +222,7 @@ data class LoginViewState(
 ) : IViewState
 
 sealed class LoginViewEvents : IViewEvents {
-    data object NavigateToHome : LoginViewEvents()
+    data object LoginSuccessful : LoginViewEvents()
     data class GeneralException(val message: String?) : LoginViewEvents()
 }
 

@@ -10,6 +10,7 @@ import com.idphoto.idphotomaster.core.common.Resource
 import com.idphoto.idphotomaster.core.common.asResource
 import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
 import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
+import com.idphoto.idphotomaster.core.data.repository.UserRepository
 import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromGalleryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
@@ -22,7 +23,8 @@ import javax.inject.Inject
 class BasketViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val readImageFromGalleryUseCase: ReadImageFromGalleryUseCase,
-    @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher
+    @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
+    private val userRepository: UserRepository
 ) :
     BaseViewModel<BasketViewState, BasketViewEvent>() {
     private val photoArgs: BasketArgs = BasketArgs(savedStateHandle)
@@ -58,6 +60,14 @@ class BasketViewModel @Inject constructor(
                 }.launchIn(this)
         }
     }
+
+    fun onCompletePurchase() {
+        if (userRepository.currentUser == null) {
+            fireEvent(BasketViewEvent.NavigateToLogin)
+        } else {
+            // TODO Complete purchase
+        }
+    }
 }
 
 data class BasketViewState(
@@ -66,4 +76,5 @@ data class BasketViewState(
 ) : IViewState
 
 sealed interface BasketViewEvent : IViewEvents {
+    data object NavigateToLogin : BasketViewEvent
 }

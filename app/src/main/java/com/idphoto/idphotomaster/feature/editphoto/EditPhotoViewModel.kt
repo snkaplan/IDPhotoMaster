@@ -2,6 +2,7 @@ package com.idphoto.idphotomaster.feature.editphoto
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.idphoto.idphotomaster.core.common.BaseViewModel
@@ -158,7 +159,7 @@ class EditPhotoViewModel @Inject constructor(
         }
     }
 
-    fun storePhotoInGallery() {
+    fun storePhotoInGallery(onSuccess: ((Uri) -> Unit)? = null) {
         viewModelScope.launch(ioDispatcher) {
             uiState.value.updatedPhoto?.let {
                 savePhotoToGalleryUseCase(it).asResource()
@@ -176,10 +177,17 @@ class EditPhotoViewModel @Inject constructor(
                                 updateState {
                                     copy(loading = false)
                                 }
+                                onSuccess?.let { callback -> callback(result.data) }
                             }
                         }
                     }.launchIn(this)
             }
+        }
+    }
+
+    fun navigateToBasket() {
+        storePhotoInGallery {
+            fireEvent(EditPhotoViewEvent.NavigateToBasket(it.toString()))
         }
     }
 }
@@ -198,4 +206,5 @@ data class EditPhotoViewState(
 sealed interface EditPhotoViewEvent : IViewEvents {
     data object PhotoReadCompleted : EditPhotoViewEvent
     data object ResetImage : EditPhotoViewEvent
+    data class NavigateToBasket(val imagePath: String) : EditPhotoViewEvent
 }

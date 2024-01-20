@@ -51,7 +51,7 @@ import com.idphoto.idphotomaster.app.MainViewModel
 
 @Composable
 fun LoginScreen(
-    navigateToHome: () -> Unit,
+    onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = hiltViewModel(),
     mainViewModel: MainViewModel? = null
@@ -60,7 +60,7 @@ fun LoginScreen(
     LaunchedEffect(key1 = viewModel.uiEvents) {
         viewModel.uiEvents.collect { event ->
             when (event) {
-                LoginViewEvents.NavigateToHome -> navigateToHome.invoke()
+                LoginViewEvents.LoginSuccessful -> onBackClick.invoke()
                 is LoginViewEvents.GeneralException -> mainViewModel?.showCustomDialog(
                     title = "Error occured :/",
                     message = event.message,

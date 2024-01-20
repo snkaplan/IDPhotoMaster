@@ -1,6 +1,5 @@
 package com.idphoto.idphotomaster.feature.editphoto
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -40,9 +39,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -55,6 +52,8 @@ import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.systemdesign.components.AppScaffold
 import com.idphoto.idphotomaster.core.systemdesign.components.AppTopBar
 import com.idphoto.idphotomaster.core.systemdesign.components.DrawLineWithDot
+import com.idphoto.idphotomaster.core.systemdesign.components.PhotoView
+import com.idphoto.idphotomaster.core.systemdesign.components.ScreenButton
 import com.idphoto.idphotomaster.core.systemdesign.icon.AppIcons
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.Blue
@@ -65,6 +64,7 @@ fun EditPhotoScreen(
     modifier: Modifier = Modifier,
     viewModel: EditPhotoViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
+    navigateToBasket: (String) -> Unit
 ) {
     val context = LocalContext.current
     val viewState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -73,6 +73,7 @@ fun EditPhotoScreen(
             when (event) {
                 EditPhotoViewEvent.PhotoReadCompleted -> viewModel.initImage(context)
                 EditPhotoViewEvent.ResetImage -> viewModel.initImage(context)
+                is EditPhotoViewEvent.NavigateToBasket -> navigateToBasket(event.imagePath)
             }
         }
     }
@@ -85,7 +86,8 @@ fun EditPhotoScreen(
             onSharpnessChanged = viewModel::onSharpnessChanged,
             onHeatChanged = viewModel::onHeatChanged,
             onRemoveBackground = viewModel::onRemoveBackground,
-            onSaveImage = viewModel::storePhotoInGallery
+            onSaveImage = viewModel::storePhotoInGallery,
+            onContinue = viewModel::navigateToBasket
         )
     }
 }
@@ -99,7 +101,8 @@ private fun ScreenContent(
     onSharpnessChanged: (brightness: Float) -> Unit,
     onHeatChanged: (brightness: Float) -> Unit,
     onRemoveBackground: (remove: Boolean) -> Unit,
-    onSaveImage: () -> Unit
+    onSaveImage: () -> Unit,
+    onContinue: () -> Unit
 ) {
     AppScaffold(
         modifier = modifier.fillMaxSize(),
@@ -154,33 +157,13 @@ private fun ScreenContent(
                         onRemoveBackground
                     )
                     Spacer(modifier = Modifier.height(15.dp))
-                    ScreenButton(text = stringResource(id = R.string.continue_text)) {
-
-                    }
+                    ScreenButton(text = stringResource(id = R.string.continue_text), onAction = onContinue)
                     Spacer(modifier = Modifier.height(15.dp))
                     ScreenButton(text = stringResource(id = R.string.save_changes), onAction = onSaveImage)
                     Spacer(modifier = Modifier.height(10.dp))
                 }
             }
         }
-    }
-}
-
-@Composable
-fun PhotoView(
-    modifier: Modifier = Modifier,
-    bitmap: ImageBitmap
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth(0.75f)
-            .height(350.dp)
-    ) {
-        Image(
-            bitmap = bitmap,
-            contentDescription = "Last captured photo",
-            contentScale = ContentScale.Crop
-        )
     }
 }
 
@@ -272,24 +255,6 @@ fun EditItem(
                         .background(Color.White)
                 )
             }
-        )
-    }
-}
-
-@Composable
-fun ScreenButton(text: String, onAction: () -> Unit) {
-    Button(
-        colors = ButtonDefaults.buttonColors(containerColor = Blue),
-        onClick = { onAction.invoke() },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        shape = RoundedCornerShape(10.dp),
-    ) {
-        Text(
-            text = text,
-            modifier = Modifier.padding(12.dp),
-            style = TextStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold, color = White)
         )
     }
 }

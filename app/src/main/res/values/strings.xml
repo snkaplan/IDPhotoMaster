@@ -35,4 +35,6 @@
     <string name="brightness">Parlaklık</string>
     <string name="heat">Sıcaklık</string>
     <string name="remove_background">Arkaplanı kaldır</string>
+    <string name="select">SEÇ</string>
+    <string name="complete_purchase">ALIŞVERİŞİ TAMAMLA</string>
 </resources>

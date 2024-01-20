@@ -25,14 +25,14 @@ internal class EditPhotoArgs(val photoPath: String) {
             )
 }
 
-fun NavGraphBuilder.editPhotoScreen(onBackClick: () -> Unit) {
+fun NavGraphBuilder.editPhotoScreen(onBackClick: () -> Unit, navigateToBasket: (String) -> Unit) {
     composable(
         route = "$EditPhotoNavigationRoute/{$photoPathArg}",
         arguments = listOf(
             navArgument(photoPathArg) { type = NavType.StringType },
         ),
     ) {
-        EditPhotoScreen(onBackClick = onBackClick)
+        EditPhotoScreen(onBackClick = onBackClick, navigateToBasket = navigateToBasket)
     }
 }
 
