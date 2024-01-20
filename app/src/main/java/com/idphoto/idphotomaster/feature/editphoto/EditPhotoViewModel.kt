@@ -2,7 +2,6 @@ package com.idphoto.idphotomaster.feature.editphoto
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.idphoto.idphotomaster.core.common.BaseViewModel
@@ -14,8 +13,9 @@ import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
 import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
 import com.idphoto.idphotomaster.core.common.extension.applyFilters
 import com.idphoto.idphotomaster.core.data.util.ImageSegmentationHelper
-import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromGalleryUseCase
-import com.idphoto.idphotomaster.core.domain.usecase.home.SavePhotoToGalleryUseCase
+import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromDevice
+import com.idphoto.idphotomaster.core.domain.usecase.home.SaveImageToTempFile
+import com.idphoto.idphotomaster.core.domain.usecase.home.SavePhotoToCache
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jp.co.cyberagent.android.gpuimage.GPUImage
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageBrightnessFilter
@@ -31,9 +31,10 @@ import javax.inject.Inject
 @HiltViewModel
 class EditPhotoViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val readImageFromGalleryUseCase: ReadImageFromGalleryUseCase,
+    private val readImageFromDevice: ReadImageFromDevice,
     @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
-    private val savePhotoToGalleryUseCase: SavePhotoToGalleryUseCase,
+    private val savePhotoToCache: SavePhotoToCache,
+    private val saveImageToTempFile: SaveImageToTempFile
 ) : BaseViewModel<EditPhotoViewState, EditPhotoViewEvent>() {
 
     private val photoArgs: EditPhotoArgs = EditPhotoArgs(savedStateHandle)
@@ -45,7 +46,7 @@ class EditPhotoViewModel @Inject constructor(
 
     private fun readImageAndUpdateState(photoPath: String) {
         viewModelScope.launch(ioDispatcher) {
-            readImageFromGalleryUseCase(photoPath).asResource()
+            readImageFromDevice(photoPath).asResource()
                 .onEach { result ->
                     when (result) {
                         Resource.Loading -> {
@@ -159,10 +160,10 @@ class EditPhotoViewModel @Inject constructor(
         }
     }
 
-    fun storePhotoInGallery(onSuccess: ((Uri) -> Unit)? = null) {
+    fun savePhoto() {
         viewModelScope.launch(ioDispatcher) {
             uiState.value.updatedPhoto?.let {
-                savePhotoToGalleryUseCase(it).asResource()
+                savePhotoToCache(photoBitmap = it, photoPath = uiState.value.savedPhotoPath).asResource()
                     .onEach { result ->
                         when (result) {
                             Resource.Loading -> {
@@ -175,9 +176,8 @@ class EditPhotoViewModel @Inject constructor(
 
                             is Resource.Success -> {
                                 updateState {
-                                    copy(loading = false)
+                                    copy(loading = false, savedPhotoPath = result.data.toString())
                                 }
-                                onSuccess?.let { callback -> callback(result.data) }
                             }
                         }
                     }.launchIn(this)
@@ -186,8 +186,25 @@ class EditPhotoViewModel @Inject constructor(
     }
 
     fun navigateToBasket() {
-        storePhotoInGallery {
-            fireEvent(EditPhotoViewEvent.NavigateToBasket(it.toString()))
+        viewModelScope.launch(ioDispatcher) {
+            uiState.value.updatedPhoto?.let {
+                saveImageToTempFile(photoBitmap = it).asResource()
+                    .onEach { result ->
+                        when (result) {
+                            Resource.Loading -> {
+                                updateState { copy(loading = true) }
+                            }
+
+                            is Resource.Error -> {
+                                updateState { copy(loading = false) }
+                            }
+
+                            is Resource.Success -> {
+                                fireEvent(EditPhotoViewEvent.NavigateToBasket(result.data.toString()))
+                            }
+                        }
+                    }.launchIn(this)
+            }
         }
     }
 }
@@ -195,6 +212,7 @@ class EditPhotoViewModel @Inject constructor(
 data class EditPhotoViewState(
     val loading: Boolean = false,
     val initialPhotoPath: String? = null,
+    val savedPhotoPath: String? = null,
     val gpuImage: GPUImage? = null,
     val updatedPhoto: Bitmap? = null,
     val initialPhoto: Bitmap? = null,

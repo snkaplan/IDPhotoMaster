@@ -25,9 +25,9 @@ class CameraViewModel @Inject constructor(
 ) : BaseViewModel<CameraViewState, CameraViewEvents>() {
     override fun createInitialState(): CameraViewState = CameraViewState()
 
-    fun storePhotoInGallery(bitmap: Bitmap) {
+    fun saveTempImage(bitmap: Bitmap) {
         viewModelScope.launch(ioDispatcher) {
-            saveImageToTempFile(bitmap).asResource()
+            saveImageToTempFile(photoBitmap = bitmap).asResource()
                 .onEach { result ->
                     when (result) {
                         Resource.Loading -> {

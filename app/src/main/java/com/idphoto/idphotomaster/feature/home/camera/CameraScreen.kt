@@ -62,7 +62,7 @@ fun CameraScreen(
         }
     }
     CameraContent(
-        onPhotoCaptured = viewModel::storePhotoInGallery,
+        onPhotoCaptured = viewModel::saveTempImage,
         lastCapturedPhoto = cameraState.capturedImage
     )
 }

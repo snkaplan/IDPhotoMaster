@@ -2,4 +2,8 @@ package com.idphoto.idphotomaster.core.common
 
 object Constants {
     const val MinPasswordLength = 6
+    const val TempFileName = "tempPhoto"
+    const val TempFileExtension = ".png"
+    const val CachedFileName = "cachedPhoto"
+    const val KEY_TEMP_FILE_START_PREFIX = "KEY_TEMP_FILE_START_PREFIX"
 }

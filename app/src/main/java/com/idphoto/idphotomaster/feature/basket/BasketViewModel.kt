@@ -11,7 +11,7 @@ import com.idphoto.idphotomaster.core.common.asResource
 import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
 import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
 import com.idphoto.idphotomaster.core.data.repository.UserRepository
-import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromGalleryUseCase
+import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromDevice
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.launchIn
@@ -22,7 +22,7 @@ import javax.inject.Inject
 @HiltViewModel
 class BasketViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val readImageFromGalleryUseCase: ReadImageFromGalleryUseCase,
+    private val readImageFromDevice: ReadImageFromDevice,
     @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
     private val userRepository: UserRepository
 ) :
@@ -36,7 +36,7 @@ class BasketViewModel @Inject constructor(
 
     private fun readImageAndUpdateState(photoPath: String) {
         viewModelScope.launch(ioDispatcher) {
-            readImageFromGalleryUseCase(photoPath).asResource()
+            readImageFromDevice(photoPath).asResource()
                 .onEach { result ->
                     when (result) {
                         Resource.Loading -> {

@@ -17,8 +17,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,10 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.idphoto.idphotomaster.R
@@ -57,7 +52,6 @@ import com.idphoto.idphotomaster.core.systemdesign.components.ScreenButton
 import com.idphoto.idphotomaster.core.systemdesign.icon.AppIcons
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.Blue
-import com.idphoto.idphotomaster.core.systemdesign.ui.theme.White
 
 @Composable
 fun EditPhotoScreen(
@@ -86,7 +80,7 @@ fun EditPhotoScreen(
             onSharpnessChanged = viewModel::onSharpnessChanged,
             onHeatChanged = viewModel::onHeatChanged,
             onRemoveBackground = viewModel::onRemoveBackground,
-            onSaveImage = viewModel::storePhotoInGallery,
+            onSaveImage = viewModel::savePhoto,
             onContinue = viewModel::navigateToBasket
         )
     }

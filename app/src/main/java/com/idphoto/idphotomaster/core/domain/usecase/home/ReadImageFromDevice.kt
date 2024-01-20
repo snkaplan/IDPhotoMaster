@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
-class ReadImageFromGalleryUseCase @Inject constructor(
+class ReadImageFromDevice @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     operator fun invoke(imagePath: String): Flow<Bitmap> {
