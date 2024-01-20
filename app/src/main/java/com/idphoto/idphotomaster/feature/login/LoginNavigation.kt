@@ -12,8 +12,8 @@ fun NavController.navigateLogin(navOptions: NavOptions? = null) {
     this.navigate(LoginNavigationRoute, navOptions)
 }
 
-fun NavGraphBuilder.loginScreen(onBackClick: () -> Unit, mainViewModel: MainViewModel) {
+fun NavGraphBuilder.loginScreen(onCloseClick: () -> Unit, mainViewModel: MainViewModel) {
     composable(LoginNavigationRoute) {
-        LoginScreen(onBackClick = onBackClick, mainViewModel = mainViewModel)
+        LoginScreen(onCloseClick = onCloseClick, mainViewModel = mainViewModel)
     }
 }

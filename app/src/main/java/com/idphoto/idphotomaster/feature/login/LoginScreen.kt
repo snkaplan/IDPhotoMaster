@@ -2,7 +2,10 @@ package com.idphoto.idphotomaster.feature.login
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,8 +17,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,12 +52,14 @@ import com.idphoto.idphotomaster.feature.login.contents.LoginScreenContent
 import com.idphoto.idphotomaster.feature.login.contents.SignupScreenContent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import com.idphoto.idphotomaster.app.MainViewModel
 
 @Composable
 fun LoginScreen(
-    onBackClick: () -> Unit,
+    onCloseClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = hiltViewModel(),
     mainViewModel: MainViewModel? = null
@@ -60,7 +68,7 @@ fun LoginScreen(
     LaunchedEffect(key1 = viewModel.uiEvents) {
         viewModel.uiEvents.collect { event ->
             when (event) {
-                LoginViewEvents.LoginSuccessful -> onBackClick.invoke()
+                LoginViewEvents.LoginSuccessful -> onCloseClick.invoke()
                 is LoginViewEvents.GeneralException -> mainViewModel?.showCustomDialog(
                     title = "Error occured :/",
                     message = event.message,
@@ -77,7 +85,8 @@ fun LoginScreen(
         onStateChange = viewModel::onPageStateChange,
         onNameValueChange = viewModel::onNameChange,
         onLastnameValueChange = viewModel::onLastnameChange,
-        onAction = if (viewState.pageState == PageState.LOGIN) viewModel::onLoginClick else viewModel::onSignupClick
+        onAction = if (viewState.pageState == PageState.LOGIN) viewModel::onLoginClick else viewModel::onSignupClick,
+        onCloseClick = onCloseClick
     )
 }
 
@@ -90,6 +99,7 @@ fun ScreenContent(
     onNameValueChange: (String) -> Unit,
     onLastnameValueChange: (String) -> Unit,
     onAction: () -> Unit,
+    onCloseClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val titleTextId = remember { mutableIntStateOf(-1) }
@@ -132,13 +142,25 @@ fun ScreenContent(
                 .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.ic_star),
-                contentDescription = "Star",
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .size(40.dp)
-            )
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Icon(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Blue)
+                        .clickable { onCloseClick() }
+                        .padding(5.dp),
+                    imageVector = Icons.Filled.Close,
+                    contentDescription = "",
+                    tint = Color.White
+                )
+                Image(
+                    painter = painterResource(id = R.drawable.ic_star),
+                    contentDescription = "Star",
+                    modifier = Modifier.size(40.dp)
+                )
+            }
+
             if (viewState.loading) {
                 LinearProgressIndicator(color = Blue)
             }

@@ -12,7 +12,6 @@ import com.idphoto.idphotomaster.feature.editphoto.editPhotoScreen
 import com.idphoto.idphotomaster.feature.editphoto.navigateToEditPhoto
 import com.idphoto.idphotomaster.feature.home.homeScreen
 import com.idphoto.idphotomaster.feature.home.navigateToHome
-import com.idphoto.idphotomaster.feature.login.LoginNavigationRoute
 import com.idphoto.idphotomaster.feature.login.loginScreen
 import com.idphoto.idphotomaster.feature.login.navigateLogin
 import com.idphoto.idphotomaster.feature.splash.SplashNavigationRoute
@@ -57,7 +56,7 @@ fun AppNavHost(
             navController.navigateToEditPhoto(capturedImagePath = it)
         })
         loginScreen(
-            onBackClick = navController::popBackStack,
+            onCloseClick = navController::popBackStack,
             mainViewModel = mainViewModel
         )
         tutorialScreen(navigateToHome = {
