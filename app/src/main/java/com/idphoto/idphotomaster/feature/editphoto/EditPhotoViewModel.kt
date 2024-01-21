@@ -217,7 +217,7 @@ data class EditPhotoViewState(
     val gpuImage: GPUImage? = null,
     val updatedPhoto: Bitmap? = null,
     val initialPhoto: Bitmap? = null,
-    val sharpness: Float = 1f,
+    val sharpness: Float = 0f,
     val brightness: Float = 0f,
     val heat: Float = 5000f
 ) : IViewState
