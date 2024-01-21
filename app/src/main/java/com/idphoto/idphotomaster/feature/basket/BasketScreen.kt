@@ -79,6 +79,7 @@ fun BasketScreen(
         googlePurchaseViewModel.uiEvents.collect { event ->
             when (event) {
                 GooglePurchaseViewEvent.PurchaseSuccess -> {
+                    viewModel.purchaseSuccess()
                     mainViewModel.showCustomDialog(
                         title = context.getString(R.string.purchase_success_title),
                         message = context.getString(R.string.purchase_success_description),

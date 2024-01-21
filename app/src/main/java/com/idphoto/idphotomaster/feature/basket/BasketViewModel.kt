@@ -12,6 +12,8 @@ import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
 import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
 import com.idphoto.idphotomaster.core.data.repository.UserRepository
 import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromDevice
+import com.idphoto.idphotomaster.core.domain.usecase.home.SavePhotoToCache
+import com.idphoto.idphotomaster.core.domain.usecase.home.SavePhotoToGalleryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.launchIn
@@ -24,9 +26,9 @@ class BasketViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val readImageFromDevice: ReadImageFromDevice,
     @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
-    private val userRepository: UserRepository
-) :
-    BaseViewModel<BasketViewState, BasketViewEvent>() {
+    private val userRepository: UserRepository,
+    private val savePhotoToGalleryUseCase: SavePhotoToGalleryUseCase,
+) : BaseViewModel<BasketViewState, BasketViewEvent>() {
     private val photoArgs: BasketArgs = BasketArgs(savedStateHandle)
     override fun createInitialState(): BasketViewState = BasketViewState()
 
@@ -66,6 +68,29 @@ class BasketViewModel @Inject constructor(
             fireEvent(BasketViewEvent.NavigateToLogin)
         } else {
             fireEvent(BasketViewEvent.StartGooglePurchase)
+        }
+    }
+
+    fun purchaseSuccess() {
+        viewModelScope.launch(ioDispatcher) {
+            uiState.value.photo?.let {
+                savePhotoToGalleryUseCase(capturePhotoBitmap = it).asResource()
+                    .onEach { result ->
+                        when (result) {
+                            Resource.Loading -> {
+                                updateState { copy(loading = true) }
+                            }
+
+                            is Resource.Error -> {
+                                updateState { copy(loading = false) }
+                            }
+
+                            is Resource.Success -> {
+                                updateState { copy(loading = false) }
+                            }
+                        }
+                    }.launchIn(this)
+            }
         }
     }
 }
