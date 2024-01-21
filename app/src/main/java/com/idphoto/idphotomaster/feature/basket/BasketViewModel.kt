@@ -65,7 +65,7 @@ class BasketViewModel @Inject constructor(
         if (userRepository.currentUser == null) {
             fireEvent(BasketViewEvent.NavigateToLogin)
         } else {
-            // TODO Complete purchase
+            fireEvent(BasketViewEvent.StartGooglePurchase)
         }
     }
 }
@@ -77,4 +77,5 @@ data class BasketViewState(
 
 sealed interface BasketViewEvent : IViewEvents {
     data object NavigateToLogin : BasketViewEvent
+    data object StartGooglePurchase : BasketViewEvent
 }

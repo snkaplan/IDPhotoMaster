@@ -10,6 +10,7 @@ import com.idphoto.idphotomaster.feature.basket.basketScreen
 import com.idphoto.idphotomaster.feature.basket.navigateToBasket
 import com.idphoto.idphotomaster.feature.editphoto.editPhotoScreen
 import com.idphoto.idphotomaster.feature.editphoto.navigateToEditPhoto
+import com.idphoto.idphotomaster.feature.home.HomeNavigationRoute
 import com.idphoto.idphotomaster.feature.home.homeScreen
 import com.idphoto.idphotomaster.feature.home.navigateToHome
 import com.idphoto.idphotomaster.feature.login.loginScreen
@@ -73,6 +74,8 @@ fun AppNavHost(
         }
         basketScreen(navController::popBackStack, navigateToLogin = {
             navController.navigateLogin()
-        })
+        }, onCompletePurchase = {
+            navController.popBackStack(route = HomeNavigationRoute, inclusive = false)
+        }, mainViewModel = mainViewModel)
     }
 }

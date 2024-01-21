@@ -39,12 +39,7 @@ class MainActivity : ComponentActivity() {
                 viewModel.uiEvents.collect { event ->
                     when (event) {
                         is MainViewEvents.ShowCustomDialog -> {
-                            dialogItem.value = DialogItem(
-                                event.title,
-                                event.message,
-                                event.confirmText,
-                                event.dismissText
-                            )
+                            dialogItem.value = event.dialogItem
                         }
                     }
                 }

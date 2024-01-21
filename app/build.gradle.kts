@@ -15,7 +15,7 @@ android {
         applicationId = "com.idphoto.idphotomaster"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
+        versionCode = 4
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -118,4 +118,7 @@ dependencies {
 
     val work_manager_version = "2.9.0"
     implementation("androidx.work:work-runtime:$work_manager_version")
+
+    val billing_version = "6.1.0"
+    implementation("com.android.billingclient:billing-ktx:$billing_version")
 }

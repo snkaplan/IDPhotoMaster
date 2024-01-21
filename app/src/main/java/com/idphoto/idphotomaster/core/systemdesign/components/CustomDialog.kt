@@ -10,6 +10,7 @@ import androidx.compose.runtime.MutableState
 fun CustomDialog(dialogItem: MutableState<DialogItem?>) {
     AlertDialog(
         onDismissRequest = {
+            dialogItem.value?.onDismissCallback?.invoke()
             dialogItem.value = null
         },
         title = {
@@ -22,6 +23,7 @@ fun CustomDialog(dialogItem: MutableState<DialogItem?>) {
             dialogItem.value?.confirmText?.let {
                 Button(
                     onClick = {
+                        dialogItem.value?.confirmCallback?.invoke()
                         dialogItem.value = null
                     }) {
                     Text(it)
@@ -31,6 +33,7 @@ fun CustomDialog(dialogItem: MutableState<DialogItem?>) {
         dismissButton = {
             dialogItem.value?.dismissText?.let {
                 Button(onClick = {
+                    dialogItem.value?.onDismissCallback?.invoke()
                     dialogItem.value = null
                 }) {
                     Text(it)
@@ -45,4 +48,6 @@ data class DialogItem(
     val description: String?,
     val confirmText: String?,
     val dismissText: String?,
+    val confirmCallback: (() -> Unit)?,
+    val onDismissCallback: (() -> Unit)?
 )

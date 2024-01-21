@@ -7,6 +7,7 @@ import androidx.navigation.NavOptions
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.idphoto.idphotomaster.app.MainViewModel
 import java.net.URLDecoder
 import java.net.URLEncoder
 
@@ -25,14 +26,24 @@ internal class BasketArgs(val selectedPhotoPath: String) {
             )
 }
 
-fun NavGraphBuilder.basketScreen(onBackClick: () -> Unit, navigateToLogin: () -> Unit) {
+fun NavGraphBuilder.basketScreen(
+    onBackClick: () -> Unit,
+    navigateToLogin: () -> Unit,
+    onCompletePurchase: () -> Unit,
+    mainViewModel: MainViewModel
+) {
     composable(
         route = "$BasketNavigationRoute/{$basketPhotoPathArg}",
         arguments = listOf(
             navArgument(basketPhotoPathArg) { type = NavType.StringType },
         ),
     ) {
-        BasketScreen(onBackClick = onBackClick, navigateToLogin = navigateToLogin)
+        BasketScreen(
+            onBackClick = onBackClick,
+            navigateToLogin = navigateToLogin,
+            onCompletePurchase = onCompletePurchase,
+            mainViewModel = mainViewModel
+        )
     }
 }
 

@@ -200,6 +200,7 @@ class EditPhotoViewModel @Inject constructor(
                             }
 
                             is Resource.Success -> {
+                                updateState { copy(loading = false) }
                                 fireEvent(EditPhotoViewEvent.NavigateToBasket(result.data.toString()))
                             }
                         }

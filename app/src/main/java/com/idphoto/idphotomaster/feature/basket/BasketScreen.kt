@@ -1,5 +1,6 @@
 package com.idphoto.idphotomaster.feature.basket
 
+import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -37,12 +38,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.idphoto.idphotomaster.R
+import com.idphoto.idphotomaster.app.MainViewModel
 import com.idphoto.idphotomaster.core.systemdesign.components.AppScaffold
 import com.idphoto.idphotomaster.core.systemdesign.components.AppTopBar
 import com.idphoto.idphotomaster.core.systemdesign.components.DrawLineWithDot
@@ -57,15 +60,55 @@ fun BasketScreen(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
     navigateToLogin: () -> Unit,
-    viewModel: BasketViewModel = hiltViewModel()
+    onCompletePurchase: () -> Unit,
+    viewModel: BasketViewModel = hiltViewModel(),
+    googlePurchaseViewModel: GooglePurchaseViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel
 ) {
     val viewState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     LaunchedEffect(key1 = viewModel.uiEvents) {
         viewModel.uiEvents.collect { event ->
             when (event) {
                 BasketViewEvent.NavigateToLogin -> navigateToLogin()
+                BasketViewEvent.StartGooglePurchase -> googlePurchaseViewModel.purchase("id_photo", context as Activity)
             }
         }
+    }
+    LaunchedEffect(key1 = googlePurchaseViewModel.uiEvents) {
+        googlePurchaseViewModel.uiEvents.collect { event ->
+            when (event) {
+                GooglePurchaseViewEvent.PurchaseSuccess -> {
+                    mainViewModel.showCustomDialog(
+                        title = context.getString(R.string.purchase_success_title),
+                        message = context.getString(R.string.purchase_success_description),
+                        confirmText = context.getString(R.string.ok),
+                        confirmCallback = { onCompletePurchase.invoke() },
+                        onDismissCallback = { onCompletePurchase.invoke() }
+                    )
+                }
+
+                GooglePurchaseViewEvent.PurchaseFailed -> {
+                    mainViewModel.showCustomDialog(
+                        title = context.getString(R.string.purchase_failed_title),
+                        message = context.getString(R.string.purchase_failed_description),
+                        confirmText = context.getString(R.string.ok)
+                    )
+                }
+
+                GooglePurchaseViewEvent.UserCancelledPurchase -> {
+                    mainViewModel.showCustomDialog(
+                        title = context.getString(R.string.purchase_failed_title),
+                        message = context.getString(R.string.purchase_user_cancelled_description),
+                        confirmText = context.getString(R.string.ok)
+                    )
+                }
+            }
+        }
+    }
+    LaunchedEffect(key1 = true) {
+        googlePurchaseViewModel.billingSetup(context)
+        googlePurchaseViewModel.checkProducts()
     }
     viewState.photo?.let {
         ScreenContent(

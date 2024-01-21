@@ -37,4 +37,10 @@
     <string name="remove_background">Arkaplanı kaldır</string>
     <string name="select">SEÇ</string>
     <string name="complete_purchase">ALIŞVERİŞİ TAMAMLA</string>
+    <string name="purchase_success_title">Alışverişi tamamlandı. Satın alımlara profilin altından ve galeriden erişebilirsiniz.</string>
+    <string name="purchase_success_description">Alışveriş Başarılı</string>
+    <string name="purchase_user_cancelled_description">Alışverişi İptal Ettiniz</string>
+    <string name="purchase_failed_description">Alışverişi Esnasında Bir Hata Oluştu :/</string>
+    <string name="purchase_failed_title">Bir Hata Oluştu</string>
+    <string name="ok">Tamam</string>
 </resources>
