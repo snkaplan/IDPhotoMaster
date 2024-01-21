@@ -12,7 +12,6 @@ import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
 import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
 import com.idphoto.idphotomaster.core.data.repository.UserRepository
 import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromDevice
-import com.idphoto.idphotomaster.core.domain.usecase.home.SavePhotoToCache
 import com.idphoto.idphotomaster.core.domain.usecase.home.SavePhotoToGalleryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher

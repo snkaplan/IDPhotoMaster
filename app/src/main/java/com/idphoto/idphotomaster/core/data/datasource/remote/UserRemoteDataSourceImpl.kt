@@ -31,7 +31,7 @@ class UserRemoteDataSourceImpl @Inject constructor(
 
     override suspend fun createUser(user: MutableMap<String, Any?>): Result<Unit> {
         return runCatching {
-            firebaseFirestore.collection(USERS_TABLE_NAME).add(user).await()
+            firebaseFirestore.collection(USERS_TABLE_NAME).document(user["user_id"].toString()).set(user).await()
         }
     }
 }
