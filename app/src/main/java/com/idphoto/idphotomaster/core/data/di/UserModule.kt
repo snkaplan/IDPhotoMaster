@@ -1,7 +1,11 @@
 package com.idphoto.idphotomaster.core.data.di
 
+import com.idphoto.idphotomaster.core.data.datasource.remote.BasketRemoteDataSource
+import com.idphoto.idphotomaster.core.data.datasource.remote.BasketRemoteDataSourceImpl
 import com.idphoto.idphotomaster.core.data.datasource.remote.UserRemoteDataSource
 import com.idphoto.idphotomaster.core.data.datasource.remote.UserRemoteDataSourceImpl
+import com.idphoto.idphotomaster.core.data.repository.BasketRepository
+import com.idphoto.idphotomaster.core.data.repository.BasketRepositoryImpl
 import com.idphoto.idphotomaster.core.data.repository.UserRepository
 import com.idphoto.idphotomaster.core.data.repository.UserRepositoryImpl
 import dagger.Binds
@@ -17,4 +21,10 @@ interface UserModule {
 
     @Binds
     fun bindAuthRepository(repositoryImpl: UserRepositoryImpl): UserRepository
+
+    @Binds
+    fun bindBasketRemoteDataSource(sourceImpl: BasketRemoteDataSourceImpl): BasketRemoteDataSource
+
+    @Binds
+    fun bindBasketRepository(basketRepository: BasketRepositoryImpl): BasketRepository
 }

@@ -10,11 +10,15 @@ import com.idphoto.idphotomaster.core.common.Resource
 import com.idphoto.idphotomaster.core.common.asResource
 import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
 import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
+import com.idphoto.idphotomaster.core.data.repository.BasketRepository
 import com.idphoto.idphotomaster.core.data.repository.UserRepository
+import com.idphoto.idphotomaster.core.domain.usecase.basket.PurchaseSuccessUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromDevice
 import com.idphoto.idphotomaster.core.domain.usecase.home.SavePhotoToGalleryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -27,6 +31,7 @@ class BasketViewModel @Inject constructor(
     @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
     private val userRepository: UserRepository,
     private val savePhotoToGalleryUseCase: SavePhotoToGalleryUseCase,
+    private val purchaseSuccessUseCase: PurchaseSuccessUseCase
 ) : BaseViewModel<BasketViewState, BasketViewEvent>() {
     private val photoArgs: BasketArgs = BasketArgs(savedStateHandle)
     override fun createInitialState(): BasketViewState = BasketViewState()
@@ -71,25 +76,25 @@ class BasketViewModel @Inject constructor(
     }
 
     fun purchaseSuccess() {
-        viewModelScope.launch(ioDispatcher) {
-            uiState.value.photo?.let {
-                savePhotoToGalleryUseCase(capturePhotoBitmap = it).asResource()
-                    .onEach { result ->
-                        when (result) {
-                            Resource.Loading -> {
-                                updateState { copy(loading = true) }
-                            }
+        viewModelScope.launch {
+            updateState { copy(loading = true) }
+            val savePhotoToGallery = async { savePhotoToGallery() }
+            val purchaseComplete = async { purchaseComplete() }
+            awaitAll(savePhotoToGallery, purchaseComplete)
+            fireEvent(BasketViewEvent.PurchaseCompleted)
+            updateState { copy(loading = false) }
+        }
+    }
 
-                            is Resource.Error -> {
-                                updateState { copy(loading = false) }
-                            }
+    private suspend fun savePhotoToGallery() {
+        uiState.value.photo?.let {
+            savePhotoToGalleryUseCase(capturePhotoBitmap = it).asResource().launchIn(viewModelScope).join()
+        }
+    }
 
-                            is Resource.Success -> {
-                                updateState { copy(loading = false) }
-                            }
-                        }
-                    }.launchIn(this)
-            }
+    private suspend fun purchaseComplete() {
+        uiState.value.photo?.let {
+            purchaseSuccessUseCase().asResource().launchIn(viewModelScope).join()
         }
     }
 }
@@ -102,4 +107,5 @@ data class BasketViewState(
 sealed interface BasketViewEvent : IViewEvents {
     data object NavigateToLogin : BasketViewEvent
     data object StartGooglePurchase : BasketViewEvent
+    data object PurchaseCompleted : BasketViewEvent
 }

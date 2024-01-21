@@ -1,6 +1,8 @@
 package com.idphoto.idphotomaster.feature.basket
 
 import android.app.Activity
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,10 +30,13 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -46,14 +52,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.app.MainViewModel
+import com.idphoto.idphotomaster.app.handler.BackHandler
 import com.idphoto.idphotomaster.core.systemdesign.components.AppScaffold
 import com.idphoto.idphotomaster.core.systemdesign.components.AppTopBar
 import com.idphoto.idphotomaster.core.systemdesign.components.DrawLineWithDot
+import com.idphoto.idphotomaster.core.systemdesign.components.LoadingView
 import com.idphoto.idphotomaster.core.systemdesign.components.PhotoView
 import com.idphoto.idphotomaster.core.systemdesign.components.ScreenButton
 import com.idphoto.idphotomaster.core.systemdesign.icon.AppIcons
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
-import com.idphoto.idphotomaster.core.systemdesign.ui.theme.Blue
 
 @Composable
 fun BasketScreen(
@@ -72,6 +79,15 @@ fun BasketScreen(
             when (event) {
                 BasketViewEvent.NavigateToLogin -> navigateToLogin()
                 BasketViewEvent.StartGooglePurchase -> googlePurchaseViewModel.purchase("id_photo", context as Activity)
+                BasketViewEvent.PurchaseCompleted -> {
+                    mainViewModel.showCustomDialog(
+                        title = context.getString(R.string.purchase_success_description),
+                        message = context.getString(R.string.purchase_success_title),
+                        confirmText = context.getString(R.string.ok),
+                        confirmCallback = { onCompletePurchase.invoke() },
+                        onDismissCallback = { onCompletePurchase.invoke() }
+                    )
+                }
             }
         }
     }
@@ -80,13 +96,6 @@ fun BasketScreen(
             when (event) {
                 GooglePurchaseViewEvent.PurchaseSuccess -> {
                     viewModel.purchaseSuccess()
-                    mainViewModel.showCustomDialog(
-                        title = context.getString(R.string.purchase_success_description),
-                        message = context.getString(R.string.purchase_success_title),
-                        confirmText = context.getString(R.string.ok),
-                        confirmCallback = { onCompletePurchase.invoke() },
-                        onDismissCallback = { onCompletePurchase.invoke() }
-                    )
                 }
 
                 GooglePurchaseViewEvent.PurchaseFailed -> {
@@ -128,26 +137,28 @@ private fun ScreenContent(
     onBackClick: () -> Unit,
     onCompletePurchase: () -> Unit
 ) {
+    if (viewState.loading) {
+        BackHandler {}
+    }
     AppScaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {
             AppTopBar(
                 leftIcon = AppIcons.BackIcon,
-                onLeftIconClicked = onBackClick
+                onLeftIconClicked = {
+                    if (viewState.loading.not()) onBackClick.invoke()
+                }
             )
         },
     ) { padding ->
         val scrollState = rememberScrollState()
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White)
                 .padding(padding)
                 .imePadding(),
         ) {
-            if (viewState.loading) {
-                LinearProgressIndicator(color = Blue)
-            }
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -184,6 +195,9 @@ private fun ScreenContent(
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                 }
+            }
+            if (viewState.loading) {
+                LoadingView()
             }
         }
     }
