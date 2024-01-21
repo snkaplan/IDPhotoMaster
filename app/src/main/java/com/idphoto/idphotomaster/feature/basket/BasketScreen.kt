@@ -81,8 +81,8 @@ fun BasketScreen(
                 GooglePurchaseViewEvent.PurchaseSuccess -> {
                     viewModel.purchaseSuccess()
                     mainViewModel.showCustomDialog(
-                        title = context.getString(R.string.purchase_success_title),
-                        message = context.getString(R.string.purchase_success_description),
+                        title = context.getString(R.string.purchase_success_description),
+                        message = context.getString(R.string.purchase_success_title),
                         confirmText = context.getString(R.string.ok),
                         confirmCallback = { onCompletePurchase.invoke() },
                         onDismissCallback = { onCompletePurchase.invoke() }
