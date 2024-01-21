@@ -151,9 +151,17 @@ private fun ScreenContent(
                         onRemoveBackground
                     )
                     Spacer(modifier = Modifier.height(15.dp))
-                    ScreenButton(text = stringResource(id = R.string.continue_text), onAction = onContinue)
+                    ScreenButton(
+                        text = stringResource(id = R.string.continue_text),
+                        onAction = onContinue,
+                        enabled = viewState.loading.not()
+                    )
                     Spacer(modifier = Modifier.height(15.dp))
-                    ScreenButton(text = stringResource(id = R.string.save_changes), onAction = onSaveImage)
+                    ScreenButton(
+                        text = stringResource(id = R.string.save_changes),
+                        onAction = onSaveImage,
+                        enabled = viewState.loading.not()
+                    )
                     Spacer(modifier = Modifier.height(10.dp))
                 }
             }

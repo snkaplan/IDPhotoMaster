@@ -164,7 +164,8 @@ private fun ScreenContent(
                         PhotoView(
                             modifier = Modifier
                                 .padding(10.dp)
-                                .clip(RoundedCornerShape(5.dp)),
+                                .clip(RoundedCornerShape(5.dp))
+                                .background(Color.White),
                             bitmap = safePhoto.asImageBitmap()
                         )
                     }

@@ -16,8 +16,9 @@ import com.idphoto.idphotomaster.core.systemdesign.ui.theme.Blue
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.White
 
 @Composable
-fun ScreenButton(modifier: Modifier = Modifier, text: String, onAction: () -> Unit) {
+fun ScreenButton(modifier: Modifier = Modifier, text: String, onAction: () -> Unit, enabled: Boolean = true) {
     Button(
+        enabled = enabled,
         colors = ButtonDefaults.buttonColors(containerColor = Blue),
         onClick = { onAction.invoke() },
         modifier = Modifier
