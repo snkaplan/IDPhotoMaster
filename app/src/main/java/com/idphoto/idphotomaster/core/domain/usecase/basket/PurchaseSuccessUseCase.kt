@@ -1,17 +1,24 @@
 package com.idphoto.idphotomaster.core.domain.usecase.basket
 
+import android.graphics.Bitmap
 import com.idphoto.idphotomaster.core.data.repository.BasketRepository
+import com.idphoto.idphotomaster.core.domain.model.Purchase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
 class PurchaseSuccessUseCase @Inject constructor(private val basketRepository: BasketRepository) {
-    operator fun invoke(): Flow<Unit> {
+    operator fun invoke(userId: String, purchaseId: String, image: Bitmap): Flow<Unit> {
         return flow {
-            val result = basketRepository.purchase()
-            if (result.isSuccess) {
-                val upload = basketRepository.uploadPhoto()
-                (upload.getOrNull() ?: throw IllegalArgumentException("error message")).also {
+            val stream = ByteArrayOutputStream()
+            image.compress(Bitmap.CompressFormat.PNG, 100, stream)
+            val data = stream.toByteArray()
+            val filename = "$userId-$purchaseId.png"
+            val upload = basketRepository.uploadPhoto(filename, data)
+            if (upload.isSuccess) {
+                val result = basketRepository.purchase(Purchase(userId, purchaseId, upload.getOrNull().toString()))
+                (result.getOrNull() ?: throw IllegalArgumentException("error message")).also {
                     emit(it)
                 }
             } else {

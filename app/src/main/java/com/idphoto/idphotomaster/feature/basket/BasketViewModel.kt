@@ -10,6 +10,7 @@ import com.idphoto.idphotomaster.core.common.Resource
 import com.idphoto.idphotomaster.core.common.asResource
 import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
 import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
+import com.idphoto.idphotomaster.core.common.safeLet
 import com.idphoto.idphotomaster.core.data.repository.UserRepository
 import com.idphoto.idphotomaster.core.domain.usecase.basket.PurchaseSuccessUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromDevice
@@ -21,6 +22,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -93,7 +95,11 @@ class BasketViewModel @Inject constructor(
 
     private suspend fun purchaseComplete() {
         uiState.value.photo?.let {
-            purchaseSuccessUseCase().asResource().launchIn(viewModelScope).join()
+            safeLet(userRepository.currentUser?.uid, uiState.value.photo) { uid, photo ->
+                purchaseSuccessUseCase(
+                    uid, UUID.randomUUID().toString(), photo
+                ).asResource().launchIn(viewModelScope).join()
+            }
         }
     }
 }

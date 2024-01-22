@@ -1,21 +1,31 @@
 package com.idphoto.idphotomaster.core.data.datasource.remote
 
+import android.net.Uri
 import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.delay
+import com.google.firebase.storage.FirebaseStorage
+import com.idphoto.idphotomaster.core.common.await
 import javax.inject.Inject
 
+
+private const val PURCHASE_TABLE_NAME = "purchase_table"
+private const val IMAGES_FOLDER = "images"
+
 class BasketRemoteDataSourceImpl @Inject constructor(
-    private val firebaseFirestore: FirebaseFirestore
+    private val firebaseFirestore: FirebaseFirestore,
+    private val firebaseStorage: FirebaseStorage
 ) : BasketRemoteDataSource {
-    override suspend fun purchase(): Result<Unit> {
+    override suspend fun purchase(purchase: MutableMap<String, Any?>): Result<Unit> {
         return runCatching {
-            delay(6000)
+            firebaseFirestore.collection(PURCHASE_TABLE_NAME).add(purchase).await()
         }
     }
 
-    override suspend fun uploadPhoto(): Result<Unit> {
+    override suspend fun uploadPhoto(fileName: String, image: ByteArray): Result<Uri> {
         return runCatching {
-            delay(7000)
+            val storageRef = firebaseStorage.reference.child(IMAGES_FOLDER).child(fileName)
+            val upload = storageRef.putBytes(image).await()
+            val uri = upload.storage.downloadUrl.await()
+            uri
         }
     }
 }
