@@ -48,6 +48,7 @@ import com.idphoto.idphotomaster.core.systemdesign.ui.theme.SectionTextColor
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
+    navigateToLogin: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val splashUiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -61,11 +62,11 @@ fun ProfileScreen(
     LaunchedEffect(key1 = true) {
         viewModel.init()
     }
-    ScreenContent(viewState = splashUiState, modifier = modifier.fillMaxSize())
+    ScreenContent(viewState = splashUiState, modifier = modifier.fillMaxSize(), navigateToLogin)
 }
 
 @Composable
-private fun ScreenContent(viewState: ProfileViewState, modifier: Modifier) {
+private fun ScreenContent(viewState: ProfileViewState, modifier: Modifier, navigateToLogin: () -> Unit) {
     val scrollState = rememberScrollState()
     Column(modifier = modifier, verticalArrangement = Arrangement.Top) {
         if (viewState.loading) {
@@ -82,7 +83,13 @@ private fun ScreenContent(viewState: ProfileViewState, modifier: Modifier) {
                 tint = Pink
             )
             Spacer(modifier = Modifier.height(10.dp))
-            UserInfo(viewState.loggedIn, viewState.user?.name, viewState.user?.lastName, viewState.user?.mail)
+            UserInfo(
+                viewState.loggedIn,
+                viewState.user?.name,
+                viewState.user?.lastName,
+                viewState.user?.mail,
+                navigateToLogin
+            )
             Spacer(modifier = Modifier.height(20.dp))
             ProfileGeneralSettings()
             Spacer(modifier = Modifier.height(20.dp))
@@ -92,7 +99,7 @@ private fun ScreenContent(viewState: ProfileViewState, modifier: Modifier) {
 }
 
 @Composable
-fun UserInfo(isLoggedIn: Boolean, name: String?, lastName: String?, email: String?) {
+fun UserInfo(isLoggedIn: Boolean, name: String?, lastName: String?, email: String?, navigateToLogin: () -> Unit) {
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         if (isLoggedIn) {
             if (name != null) {
@@ -102,7 +109,7 @@ fun UserInfo(isLoggedIn: Boolean, name: String?, lastName: String?, email: Strin
                 Text(text = email, style = TextStyle(fontWeight = FontWeight.Normal, fontSize = 16.sp))
             }
         } else {
-            Button(onClick = { }) {
+            Button(onClick = navigateToLogin) {
                 Text(text = stringResource(id = R.string.login))
             }
         }

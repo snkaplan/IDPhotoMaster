@@ -78,6 +78,8 @@ fun AppNavHost(
         }, onCompletePurchase = {
             navController.popBackStack(route = HomeNavigationRoute, inclusive = false)
         }, mainViewModel = mainViewModel)
-        profileScreen()
+        profileScreen(navigateToLogin = {
+            navController.navigateLogin()
+        })
     }
 }
