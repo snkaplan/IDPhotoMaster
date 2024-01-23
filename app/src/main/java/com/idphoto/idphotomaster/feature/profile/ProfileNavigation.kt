@@ -8,10 +8,11 @@ import androidx.navigation.compose.composable
 const val ProfileNavigationRoute = "profile_route"
 
 fun NavGraphBuilder.profileScreen(
-    navigateToLogin: () -> Unit
+    navigateToLogin: () -> Unit,
+    navigateToSavedPhotos: () -> Unit
 ) {
     composable(ProfileNavigationRoute) {
-        ProfileScreen(navigateToLogin = navigateToLogin)
+        ProfileScreen(navigateToLogin = navigateToLogin, navigateToSavedPhotos = navigateToSavedPhotos)
     }
 }
 

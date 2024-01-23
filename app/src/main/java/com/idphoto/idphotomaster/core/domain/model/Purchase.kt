@@ -8,4 +8,14 @@ data class Purchase(val userId: String, val purchaseId: String, val cdnUrl: Stri
             "cdn_url" to cdnUrl
         )
     }
+
+    companion object {
+        fun fromFirebaseMap(map: Map<String, Any?>): Purchase {
+            return Purchase(
+                userId = map["user_id"].toString(),
+                purchaseId = map["purchase_id"].toString(),
+                cdnUrl = map["cdn_url"].toString(),
+            )
+        }
+    }
 }

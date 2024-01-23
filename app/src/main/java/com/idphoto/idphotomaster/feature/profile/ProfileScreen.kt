@@ -49,6 +49,7 @@ import com.idphoto.idphotomaster.core.systemdesign.ui.theme.SectionTextColor
 fun ProfileScreen(
     modifier: Modifier = Modifier,
     navigateToLogin: () -> Unit,
+    navigateToSavedPhotos: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val splashUiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -62,11 +63,16 @@ fun ProfileScreen(
     LaunchedEffect(key1 = true) {
         viewModel.init()
     }
-    ScreenContent(viewState = splashUiState, modifier = modifier.fillMaxSize(), navigateToLogin)
+    ScreenContent(viewState = splashUiState, modifier = modifier.fillMaxSize(), navigateToLogin, navigateToSavedPhotos)
 }
 
 @Composable
-private fun ScreenContent(viewState: ProfileViewState, modifier: Modifier, navigateToLogin: () -> Unit) {
+private fun ScreenContent(
+    viewState: ProfileViewState,
+    modifier: Modifier,
+    navigateToLogin: () -> Unit,
+    navigateToSavedPhotos: () -> Unit
+) {
     val scrollState = rememberScrollState()
     Column(modifier = modifier, verticalArrangement = Arrangement.Top) {
         if (viewState.loading) {
@@ -91,7 +97,7 @@ private fun ScreenContent(viewState: ProfileViewState, modifier: Modifier, navig
                 navigateToLogin
             )
             Spacer(modifier = Modifier.height(20.dp))
-            ProfileGeneralSettings()
+            ProfileGeneralSettings(navigateToSavedPhotos)
             Spacer(modifier = Modifier.height(20.dp))
             ProfileGeneralInfo()
         }
@@ -117,11 +123,15 @@ fun UserInfo(isLoggedIn: Boolean, name: String?, lastName: String?, email: Strin
 }
 
 @Composable
-fun ProfileGeneralSettings() {
+fun ProfileGeneralSettings(navigateToSavedPhotos: () -> Unit) {
     Column {
         ProfileSectionHeader(stringResource(id = R.string.general_settings))
         ProfileSectionItem(Icons.Default.Language, stringResource(id = R.string.language)) {}
-        ProfileSectionItem(Icons.Default.StarOutline, stringResource(id = R.string.saved_photos)) {}
+        ProfileSectionItem(
+            Icons.Default.StarOutline,
+            stringResource(id = R.string.saved_photos),
+            onClick = navigateToSavedPhotos
+        )
     }
 }
 

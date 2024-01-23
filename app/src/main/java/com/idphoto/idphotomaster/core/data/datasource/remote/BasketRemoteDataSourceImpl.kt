@@ -3,11 +3,10 @@ package com.idphoto.idphotomaster.core.data.datasource.remote
 import android.net.Uri
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
+import com.idphoto.idphotomaster.core.common.Constants.PURCHASE_TABLE_NAME
 import com.idphoto.idphotomaster.core.common.await
 import javax.inject.Inject
 
-
-private const val PURCHASE_TABLE_NAME = "purchase_table"
 private const val IMAGES_FOLDER = "images"
 
 class BasketRemoteDataSourceImpl @Inject constructor(

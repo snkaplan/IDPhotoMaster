@@ -6,4 +6,5 @@ object Constants {
     const val TempFileExtension = ".png"
     const val CachedFileName = "cachedPhoto"
     const val KEY_TEMP_FILE_START_PREFIX = "KEY_TEMP_FILE_START_PREFIX"
+    const val PURCHASE_TABLE_NAME = "purchase_table"
 }

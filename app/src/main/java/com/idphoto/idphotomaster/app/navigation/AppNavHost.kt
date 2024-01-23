@@ -16,6 +16,8 @@ import com.idphoto.idphotomaster.feature.home.navigateToHome
 import com.idphoto.idphotomaster.feature.login.loginScreen
 import com.idphoto.idphotomaster.feature.login.navigateLogin
 import com.idphoto.idphotomaster.feature.profile.profileScreen
+import com.idphoto.idphotomaster.feature.savedphotos.navigateToSavedPhotos
+import com.idphoto.idphotomaster.feature.savedphotos.savedPhotosScreen
 import com.idphoto.idphotomaster.feature.splash.SplashNavigationRoute
 import com.idphoto.idphotomaster.feature.splash.splashScreen
 import com.idphoto.idphotomaster.feature.tutorial.TutorialNavigationRoute
@@ -80,6 +82,9 @@ fun AppNavHost(
         }, mainViewModel = mainViewModel)
         profileScreen(navigateToLogin = {
             navController.navigateLogin()
+        }, navigateToSavedPhotos = {
+            navController.navigateToSavedPhotos()
         })
+        savedPhotosScreen(onBackClick = navController::popBackStack)
     }
 }
