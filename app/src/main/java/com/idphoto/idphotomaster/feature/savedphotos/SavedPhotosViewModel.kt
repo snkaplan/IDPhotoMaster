@@ -42,7 +42,6 @@ class SavedPhotosViewModel @Inject constructor(
                     }
 
                     is Resource.Success -> {
-                        println("Satın alımlar: ${result.data}")
                         updateState { copy(loading = false, userPurchases = result.data) }
                     }
                 }
