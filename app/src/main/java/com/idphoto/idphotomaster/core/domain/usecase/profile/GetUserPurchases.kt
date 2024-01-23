@@ -4,6 +4,7 @@ import android.content.Context
 import com.idphoto.idphotomaster.core.common.Constants.CachedFileName
 import com.idphoto.idphotomaster.core.data.repository.OrdersRepository
 import com.idphoto.idphotomaster.core.domain.model.Purchase
+import com.idphoto.idphotomaster.core.domain.model.UserSavedPhoto
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
@@ -18,7 +19,7 @@ class GetUserPurchases @Inject constructor(
     private val ordersRepository: OrdersRepository,
     @ApplicationContext private val context: Context
 ) {
-    suspend operator fun invoke(uid: String): Flow<List<Purchase>> {
+    suspend operator fun invoke(uid: String): Flow<List<UserSavedPhoto>> {
         return flow {
             coroutineScope {
                 val purchases = async { ordersRepository.getUserPurchases(uid) }
@@ -26,11 +27,14 @@ class GetUserPurchases @Inject constructor(
                 val result = purchases.await()
                 val filesResponse = files.await()
                 (result.getOrNull() ?: throw IllegalArgumentException("error message")).also {
-                    val list = mutableListOf<Purchase>()
+                    val list = mutableListOf<UserSavedPhoto>()
                     it.forEach { item ->
                         item.data?.let { safeData ->
-                            list.add(Purchase.fromFirebaseMap(safeData))
+                            list.add(UserSavedPhoto(Purchase.fromFirebaseMap(safeData).cdnUrl, true))
                         }
+                    }
+                    filesResponse.forEach { fileItem ->
+                        list.add(UserSavedPhoto(fileItem.path, false))
                     }
                     emit(list)
                 }

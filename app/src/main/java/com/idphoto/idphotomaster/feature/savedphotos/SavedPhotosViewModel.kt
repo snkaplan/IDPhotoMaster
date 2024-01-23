@@ -7,7 +7,7 @@ import com.idphoto.idphotomaster.core.common.IViewState
 import com.idphoto.idphotomaster.core.common.Resource
 import com.idphoto.idphotomaster.core.common.asResource
 import com.idphoto.idphotomaster.core.data.repository.UserRepository
-import com.idphoto.idphotomaster.core.domain.model.Purchase
+import com.idphoto.idphotomaster.core.domain.model.UserSavedPhoto
 import com.idphoto.idphotomaster.core.domain.usecase.profile.GetUserPurchases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
@@ -42,7 +42,7 @@ class SavedPhotosViewModel @Inject constructor(
                     }
 
                     is Resource.Success -> {
-                        updateState { copy(loading = false, userPurchases = result.data) }
+                        updateState { copy(loading = false, savedPhotos = result.data) }
                     }
                 }
             }.launchIn(this)
@@ -50,7 +50,7 @@ class SavedPhotosViewModel @Inject constructor(
     }
 }
 
-data class SavedPhotosViewState(val loading: Boolean = false, val userPurchases: List<Purchase>? = null) :
+data class SavedPhotosViewState(val loading: Boolean = false, val savedPhotos: List<UserSavedPhoto>? = null) :
     IViewState
 
 sealed class SavedPhotoViewEvents : IViewEvents {}
