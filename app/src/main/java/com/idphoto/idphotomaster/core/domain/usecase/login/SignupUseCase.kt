@@ -18,7 +18,7 @@ class SignupUseCase @Inject constructor(private val userRepository: UserReposito
             if (result.isSuccess) {
                 val create = userRepository.createUser(
                     User(
-                        uid = userRepository.currentUser?.uid,
+                        userId = userRepository.currentUser?.uid,
                         name = name,
                         lastName = lastName,
                         mail = mail

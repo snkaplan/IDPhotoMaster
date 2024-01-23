@@ -29,9 +29,24 @@ class UserRemoteDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun createUser(user: MutableMap<String, Any?>): Result<Unit> {
+    override suspend fun createUser(user: MutableMap<String, Any?>, docId: String?): Result<Unit> {
         return runCatching {
-            firebaseFirestore.collection(USERS_TABLE_NAME).document(user["user_id"].toString()).set(user).await()
+            if (docId != null) {
+                firebaseFirestore.collection(USERS_TABLE_NAME).document(docId).set(user).await()
+            }
+        }
+    }
+
+    override suspend fun getUser(uid: String): Result<Map<String, Any?>> {
+        return runCatching {
+            val result = firebaseFirestore.collection(USERS_TABLE_NAME).document(uid).get().await()
+            result.data ?: throw Exception()
+        }
+    }
+
+    override suspend fun signOut(): Result<Unit> {
+        return runCatching {
+            auth.signOut()
         }
     }
 }

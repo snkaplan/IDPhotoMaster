@@ -118,9 +118,6 @@ internal fun AppNavBar(
             NavigationBarItem(
                 selected = selected,
                 onClick = { onNavigateToDestination(destination) },
-                label = {
-                    TitleMedium(text = stringResource(id = destination.titleTextId))
-                },
                 icon = {
                     val icon = if (selected) {
                         destination.selectedIcon

@@ -15,6 +15,7 @@ import com.idphoto.idphotomaster.feature.home.homeScreen
 import com.idphoto.idphotomaster.feature.home.navigateToHome
 import com.idphoto.idphotomaster.feature.login.loginScreen
 import com.idphoto.idphotomaster.feature.login.navigateLogin
+import com.idphoto.idphotomaster.feature.profile.profileScreen
 import com.idphoto.idphotomaster.feature.splash.SplashNavigationRoute
 import com.idphoto.idphotomaster.feature.splash.splashScreen
 import com.idphoto.idphotomaster.feature.tutorial.TutorialNavigationRoute
@@ -77,5 +78,6 @@ fun AppNavHost(
         }, onCompletePurchase = {
             navController.popBackStack(route = HomeNavigationRoute, inclusive = false)
         }, mainViewModel = mainViewModel)
+        profileScreen()
     }
 }

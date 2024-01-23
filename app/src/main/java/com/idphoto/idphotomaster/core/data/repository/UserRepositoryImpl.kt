@@ -25,7 +25,14 @@ class UserRepositoryImpl @Inject constructor(
     }
 
     override suspend fun createUser(user: User): Result<Unit> {
-        return userRemoteDataSource.createUser(user.toFirebaseMap())
+        return userRemoteDataSource.createUser(user.toFirebaseMap(), user.userId)
     }
 
+    override suspend fun signOut(): Result<Unit> {
+        return userRemoteDataSource.signOut()
+    }
+
+    override suspend fun getUser(uid: String): Result<Map<String, Any?>> {
+        return userRemoteDataSource.getUser(uid)
+    }
 }

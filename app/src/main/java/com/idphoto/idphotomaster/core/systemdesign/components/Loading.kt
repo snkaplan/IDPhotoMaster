@@ -9,14 +9,15 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 
 @Composable
-fun LoadingView() {
+fun LoadingView(modifier: Modifier = Modifier, backgroundColor: Color = BackgroundColor.copy(alpha = 0.5f)) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
-            .background(BackgroundColor.copy(alpha = 0.5f))
+            .background(backgroundColor)
     )
     Column(
         modifier = Modifier.fillMaxSize(),

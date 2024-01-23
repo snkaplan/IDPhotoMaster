@@ -16,6 +16,7 @@ import com.idphoto.idphotomaster.core.data.util.NetworkMonitor
 import com.idphoto.idphotomaster.core.systemdesign.ui.TrackDisposableJank
 import com.idphoto.idphotomaster.feature.home.HomeNavigationRoute
 import com.idphoto.idphotomaster.feature.home.navigateToHome
+import com.idphoto.idphotomaster.feature.profile.navigateToProfile
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -70,6 +71,7 @@ class MainAppState(
 
         when (topLevelDestination) {
             TopLevelDestinations.HOME -> navController.navigateToHome(topLevelNavOptions)
+            TopLevelDestinations.PROFILE -> navController.navigateToProfile(topLevelNavOptions)
         }
     }
 
