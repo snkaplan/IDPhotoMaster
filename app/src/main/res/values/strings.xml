@@ -43,4 +43,11 @@
     <string name="purchase_failed_description">Alışverişi Esnasında Bir Hata Oluştu :/</string>
     <string name="purchase_failed_title">Bir Hata Oluştu</string>
     <string name="ok">Tamam</string>
+    <string name="general_settings">Genel Ayarlar</string>
+    <string name="language">Dil</string>
+    <string name="saved_photos">Kayıtlı Fotoğraflar</string>
+    <string name="information">Bilgi</string>
+    <string name="about">Uygulama Hakkında</string>
+    <string name="terms_and_conditions">Şartlar ve Koşullar</string>
+    <string name="privacy_polciy">Gizlilik Güvenlik</string>
 </resources>
