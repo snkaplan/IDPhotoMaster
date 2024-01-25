@@ -30,12 +30,12 @@ data class TutorialViewState(
     val loading: Boolean = false,
     val tutorialItems: List<TutorialPageItem> = listOf(
         TutorialPageItem(
-            R.drawable.ic_tutorial_biometric,
+            R.drawable.ic_tutorial_first,
             R.string.tutorial_biometric_title,
             R.string.tutorial_biometric_description
         ),
         TutorialPageItem(
-            R.drawable.ic_tutorial_edit,
+            R.drawable.ic_tutorial_second,
             R.string.tutorial_edit_bg_title,
             R.string.tutorial_edit_bg_description
         )
