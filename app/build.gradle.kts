@@ -123,4 +123,6 @@ dependencies {
 
     val billing_version = "6.1.0"
     implementation("com.android.billingclient:billing-ktx:$billing_version")
+
+    implementation("io.coil-kt:coil-compose:2.5.0")
 }
