@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -27,20 +28,25 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.os.ConfigurationCompat
+import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.idphoto.idphotomaster.R
+import com.idphoto.idphotomaster.core.domain.model.AppLanguageItem
 import com.idphoto.idphotomaster.core.systemdesign.components.InformationBottomSheet
 import com.idphoto.idphotomaster.core.systemdesign.components.LoadingView
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
@@ -55,8 +61,10 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val splashUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val locale = getLocale()
     LaunchedEffect(key1 = true) {
-        viewModel.init()
+        viewModel.init(context, locale)
     }
     ScreenContent(
         viewState = splashUiState,
@@ -99,7 +107,12 @@ private fun ScreenContent(
                 navigateToLogin
             )
             Spacer(modifier = Modifier.height(20.dp))
-            ProfileGeneralSettings(navigateToSavedPhotos)
+            ProfileGeneralSettings(
+                viewState.showLanguageBottomSheet,
+                navigateToSavedPhotos,
+                viewState.languageList,
+                onViewEvent
+            )
             Spacer(modifier = Modifier.height(20.dp))
             ProfileGeneralInfo(onViewEvent = onViewEvent)
             if (viewState.infoBottomSheet != null) {
@@ -131,16 +144,43 @@ fun UserInfo(isLoggedIn: Boolean, name: String?, lastName: String?, email: Strin
 }
 
 @Composable
-fun ProfileGeneralSettings(navigateToSavedPhotos: () -> Unit) {
+fun ProfileGeneralSettings(
+    showLanguageBottomSheet: Boolean?,
+    navigateToSavedPhotos: () -> Unit,
+    languageList: List<AppLanguageItem>?,
+    onViewEvent: (ProfileViewTriggeredEvent) -> Unit
+) {
     Column {
         ProfileSectionHeader(stringResource(id = R.string.general_settings))
-        ProfileSectionItem(Icons.Default.Language, stringResource(id = R.string.language)) {}
+        ProfileSectionItem(Icons.Default.Language, stringResource(id = R.string.language)) {
+            onViewEvent.invoke(ProfileViewTriggeredEvent.ShowLanguageBottomSheet)
+        }
         ProfileSectionItem(
             Icons.Default.StarOutline,
             stringResource(id = R.string.saved_photos),
             onClick = navigateToSavedPhotos
         )
     }
+    if (showLanguageBottomSheet == true) {
+        val context = LocalContext.current
+        ChangeLanguageBottomSheet(
+            modifier = Modifier.heightIn(max = 300.dp),
+            onDismissRequest = { onViewEvent.invoke(ProfileViewTriggeredEvent.LanguageBottomSheetDismissed) },
+            options = languageList,
+            onConfirm = { selectedCode ->
+                selectedCode?.let { safeCode ->
+                    onViewEvent.invoke(ProfileViewTriggeredEvent.ChangeLanguage(context, safeCode))
+                }
+            }
+        )
+    }
+}
+
+@Composable
+@ReadOnlyComposable
+fun getLocale(): java.util.Locale {
+    val configuration = LocalConfiguration.current
+    return ConfigurationCompat.getLocales(configuration).get(0) ?: LocaleListCompat.getDefault()[0]!!
 }
 
 @Composable
@@ -151,7 +191,7 @@ fun ProfileGeneralInfo(onViewEvent: (ProfileViewTriggeredEvent) -> Unit) {
         ProfileSectionItem(Icons.Default.PhoneAndroid, stringResource(id = R.string.about)) {
             onViewEvent(
                 ProfileViewTriggeredEvent.ShowInfoBottomSheet(
-                    context.getString(R.string.info_sheet_title_lorem),
+                    context.getString(R.string.about),
                     context.getString(R.string.info_sheet_description_lorem)
                 )
             )
@@ -159,7 +199,7 @@ fun ProfileGeneralInfo(onViewEvent: (ProfileViewTriggeredEvent) -> Unit) {
         ProfileSectionItem(Icons.Default.FilePresent, stringResource(id = R.string.terms_and_conditions)) {
             onViewEvent(
                 ProfileViewTriggeredEvent.ShowInfoBottomSheet(
-                    context.getString(R.string.info_sheet_title_lorem),
+                    context.getString(R.string.terms_and_conditions),
                     context.getString(R.string.info_sheet_description_lorem)
                 )
             )
@@ -167,7 +207,7 @@ fun ProfileGeneralInfo(onViewEvent: (ProfileViewTriggeredEvent) -> Unit) {
         ProfileSectionItem(Icons.Default.Security, stringResource(id = R.string.privacy_policy)) {
             onViewEvent(
                 ProfileViewTriggeredEvent.ShowInfoBottomSheet(
-                    context.getString(R.string.info_sheet_title_lorem),
+                    context.getString(R.string.privacy_policy),
                     context.getString(R.string.info_sheet_description_lorem)
                 )
             )
