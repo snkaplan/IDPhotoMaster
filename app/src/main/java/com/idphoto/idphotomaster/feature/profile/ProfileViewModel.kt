@@ -7,6 +7,7 @@ import com.idphoto.idphotomaster.core.common.IViewState
 import com.idphoto.idphotomaster.core.common.Resource
 import com.idphoto.idphotomaster.core.common.asResource
 import com.idphoto.idphotomaster.core.data.repository.UserRepository
+import com.idphoto.idphotomaster.core.domain.model.InfoBottomSheetItem
 import com.idphoto.idphotomaster.core.domain.model.User
 import com.idphoto.idphotomaster.core.domain.usecase.profile.GetUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -48,9 +49,32 @@ class ProfileViewModel @Inject constructor(
             }.launchIn(this)
         }
     }
+
+    fun onTriggerEvent(event: ProfileViewTriggeredEvent) {
+        viewModelScope.launch {
+            when (event) {
+                is ProfileViewTriggeredEvent.ShowInfoBottomSheet -> {
+                    updateState { copy(infoBottomSheet = InfoBottomSheetItem(event.title, event.description)) }
+                }
+
+                ProfileViewTriggeredEvent.InfoBottomSheetDismissed -> {
+                    updateState { copy(infoBottomSheet = null) }
+                }
+            }
+        }
+    }
 }
 
-data class ProfileViewState(val loading: Boolean = false, val loggedIn: Boolean = false, val user: User? = null) :
-    IViewState
+data class ProfileViewState(
+    val loading: Boolean = false,
+    val loggedIn: Boolean = false,
+    val user: User? = null,
+    val infoBottomSheet: InfoBottomSheetItem? = null
+) : IViewState
 
 sealed class ProfileViewEvents : IViewEvents {}
+
+sealed class ProfileViewTriggeredEvent {
+    data class ShowInfoBottomSheet(val title: String, val description: String) : ProfileViewTriggeredEvent()
+    data object InfoBottomSheetDismissed : ProfileViewTriggeredEvent()
+}

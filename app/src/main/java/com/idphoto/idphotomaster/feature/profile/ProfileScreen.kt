@@ -15,9 +15,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.FilePresent
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Security
@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -40,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.idphoto.idphotomaster.R
+import com.idphoto.idphotomaster.core.systemdesign.components.InformationBottomSheet
 import com.idphoto.idphotomaster.core.systemdesign.components.LoadingView
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.Pink
@@ -53,17 +55,16 @@ fun ProfileScreen(
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
     val splashUiState by viewModel.uiState.collectAsStateWithLifecycle()
-    LaunchedEffect(key1 = viewModel.uiEvents) {
-        viewModel.uiEvents.collect { event ->
-            when (event) {
-                else -> {}
-            }
-        }
-    }
     LaunchedEffect(key1 = true) {
         viewModel.init()
     }
-    ScreenContent(viewState = splashUiState, modifier = modifier.fillMaxSize(), navigateToLogin, navigateToSavedPhotos)
+    ScreenContent(
+        viewState = splashUiState,
+        modifier = modifier.fillMaxSize(),
+        navigateToLogin = navigateToLogin,
+        navigateToSavedPhotos = navigateToSavedPhotos,
+        onViewEvent = viewModel::onTriggerEvent
+    )
 }
 
 @Composable
@@ -71,7 +72,8 @@ private fun ScreenContent(
     viewState: ProfileViewState,
     modifier: Modifier,
     navigateToLogin: () -> Unit,
-    navigateToSavedPhotos: () -> Unit
+    navigateToSavedPhotos: () -> Unit,
+    onViewEvent: (ProfileViewTriggeredEvent) -> Unit,
 ) {
     val scrollState = rememberScrollState()
     Column(modifier = modifier, verticalArrangement = Arrangement.Top) {
@@ -99,7 +101,13 @@ private fun ScreenContent(
             Spacer(modifier = Modifier.height(20.dp))
             ProfileGeneralSettings(navigateToSavedPhotos)
             Spacer(modifier = Modifier.height(20.dp))
-            ProfileGeneralInfo()
+            ProfileGeneralInfo(onViewEvent = onViewEvent)
+            if (viewState.infoBottomSheet != null) {
+                InformationBottomSheet(
+                    onDismissRequest = { onViewEvent.invoke(ProfileViewTriggeredEvent.InfoBottomSheetDismissed) },
+                    infoBottomSheetItem = viewState.infoBottomSheet
+                )
+            }
         }
     }
 }
@@ -136,12 +144,34 @@ fun ProfileGeneralSettings(navigateToSavedPhotos: () -> Unit) {
 }
 
 @Composable
-fun ProfileGeneralInfo() {
+fun ProfileGeneralInfo(onViewEvent: (ProfileViewTriggeredEvent) -> Unit) {
+    val context = LocalContext.current
     Column {
         ProfileSectionHeader(stringResource(id = R.string.information))
-        ProfileSectionItem(Icons.Default.PhoneAndroid, stringResource(id = R.string.about)) {}
-        ProfileSectionItem(Icons.Default.FilePresent, stringResource(id = R.string.terms_and_conditions)) {}
-        ProfileSectionItem(Icons.Default.Security, stringResource(id = R.string.privacy_polciy)) {}
+        ProfileSectionItem(Icons.Default.PhoneAndroid, stringResource(id = R.string.about)) {
+            onViewEvent(
+                ProfileViewTriggeredEvent.ShowInfoBottomSheet(
+                    context.getString(R.string.info_sheet_title_lorem),
+                    context.getString(R.string.info_sheet_description_lorem)
+                )
+            )
+        }
+        ProfileSectionItem(Icons.Default.FilePresent, stringResource(id = R.string.terms_and_conditions)) {
+            onViewEvent(
+                ProfileViewTriggeredEvent.ShowInfoBottomSheet(
+                    context.getString(R.string.info_sheet_title_lorem),
+                    context.getString(R.string.info_sheet_description_lorem)
+                )
+            )
+        }
+        ProfileSectionItem(Icons.Default.Security, stringResource(id = R.string.privacy_policy)) {
+            onViewEvent(
+                ProfileViewTriggeredEvent.ShowInfoBottomSheet(
+                    context.getString(R.string.info_sheet_title_lorem),
+                    context.getString(R.string.info_sheet_description_lorem)
+                )
+            )
+        }
     }
 }
 
@@ -190,7 +220,7 @@ fun ProfileSectionItem(icon: ImageVector, title: String, onClick: () -> Unit) {
         Spacer(modifier = Modifier.weight(1f))
         Icon(
             modifier = Modifier.padding(horizontal = 30.dp),
-            imageVector = Icons.Default.KeyboardArrowRight,
+            imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
             contentDescription = "",
             tint = SectionTextColor
         )
