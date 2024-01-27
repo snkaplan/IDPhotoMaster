@@ -85,6 +85,8 @@ fun AppNavHost(
         }, navigateToSavedPhotos = {
             navController.navigateToSavedPhotos()
         })
-        savedPhotosScreen(onBackClick = navController::popBackStack)
+        savedPhotosScreen(onBackClick = navController::popBackStack, navigateToEditScreen = {
+            navController.navigateToEditPhoto(capturedImagePath = it)
+        })
     }
 }

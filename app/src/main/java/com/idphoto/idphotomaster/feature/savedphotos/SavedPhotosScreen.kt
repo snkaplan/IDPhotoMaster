@@ -1,12 +1,13 @@
 package com.idphoto.idphotomaster.feature.savedphotos
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,6 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -41,26 +43,35 @@ import com.idphoto.idphotomaster.core.systemdesign.ui.theme.Blue
 fun SavedPhotosScreen(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
+    navigateToEditScreen: (String) -> Unit,
     viewModel: SavedPhotosViewModel = hiltViewModel()
 ) {
     val splashUiState by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(key1 = viewModel.uiEvents) {
         viewModel.uiEvents.collect { event ->
             when (event) {
-                else -> {}
+                is SavedPhotoViewEvents.NavigateToEditPhotoWithPath -> navigateToEditScreen(event.path)
             }
         }
     }
     LaunchedEffect(key1 = true) {
         viewModel.init()
     }
-    ScreenContent(viewState = splashUiState, modifier = modifier.fillMaxSize(), onBackClick = onBackClick)
+    ScreenContent(
+        viewState = splashUiState,
+        modifier = modifier.fillMaxSize(),
+        onBackClick = onBackClick,
+        onSavedPhotoClicked = viewModel::onSavedPhotoClicked,
+        onBoughtPhotoClicked = viewModel::onBoughtPhotoClicked
+    )
 }
 
 @Composable
 private fun ScreenContent(
     viewState: SavedPhotosViewState,
     modifier: Modifier,
+    onSavedPhotoClicked: (String) -> Unit,
+    onBoughtPhotoClicked: (Context, String) -> Unit,
     onBackClick: () -> Unit,
 ) {
     AppScaffold(
@@ -78,19 +89,41 @@ private fun ScreenContent(
                 .background(Color.White)
                 .padding(padding)
                 .imePadding(),
-            verticalArrangement = Arrangement.Top
+            verticalArrangement = Arrangement.Top,
         ) {
             if (viewState.loading) {
-                LinearProgressIndicator(color = Blue)
-                Spacer(modifier = Modifier.height(10.dp))
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(10.dp),
+                    color = Blue
+                )
             }
-            viewState.savedPhotos?.let { PhotoList(it) }
+            viewState.savedPhotos?.let {
+                PhotoList(
+                    it,
+                    onSavedPhotoClicked = { safePath ->
+                        if (viewState.loading.not()) {
+                            onSavedPhotoClicked.invoke(safePath)
+                        }
+                    },
+                    onBoughtPhotoClicked = { ctx, url ->
+                        if (viewState.loading.not()) {
+                            onBoughtPhotoClicked.invoke(ctx, url)
+                        }
+                    }
+                )
+            }
         }
     }
 }
 
 @Composable
-fun PhotoList(photos: List<UserSavedPhoto>) {
+fun PhotoList(
+    photos: List<UserSavedPhoto>,
+    onSavedPhotoClicked: (String) -> Unit,
+    onBoughtPhotoClicked: (Context, String) -> Unit
+) {
     LazyVerticalGrid(
         modifier = Modifier
             .fillMaxSize(),
@@ -100,13 +133,22 @@ fun PhotoList(photos: List<UserSavedPhoto>) {
         columns = GridCells.Fixed(count = 2)
     ) {
         itemsIndexed(photos) { _, item ->
-            PhotoItem(savedPhoto = item)
+            PhotoItem(
+                savedPhoto = item,
+                onSavedPhotoClicked = onSavedPhotoClicked,
+                onBoughtPhotoClicked = onBoughtPhotoClicked
+            )
         }
     }
 }
 
 @Composable
-fun PhotoItem(savedPhoto: UserSavedPhoto) {
+fun PhotoItem(
+    savedPhoto: UserSavedPhoto,
+    onSavedPhotoClicked: (String) -> Unit,
+    onBoughtPhotoClicked: (Context, String) -> Unit
+) {
+    val context = LocalContext.current
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -114,6 +156,13 @@ fun PhotoItem(savedPhoto: UserSavedPhoto) {
             .background(color = Color.White)
             .border(4.dp, BackgroundColor, RoundedCornerShape(10.dp))
             .padding(4.dp)
+            .clickable {
+                if (savedPhoto.bought.not()) {
+                    onSavedPhotoClicked.invoke(savedPhoto.cdnUrl)
+                } else {
+                    onBoughtPhotoClicked(context, savedPhoto.cdnUrl)
+                }
+            }
     ) {
         CoilImageComponent(imageUrl = savedPhoto.cdnUrl)
         if (savedPhoto.bought) {

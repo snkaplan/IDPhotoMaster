@@ -7,9 +7,12 @@ import androidx.navigation.compose.composable
 
 const val SavedPhotosNavigationRoute = "saved_photos_route"
 
-fun NavGraphBuilder.savedPhotosScreen(onBackClick: () -> Unit) {
+fun NavGraphBuilder.savedPhotosScreen(
+    onBackClick: () -> Unit,
+    navigateToEditScreen: (String) -> Unit
+) {
     composable(SavedPhotosNavigationRoute) {
-        SavedPhotosScreen(onBackClick = onBackClick)
+        SavedPhotosScreen(onBackClick = onBackClick, navigateToEditScreen = navigateToEditScreen)
     }
 }
 
