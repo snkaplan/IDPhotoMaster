@@ -54,6 +54,8 @@ import com.idphoto.idphotomaster.core.systemdesign.components.PhotoView
 import com.idphoto.idphotomaster.core.systemdesign.components.ScreenButton
 import com.idphoto.idphotomaster.core.systemdesign.icon.AppIcons
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
+import com.idphoto.idphotomaster.core.systemdesign.utils.DisableScreenshot
+import com.idphoto.idphotomaster.core.systemdesign.utils.findActivity
 
 @Composable
 fun BasketScreen(
@@ -67,6 +69,7 @@ fun BasketScreen(
 ) {
     val viewState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val activity = context.findActivity()
     LaunchedEffect(key1 = viewModel.uiEvents) {
         viewModel.uiEvents.collect { event ->
             when (event) {
@@ -113,6 +116,7 @@ fun BasketScreen(
         googlePurchaseViewModel.billingSetup(context)
         googlePurchaseViewModel.checkProducts()
     }
+    DisableScreenshot(activity)
     viewState.photo?.let {
         ScreenContent(
             viewState = viewState,

@@ -38,6 +38,8 @@ import com.idphoto.idphotomaster.core.systemdesign.components.CoilImageComponent
 import com.idphoto.idphotomaster.core.systemdesign.icon.AppIcons
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.Blue
+import com.idphoto.idphotomaster.core.systemdesign.utils.DisableScreenshot
+import com.idphoto.idphotomaster.core.systemdesign.utils.findActivity
 
 @Composable
 fun SavedPhotosScreen(
@@ -46,6 +48,7 @@ fun SavedPhotosScreen(
     navigateToEditScreen: (String) -> Unit,
     viewModel: SavedPhotosViewModel = hiltViewModel()
 ) {
+    val activity = LocalContext.current.findActivity()
     val splashUiState by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(key1 = viewModel.uiEvents) {
         viewModel.uiEvents.collect { event ->
@@ -57,6 +60,8 @@ fun SavedPhotosScreen(
     LaunchedEffect(key1 = true) {
         viewModel.init()
     }
+
+    DisableScreenshot(activity)
     ScreenContent(
         viewState = splashUiState,
         modifier = modifier.fillMaxSize(),

@@ -52,6 +52,8 @@ import com.idphoto.idphotomaster.core.systemdesign.components.ScreenButton
 import com.idphoto.idphotomaster.core.systemdesign.icon.AppIcons
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.Blue
+import com.idphoto.idphotomaster.core.systemdesign.utils.DisableScreenshot
+import com.idphoto.idphotomaster.core.systemdesign.utils.findActivity
 
 @Composable
 fun EditPhotoScreen(
@@ -61,6 +63,7 @@ fun EditPhotoScreen(
     navigateToBasket: (String) -> Unit
 ) {
     val context = LocalContext.current
+    val activity = context.findActivity()
     val viewState by viewModel.uiState.collectAsStateWithLifecycle()
     LaunchedEffect(key1 = viewModel.uiEvents) {
         viewModel.uiEvents.collect { event ->
@@ -71,6 +74,8 @@ fun EditPhotoScreen(
             }
         }
     }
+
+    DisableScreenshot(activity)
     viewState.updatedPhoto?.let {
         ScreenContent(
             viewState = viewState,
