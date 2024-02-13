@@ -7,6 +7,7 @@ import android.os.LocaleList
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.common.BaseViewModel
 import com.idphoto.idphotomaster.core.common.IViewEvents
@@ -17,6 +18,7 @@ import com.idphoto.idphotomaster.core.data.repository.UserRepository
 import com.idphoto.idphotomaster.core.domain.model.AppLanguageItem
 import com.idphoto.idphotomaster.core.domain.model.InfoBottomSheetItem
 import com.idphoto.idphotomaster.core.domain.model.User
+import com.idphoto.idphotomaster.core.domain.usecase.config.GetConfigUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.profile.GetUserUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
@@ -28,12 +30,14 @@ import javax.inject.Inject
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
-    private val getUserUseCase: GetUserUseCase
+    private val getUserUseCase: GetUserUseCase,
+    private val getConfigUseCase: GetConfigUseCase
 ) :
     BaseViewModel<ProfileViewState, ProfileViewEvents>() {
     override fun createInitialState(): ProfileViewState = ProfileViewState()
 
     fun init(context: Context, locale: Locale) {
+        getConfig()
         val languageList = listOf(
             AppLanguageItem(context.getString(R.string.turkish), "tr", locale.language == "tr"),
             AppLanguageItem(context.getString(R.string.english), "en", locale.language == "en")
@@ -41,6 +45,20 @@ class ProfileViewModel @Inject constructor(
         updateState { copy(languageList = languageList) }
         userRepository.currentUser?.let {
             getUser(it.uid)
+        }
+    }
+
+    private fun getConfig() {
+        viewModelScope.launch {
+            getConfigUseCase.invoke().asResource().onEach { result ->
+                when (result) {
+                    is Resource.Error -> {}
+                    Resource.Loading -> {}
+                    is Resource.Success -> {
+                        updateState { copy(config = result.data) }
+                    }
+                }
+            }.launchIn(this)
         }
     }
 
@@ -106,7 +124,8 @@ data class ProfileViewState(
     val user: User? = null,
     val infoBottomSheet: InfoBottomSheetItem? = null,
     val showLanguageBottomSheet: Boolean? = false,
-    val languageList: List<AppLanguageItem>? = null
+    val languageList: List<AppLanguageItem>? = null,
+    val config: FirebaseRemoteConfig? = null
 ) : IViewState
 
 sealed class ProfileViewEvents : IViewEvents

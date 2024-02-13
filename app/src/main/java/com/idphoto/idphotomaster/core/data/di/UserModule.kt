@@ -2,12 +2,16 @@ package com.idphoto.idphotomaster.core.data.di
 
 import com.idphoto.idphotomaster.core.data.datasource.remote.BasketRemoteDataSource
 import com.idphoto.idphotomaster.core.data.datasource.remote.BasketRemoteDataSourceImpl
+import com.idphoto.idphotomaster.core.data.datasource.remote.ConfigRemoteDataSource
+import com.idphoto.idphotomaster.core.data.datasource.remote.ConfigRemoteDataSourceImpl
 import com.idphoto.idphotomaster.core.data.datasource.remote.OrdersRemoteDataSource
 import com.idphoto.idphotomaster.core.data.datasource.remote.OrdersRemoteDataSourceImpl
 import com.idphoto.idphotomaster.core.data.datasource.remote.UserRemoteDataSource
 import com.idphoto.idphotomaster.core.data.datasource.remote.UserRemoteDataSourceImpl
 import com.idphoto.idphotomaster.core.data.repository.BasketRepository
 import com.idphoto.idphotomaster.core.data.repository.BasketRepositoryImpl
+import com.idphoto.idphotomaster.core.data.repository.ConfigRepository
+import com.idphoto.idphotomaster.core.data.repository.ConfigRepositoryImpl
 import com.idphoto.idphotomaster.core.data.repository.OrdersRepository
 import com.idphoto.idphotomaster.core.data.repository.OrdersRepositoryImpl
 import com.idphoto.idphotomaster.core.data.repository.UserRepository
@@ -37,4 +41,10 @@ interface UserModule {
 
     @Binds
     fun bindOrdersRepository(ordersRepository: OrdersRepositoryImpl): OrdersRepository
+
+    @Binds
+    fun bindConfigRemoteDataSource(sourceImpl: ConfigRemoteDataSourceImpl): ConfigRemoteDataSource
+
+    @Binds
+    fun bindConfigRepository(configRepository: ConfigRepositoryImpl): ConfigRepository
 }
