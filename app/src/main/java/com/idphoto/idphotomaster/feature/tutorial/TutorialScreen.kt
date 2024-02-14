@@ -17,7 +17,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -39,6 +38,7 @@ import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.systemdesign.components.DotIndicator
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.Blue
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.LightGrey
+import de.palm.composestateevents.NavigationEventEffect
 import kotlinx.coroutines.launch
 
 @Composable
@@ -48,13 +48,11 @@ fun TutorialScreen(
     viewModel: TutorialViewModel = hiltViewModel()
 ) {
     val viewState by viewModel.uiState.collectAsStateWithLifecycle()
-    LaunchedEffect(key1 = viewModel.uiEvents) {
-        viewModel.uiEvents.collect { event ->
-            when (event) {
-                TutorialViewEvents.NavigateToHome -> navigateToHome.invoke()
-            }
-        }
-    }
+    NavigationEventEffect(
+        event = viewState.navigateToHome,
+        onConsumed = viewModel::onNavigateToHomeConsumed,
+        action = navigateToHome
+    )
     ScreenContent(
         viewState = viewState,
         onSkipClicked = viewModel::onSkipClicked,

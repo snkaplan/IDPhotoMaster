@@ -3,7 +3,6 @@ package com.idphoto.idphotomaster.feature.login
 import androidx.lifecycle.viewModelScope
 import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.common.BaseViewModel
-import com.idphoto.idphotomaster.core.common.IViewEvents
 import com.idphoto.idphotomaster.core.common.IViewState
 import com.idphoto.idphotomaster.core.common.Resource
 import com.idphoto.idphotomaster.core.common.asResource
@@ -17,6 +16,10 @@ import com.idphoto.idphotomaster.core.domain.usecase.login.SignupUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.login.ValidateAuthUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.login.ValidateSignupUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import de.palm.composestateevents.StateEvent
+import de.palm.composestateevents.StateEventWithContent
+import de.palm.composestateevents.consumed
+import de.palm.composestateevents.triggered
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -28,7 +31,7 @@ class LoginViewModel @Inject constructor(
     private val signupUseCase: SignupUseCase,
     private val validateAuthUseCase: ValidateAuthUseCase,
     private val validateSignupUseCase: ValidateSignupUseCase
-) : BaseViewModel<LoginViewState, LoginViewEvents>() {
+) : BaseViewModel<LoginViewState>() {
 
     override fun createInitialState(): LoginViewState = LoginViewState()
 
@@ -74,9 +77,8 @@ class LoginViewModel @Inject constructor(
 
                         is Resource.Success -> {
                             updateState {
-                                copy(loading = false)
+                                copy(loading = false, loginSuccessful = triggered)
                             }
-                            fireEvent(LoginViewEvents.LoginSuccessful)
                         }
                     }
                 }.launchIn(this)
@@ -134,9 +136,8 @@ class LoginViewModel @Inject constructor(
 
                         is Resource.Success -> {
                             updateState {
-                                copy(loading = false)
+                                copy(loading = false, loginSuccessful = triggered)
                             }
-                            fireEvent(LoginViewEvents.LoginSuccessful)
                         }
                     }
                 }.launchIn(this)
@@ -201,10 +202,22 @@ class LoginViewModel @Inject constructor(
             }
 
             else -> {
-                updateState { copy(loading = false) }
-                fireEvent(LoginViewEvents.GeneralException(th.localizedMessage))
+                updateState {
+                    copy(
+                        loading = false,
+                        exceptionEvent = triggered(th.localizedMessage ?: "General Exception")
+                    )
+                }
             }
         }
+    }
+
+    fun onLoginSuccessfulConsumed() {
+        updateState { copy(loginSuccessful = consumed) }
+    }
+
+    fun onExceptionConsumed() {
+        updateState { copy(exceptionEvent = consumed()) }
     }
 }
 
@@ -218,13 +231,10 @@ data class LoginViewState(
     val mailErrorMessage: Int? = null,
     val nameErrorMessage: Int? = null,
     val lastNameErrorMessage: Int? = null,
-    val pageState: PageState = PageState.LOGIN
+    val pageState: PageState = PageState.LOGIN,
+    val loginSuccessful: StateEvent = consumed,
+    val exceptionEvent: StateEventWithContent<String> = consumed()
 ) : IViewState
-
-sealed class LoginViewEvents : IViewEvents {
-    data object LoginSuccessful : LoginViewEvents()
-    data class GeneralException(val message: String?) : LoginViewEvents()
-}
 
 enum class PageState {
     LOGIN,

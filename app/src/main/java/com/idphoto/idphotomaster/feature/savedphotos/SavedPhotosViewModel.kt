@@ -8,7 +8,6 @@ import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
 import coil.request.ImageRequest
 import com.idphoto.idphotomaster.core.common.BaseViewModel
-import com.idphoto.idphotomaster.core.common.IViewEvents
 import com.idphoto.idphotomaster.core.common.IViewState
 import com.idphoto.idphotomaster.core.common.Resource
 import com.idphoto.idphotomaster.core.common.asResource
@@ -19,6 +18,9 @@ import com.idphoto.idphotomaster.core.domain.model.UserSavedPhoto
 import com.idphoto.idphotomaster.core.domain.usecase.home.SaveImageToTempFile
 import com.idphoto.idphotomaster.core.domain.usecase.profile.GetUserPurchases
 import dagger.hilt.android.lifecycle.HiltViewModel
+import de.palm.composestateevents.StateEventWithContent
+import de.palm.composestateevents.consumed
+import de.palm.composestateevents.triggered
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
@@ -34,7 +36,7 @@ class SavedPhotosViewModel @Inject constructor(
     @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
     private val saveImageToTempFile: SaveImageToTempFile
 ) :
-    BaseViewModel<SavedPhotosViewState, SavedPhotoViewEvents>() {
+    BaseViewModel<SavedPhotosViewState>() {
     override fun createInitialState(): SavedPhotosViewState = SavedPhotosViewState()
 
     fun init() {
@@ -65,7 +67,7 @@ class SavedPhotosViewModel @Inject constructor(
 
     fun onSavedPhotoClicked(photoPath: String) {
         val uri = Uri.fromFile(File(photoPath))
-        fireEvent(SavedPhotoViewEvents.NavigateToEditPhotoWithPath(uri.toString()))
+        updateState { copy(navigateToEditPhoto = triggered(uri.toString())) }
     }
 
     fun onBoughtPhotoClicked(context: Context, url: String) {
@@ -97,17 +99,19 @@ class SavedPhotosViewModel @Inject constructor(
                     }
 
                     is Resource.Success -> {
-                        updateState { copy(loading = false) }
-                        fireEvent(SavedPhotoViewEvents.NavigateToEditPhotoWithPath(result.data.toString()))
+                        updateState { copy(loading = false, navigateToEditPhoto = triggered(result.data.toString())) }
                     }
                 }
             }.launchIn(launchScope)
     }
+
+    fun onNavigateEditPhotoConsumed() {
+        updateState { copy(navigateToEditPhoto = consumed()) }
+    }
 }
 
-data class SavedPhotosViewState(val loading: Boolean = false, val savedPhotos: List<UserSavedPhoto>? = null) :
-    IViewState
-
-sealed class SavedPhotoViewEvents : IViewEvents {
-    data class NavigateToEditPhotoWithPath(val path: String) : SavedPhotoViewEvents()
-}
+data class SavedPhotosViewState(
+    val loading: Boolean = false,
+    val savedPhotos: List<UserSavedPhoto>? = null,
+    val navigateToEditPhoto: StateEventWithContent<String> = consumed()
+) : IViewState

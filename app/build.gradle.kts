@@ -131,4 +131,6 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.5.0")
 
     implementation("androidx.compose.material3:material3:1.2.0-rc01")
+
+    implementation("com.github.leonard-palm:compose-state-events:2.2.0")
 }

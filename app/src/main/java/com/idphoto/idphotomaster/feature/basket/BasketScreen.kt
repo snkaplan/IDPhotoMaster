@@ -56,6 +56,8 @@ import com.idphoto.idphotomaster.core.systemdesign.icon.AppIcons
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 import com.idphoto.idphotomaster.core.systemdesign.utils.DisableScreenshot
 import com.idphoto.idphotomaster.core.systemdesign.utils.findActivity
+import de.palm.composestateevents.EventEffect
+import de.palm.composestateevents.NavigationEventEffect
 
 @Composable
 fun BasketScreen(
@@ -70,48 +72,58 @@ fun BasketScreen(
     val viewState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val activity = context.findActivity()
-    LaunchedEffect(key1 = viewModel.uiEvents) {
-        viewModel.uiEvents.collect { event ->
-            when (event) {
-                BasketViewEvent.NavigateToLogin -> navigateToLogin()
-                BasketViewEvent.StartGooglePurchase -> googlePurchaseViewModel.purchase("id_photo", context as Activity)
-                BasketViewEvent.PurchaseCompleted -> {
-                    mainViewModel.showCustomDialog(
-                        title = context.getString(R.string.purchase_success_description),
-                        message = context.getString(R.string.purchase_success_title),
-                        confirmText = context.getString(R.string.ok),
-                        confirmCallback = { onCompletePurchase.invoke() },
-                        onDismissCallback = { onCompletePurchase.invoke() }
-                    )
-                }
-            }
+    NavigationEventEffect(
+        event = viewState.navigateToLogin,
+        onConsumed = viewModel::onNavigateToLoginConsumed,
+        action = navigateToLogin
+    )
+    EventEffect(
+        event = viewState.startGooglePurchase,
+        onConsumed = viewModel::onStartGooglePurchaseConsumed,
+        action = {
+            googlePurchaseViewModel.purchase("id_photo", context as Activity)
         }
-    }
-    LaunchedEffect(key1 = googlePurchaseViewModel.uiEvents) {
-        googlePurchaseViewModel.uiEvents.collect { event ->
-            when (event) {
-                GooglePurchaseViewEvent.PurchaseSuccess -> {
-                    viewModel.purchaseSuccess()
-                }
-
-                GooglePurchaseViewEvent.PurchaseFailed -> {
-                    mainViewModel.showCustomDialog(
-                        title = context.getString(R.string.purchase_failed_title),
-                        message = context.getString(R.string.purchase_failed_description),
-                        confirmText = context.getString(R.string.ok)
-                    )
-                }
-
-                GooglePurchaseViewEvent.UserCancelledPurchase -> {
-                    mainViewModel.showCustomDialog(
-                        title = context.getString(R.string.purchase_failed_title),
-                        message = context.getString(R.string.purchase_user_cancelled_description),
-                        confirmText = context.getString(R.string.ok)
-                    )
-                }
-            }
+    )
+    EventEffect(
+        event = viewState.purchaseCompleted,
+        onConsumed = viewModel::onPurchaseCompletedConsumed,
+        action = {
+            mainViewModel.showCustomDialog(
+                title = context.getString(R.string.purchase_success_description),
+                message = context.getString(R.string.purchase_success_title),
+                confirmText = context.getString(R.string.ok),
+                confirmCallback = { onCompletePurchase.invoke() },
+                onDismissCallback = { onCompletePurchase.invoke() }
+            )
         }
-    }
+    )
+    EventEffect(
+        event = googlePurchaseViewModel.uiState.value.purchaseSuccess,
+        onConsumed = googlePurchaseViewModel::onPurchaseSuccessConsumed,
+        action = { viewModel.purchaseSuccess() }
+    )
+    EventEffect(
+        event = googlePurchaseViewModel.uiState.value.purchaseFailed,
+        onConsumed = googlePurchaseViewModel::onPurchaseFailedConsumed,
+        action = {
+            mainViewModel.showCustomDialog(
+                title = context.getString(R.string.purchase_failed_title),
+                message = context.getString(R.string.purchase_failed_description),
+                confirmText = context.getString(R.string.ok)
+            )
+        }
+    )
+    EventEffect(
+        event = googlePurchaseViewModel.uiState.value.userCancelledPurchase,
+        onConsumed = googlePurchaseViewModel::onUserCancelledPurchaseConsumed,
+        action = {
+            mainViewModel.showCustomDialog(
+                title = context.getString(R.string.purchase_failed_title),
+                message = context.getString(R.string.purchase_user_cancelled_description),
+                confirmText = context.getString(R.string.ok)
+            )
+        }
+    )
     LaunchedEffect(key1 = true) {
         googlePurchaseViewModel.billingSetup(context)
         googlePurchaseViewModel.checkProducts()

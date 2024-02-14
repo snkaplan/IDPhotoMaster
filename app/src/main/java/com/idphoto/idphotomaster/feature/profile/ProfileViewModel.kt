@@ -10,7 +10,6 @@ import androidx.lifecycle.viewModelScope
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.common.BaseViewModel
-import com.idphoto.idphotomaster.core.common.IViewEvents
 import com.idphoto.idphotomaster.core.common.IViewState
 import com.idphoto.idphotomaster.core.common.Resource
 import com.idphoto.idphotomaster.core.common.asResource
@@ -32,8 +31,7 @@ class ProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val getUserUseCase: GetUserUseCase,
     private val getConfigUseCase: GetConfigUseCase
-) :
-    BaseViewModel<ProfileViewState, ProfileViewEvents>() {
+) : BaseViewModel<ProfileViewState>() {
     override fun createInitialState(): ProfileViewState = ProfileViewState()
 
     fun init(context: Context, locale: Locale) {
@@ -139,8 +137,6 @@ data class ProfileViewState(
     val languageList: List<AppLanguageItem>? = null,
     val config: FirebaseRemoteConfig? = null
 ) : IViewState
-
-sealed class ProfileViewEvents : IViewEvents
 
 sealed class ProfileViewTriggeredEvent {
     data class ShowInfoBottomSheet(val title: String, val type: GeneralInfoType) : ProfileViewTriggeredEvent()

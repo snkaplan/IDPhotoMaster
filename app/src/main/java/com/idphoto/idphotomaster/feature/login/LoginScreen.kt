@@ -25,16 +25,20 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -42,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.idphoto.idphotomaster.R
+import com.idphoto.idphotomaster.app.MainViewModel
 import com.idphoto.idphotomaster.core.systemdesign.components.AppScaffold
 import com.idphoto.idphotomaster.core.systemdesign.ui.LocalDim
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
@@ -50,33 +55,33 @@ import com.idphoto.idphotomaster.core.systemdesign.ui.theme.LightGrey
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.White
 import com.idphoto.idphotomaster.feature.login.contents.LoginScreenContent
 import com.idphoto.idphotomaster.feature.login.contents.SignupScreenContent
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
-import com.idphoto.idphotomaster.app.MainViewModel
+import de.palm.composestateevents.EventEffect
+import de.palm.composestateevents.NavigationEventEffect
 
 @Composable
 fun LoginScreen(
     onCloseClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = hiltViewModel(),
-    mainViewModel: MainViewModel? = null
+    mainViewModel: MainViewModel
 ) {
     val viewState by viewModel.uiState.collectAsStateWithLifecycle()
-    LaunchedEffect(key1 = viewModel.uiEvents) {
-        viewModel.uiEvents.collect { event ->
-            when (event) {
-                LoginViewEvents.LoginSuccessful -> onCloseClick.invoke()
-                is LoginViewEvents.GeneralException -> mainViewModel?.showCustomDialog(
-                    title = "Error occured :/",
-                    message = event.message,
-                    confirmText = "ok"
-                )
-            }
+    NavigationEventEffect(
+        event = viewState.loginSuccessful,
+        onConsumed = viewModel::onLoginSuccessfulConsumed,
+        action = onCloseClick
+    )
+    EventEffect(
+        event = viewState.exceptionEvent,
+        onConsumed = viewModel::onExceptionConsumed,
+        action = {
+            mainViewModel.showCustomDialog(
+                title = "Error occured :/",
+                message = it,
+                confirmText = "ok"
+            )
         }
-    }
+    )
     ScreenContent(
         viewState = viewState,
         modifier = modifier.fillMaxSize(),

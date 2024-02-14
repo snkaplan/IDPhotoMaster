@@ -27,7 +27,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +53,8 @@ import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.Blue
 import com.idphoto.idphotomaster.core.systemdesign.utils.DisableScreenshot
 import com.idphoto.idphotomaster.core.systemdesign.utils.findActivity
+import de.palm.composestateevents.EventEffect
+import de.palm.composestateevents.NavigationEventEffect
 
 @Composable
 fun EditPhotoScreen(
@@ -65,15 +66,21 @@ fun EditPhotoScreen(
     val context = LocalContext.current
     val activity = context.findActivity()
     val viewState by viewModel.uiState.collectAsStateWithLifecycle()
-    LaunchedEffect(key1 = viewModel.uiEvents) {
-        viewModel.uiEvents.collect { event ->
-            when (event) {
-                EditPhotoViewEvent.PhotoReadCompleted -> viewModel.initImage(context)
-                EditPhotoViewEvent.ResetImage -> viewModel.initImage(context)
-                is EditPhotoViewEvent.NavigateToBasket -> navigateToBasket(event.imagePath)
-            }
-        }
-    }
+    EventEffect(
+        event = viewState.photoReadCompleted,
+        onConsumed = viewModel::onPhotoReadCompletedConsumed,
+        action = { viewModel.initImage(context) }
+    )
+    EventEffect(
+        event = viewState.resetImage,
+        onConsumed = viewModel::onResetImageConsumed,
+        action = { viewModel.initImage(context) }
+    )
+    NavigationEventEffect(
+        event = viewState.navigateToBasket,
+        onConsumed = viewModel::onNavigateToBasketConsumed,
+        action = navigateToBasket
+    )
 
     DisableScreenshot(activity)
     viewState.updatedPhoto?.let {

@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.work.Constraints
@@ -21,6 +20,7 @@ import com.idphoto.idphotomaster.core.systemdesign.components.CustomDialog
 import com.idphoto.idphotomaster.core.systemdesign.components.DialogItem
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.IDPhotoMasterTheme
 import dagger.hilt.android.AndroidEntryPoint
+import de.palm.composestateevents.EventEffect
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -35,15 +35,13 @@ class MainActivity : ComponentActivity() {
         deleteTempFiles()
         setContent {
             val dialogItem = remember { mutableStateOf<DialogItem?>(null) }
-            LaunchedEffect(key1 = viewModel.uiEvents) {
-                viewModel.uiEvents.collect { event ->
-                    when (event) {
-                        is MainViewEvents.ShowCustomDialog -> {
-                            dialogItem.value = event.dialogItem
-                        }
-                    }
+            EventEffect(
+                event = viewModel.uiState.value.showDialogEvent,
+                onConsumed = viewModel::onShowCustomDialogConsumed,
+                action = {
+                    dialogItem.value = it
                 }
-            }
+            )
             IDPhotoMasterTheme {
                 if (dialogItem.value != null) {
                     CustomDialog(dialogItem = dialogItem)

@@ -5,7 +5,6 @@ import android.graphics.Bitmap
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.idphoto.idphotomaster.core.common.BaseViewModel
-import com.idphoto.idphotomaster.core.common.IViewEvents
 import com.idphoto.idphotomaster.core.common.IViewState
 import com.idphoto.idphotomaster.core.common.Resource
 import com.idphoto.idphotomaster.core.common.asResource
@@ -17,6 +16,10 @@ import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromDevice
 import com.idphoto.idphotomaster.core.domain.usecase.home.SaveImageToTempFile
 import com.idphoto.idphotomaster.core.domain.usecase.home.SavePhotoToCache
 import dagger.hilt.android.lifecycle.HiltViewModel
+import de.palm.composestateevents.StateEvent
+import de.palm.composestateevents.StateEventWithContent
+import de.palm.composestateevents.consumed
+import de.palm.composestateevents.triggered
 import jp.co.cyberagent.android.gpuimage.GPUImage
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageBrightnessFilter
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilterGroup
@@ -35,7 +38,7 @@ class EditPhotoViewModel @Inject constructor(
     @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
     private val savePhotoToCache: SavePhotoToCache,
     private val saveImageToTempFile: SaveImageToTempFile
-) : BaseViewModel<EditPhotoViewState, EditPhotoViewEvent>() {
+) : BaseViewModel<EditPhotoViewState>() {
 
     private val photoArgs: EditPhotoArgs = EditPhotoArgs(savedStateHandle)
     override fun createInitialState(): EditPhotoViewState = EditPhotoViewState()
@@ -63,10 +66,10 @@ class EditPhotoViewModel @Inject constructor(
                                 copy(
                                     initialPhotoPath = photoPath,
                                     initialPhoto = converted,
-                                    loading = false
+                                    loading = false,
+                                    photoReadCompleted = triggered
                                 )
                             }
-                            fireEvent(EditPhotoViewEvent.PhotoReadCompleted)
                         }
                     }
                 }.launchIn(this)
@@ -155,7 +158,7 @@ class EditPhotoViewModel @Inject constructor(
                     }
                 }
             } else {
-                fireEvent(EditPhotoViewEvent.ResetImage)
+                updateState { copy(resetImage = triggered) }
             }
         }
     }
@@ -200,13 +203,29 @@ class EditPhotoViewModel @Inject constructor(
                             }
 
                             is Resource.Success -> {
-                                updateState { copy(loading = false) }
-                                fireEvent(EditPhotoViewEvent.NavigateToBasket(result.data.toString()))
+                                updateState {
+                                    copy(
+                                        loading = false,
+                                        navigateToBasket = triggered(result.data.toString())
+                                    )
+                                }
                             }
                         }
                     }.launchIn(this)
             }
         }
+    }
+
+    fun onPhotoReadCompletedConsumed() {
+        updateState { copy(photoReadCompleted = consumed) }
+    }
+
+    fun onResetImageConsumed() {
+        updateState { copy(resetImage = consumed) }
+    }
+
+    fun onNavigateToBasketConsumed() {
+        updateState { copy(navigateToBasket = consumed()) }
     }
 }
 
@@ -219,11 +238,8 @@ data class EditPhotoViewState(
     val initialPhoto: Bitmap? = null,
     val sharpness: Float = 0f,
     val brightness: Float = 0f,
-    val heat: Float = 5000f
+    val heat: Float = 5000f,
+    val photoReadCompleted: StateEvent = consumed,
+    val resetImage: StateEvent = consumed,
+    val navigateToBasket: StateEventWithContent<String> = consumed()
 ) : IViewState
-
-sealed interface EditPhotoViewEvent : IViewEvents {
-    data object PhotoReadCompleted : EditPhotoViewEvent
-    data object ResetImage : EditPhotoViewEvent
-    data class NavigateToBasket(val imagePath: String) : EditPhotoViewEvent
-}

@@ -40,6 +40,7 @@ import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.Blue
 import com.idphoto.idphotomaster.core.systemdesign.utils.DisableScreenshot
 import com.idphoto.idphotomaster.core.systemdesign.utils.findActivity
+import de.palm.composestateevents.NavigationEventEffect
 
 @Composable
 fun SavedPhotosScreen(
@@ -49,21 +50,19 @@ fun SavedPhotosScreen(
     viewModel: SavedPhotosViewModel = hiltViewModel()
 ) {
     val activity = LocalContext.current.findActivity()
-    val splashUiState by viewModel.uiState.collectAsStateWithLifecycle()
-    LaunchedEffect(key1 = viewModel.uiEvents) {
-        viewModel.uiEvents.collect { event ->
-            when (event) {
-                is SavedPhotoViewEvents.NavigateToEditPhotoWithPath -> navigateToEditScreen(event.path)
-            }
-        }
-    }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    NavigationEventEffect(
+        event = uiState.navigateToEditPhoto,
+        onConsumed = viewModel::onNavigateEditPhotoConsumed,
+        action = navigateToEditScreen
+    )
     LaunchedEffect(key1 = true) {
         viewModel.init()
     }
 
     DisableScreenshot(activity)
     ScreenContent(
-        viewState = splashUiState,
+        viewState = uiState,
         modifier = modifier.fillMaxSize(),
         onBackClick = onBackClick,
         onSavedPhotoClicked = viewModel::onSavedPhotoClicked,

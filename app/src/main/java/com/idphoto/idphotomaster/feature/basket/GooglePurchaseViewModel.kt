@@ -16,27 +16,29 @@ import com.android.billingclient.api.QueryPurchasesParams
 import com.android.billingclient.api.consumePurchase
 import com.google.common.collect.ImmutableList
 import com.idphoto.idphotomaster.core.common.BaseViewModel
-import com.idphoto.idphotomaster.core.common.IViewEvents
 import com.idphoto.idphotomaster.core.common.IViewState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import de.palm.composestateevents.StateEvent
+import de.palm.composestateevents.consumed
+import de.palm.composestateevents.triggered
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class GooglePurchaseViewModel @Inject constructor() : BaseViewModel<IViewState, GooglePurchaseViewEvent>() {
+class GooglePurchaseViewModel @Inject constructor() : BaseViewModel<GooglePurchaseViewState>() {
 
     private val purchaseUpdateListener = PurchasesUpdatedListener { result, purchases ->
         if (result.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
             for (purchase in purchases) {
-                fireEvent(GooglePurchaseViewEvent.PurchaseSuccess)
+                updateState { copy(purchaseSuccess = triggered) }
                 handlePurchase(purchase)
             }
         } else if (result.responseCode == BillingClient.BillingResponseCode.USER_CANCELED) {
             // User canceled the purchase
-            fireEvent(GooglePurchaseViewEvent.UserCancelledPurchase)
+            updateState { copy(userCancelledPurchase = triggered) }
         } else {
             // Handle other error cases
-            fireEvent(GooglePurchaseViewEvent.PurchaseFailed)
+            updateState { copy(purchaseFailed = triggered) }
         }
     }
 
@@ -64,7 +66,7 @@ class GooglePurchaseViewModel @Inject constructor() : BaseViewModel<IViewState, 
             .setPurchaseToken(purchase.purchaseToken)
             .build()
 
-        val listener = ConsumeResponseListener { billingResult, s -> }
+        val listener = ConsumeResponseListener { _, _ -> }
         billingClient.consumeAsync(consumeParams, listener)
         if (purchase.purchaseState == Purchase.PurchaseState.PURCHASED) {
             viewModelScope.launch {
@@ -128,13 +130,25 @@ class GooglePurchaseViewModel @Inject constructor() : BaseViewModel<IViewState, 
         }
     }
 
-    override fun createInitialState(): IViewState {
-        return object : IViewState {}
+    override fun createInitialState(): GooglePurchaseViewState {
+        return GooglePurchaseViewState()
+    }
+
+    fun onPurchaseSuccessConsumed() {
+        updateState { copy(purchaseSuccess = consumed) }
+    }
+
+    fun onPurchaseFailedConsumed() {
+        updateState { copy(purchaseFailed = consumed) }
+    }
+
+    fun onUserCancelledPurchaseConsumed() {
+        updateState { copy(userCancelledPurchase = consumed) }
     }
 }
 
-sealed interface GooglePurchaseViewEvent : IViewEvents {
-    data object PurchaseSuccess : GooglePurchaseViewEvent
-    data object PurchaseFailed : GooglePurchaseViewEvent
-    data object UserCancelledPurchase : GooglePurchaseViewEvent
-}
+data class GooglePurchaseViewState(
+    val purchaseSuccess: StateEvent = consumed,
+    val purchaseFailed: StateEvent = consumed,
+    val userCancelledPurchase: StateEvent = consumed
+) : IViewState

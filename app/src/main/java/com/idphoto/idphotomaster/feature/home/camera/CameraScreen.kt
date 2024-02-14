@@ -27,7 +27,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -57,6 +56,7 @@ import com.idphoto.idphotomaster.core.common.extension.rotateBitmap
 import com.idphoto.idphotomaster.core.systemdesign.components.AppScaffold
 import com.idphoto.idphotomaster.core.systemdesign.components.LoadingView
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
+import de.palm.composestateevents.NavigationEventEffect
 import java.util.concurrent.Executor
 
 @Composable
@@ -65,13 +65,11 @@ fun CameraScreen(
     viewModel: CameraViewModel = hiltViewModel()
 ) {
     val cameraState: CameraViewState by viewModel.uiState.collectAsStateWithLifecycle()
-    LaunchedEffect(key1 = viewModel.uiEvents) {
-        viewModel.uiEvents.collect { event ->
-            when (event) {
-                is CameraViewEvents.NavigateToEditPhoto -> navigateToEditPhoto.invoke(event.capturedImageUri.toString())
-            }
-        }
-    }
+    NavigationEventEffect(
+        event = cameraState.navigateToEditPhoto,
+        onConsumed = viewModel::onNavigateToEditPhotoConsumed,
+        action = navigateToEditPhoto
+    )
     CameraContent(
         onPhotoCaptured = viewModel::saveTempImage,
         lastCapturedPhoto = cameraState.capturedImage,

@@ -1,32 +1,31 @@
 package com.idphoto.idphotomaster.feature.splash
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import de.palm.composestateevents.NavigationEventEffect
 
 @Composable
 fun SplashScreen(
     navigateToHome: () -> Unit,
     navigateToTutorial: () -> Unit,
-    modifier: Modifier = Modifier,
     viewModel: SplashViewModel = hiltViewModel()
 ) {
     val splashUiState by viewModel.uiState.collectAsStateWithLifecycle()
-    LaunchedEffect(key1 = viewModel.uiEvents) {
-        viewModel.uiEvents.collect { event ->
-            when (event) {
-                SplashViewEvents.NavigateToHome -> navigateToHome.invoke()
-                SplashViewEvents.NavigateToTutorial -> navigateToTutorial.invoke()
-            }
-        }
-    }
-    ScreenContent(viewState = splashUiState, modifier = modifier.fillMaxSize())
+    NavigationEventEffect(
+        event = splashUiState.navigateToHome,
+        onConsumed = viewModel::onNavigateToHomeConsumed,
+        action = navigateToHome
+    )
+    NavigationEventEffect(
+        event = splashUiState.navigateToTutorial,
+        onConsumed = viewModel::onNavigateToTutorialConsumed,
+        action = navigateToTutorial
+    )
+    ScreenContent()
 }
 
 @Composable
-private fun ScreenContent(viewState: SplashViewState, modifier: Modifier) {
+private fun ScreenContent() {
 }
