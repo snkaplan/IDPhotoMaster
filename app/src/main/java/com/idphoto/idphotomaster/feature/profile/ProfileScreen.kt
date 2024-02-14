@@ -192,7 +192,7 @@ fun ProfileGeneralInfo(onViewEvent: (ProfileViewTriggeredEvent) -> Unit) {
             onViewEvent(
                 ProfileViewTriggeredEvent.ShowInfoBottomSheet(
                     context.getString(R.string.about),
-                    context.getString(R.string.info_sheet_description_lorem)
+                    GeneralInfoType.About
                 )
             )
         }
@@ -200,7 +200,7 @@ fun ProfileGeneralInfo(onViewEvent: (ProfileViewTriggeredEvent) -> Unit) {
             onViewEvent(
                 ProfileViewTriggeredEvent.ShowInfoBottomSheet(
                     context.getString(R.string.terms_and_conditions),
-                    context.getString(R.string.info_sheet_description_lorem)
+                    GeneralInfoType.TermsAndConditions
                 )
             )
         }
@@ -208,7 +208,7 @@ fun ProfileGeneralInfo(onViewEvent: (ProfileViewTriggeredEvent) -> Unit) {
             onViewEvent(
                 ProfileViewTriggeredEvent.ShowInfoBottomSheet(
                     context.getString(R.string.privacy_policy),
-                    context.getString(R.string.info_sheet_description_lorem)
+                    GeneralInfoType.PrivacyPolicy
                 )
             )
         }

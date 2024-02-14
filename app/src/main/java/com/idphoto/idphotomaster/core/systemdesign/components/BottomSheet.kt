@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -49,17 +51,22 @@ fun InformationBottomSheet(
     infoBottomSheetItem: InfoBottomSheetItem
 ) {
     val sheetState = rememberModalBottomSheetState(true)
+    val scrollState = rememberScrollState()
     BottomSheet(onDismissRequest = onDismissRequest, sheetState = sheetState) {
-        Column(modifier = Modifier.fillMaxHeight(0.6f)) {
+        Column(
+            modifier = Modifier
+                .fillMaxHeight(0.6f)
+        ) {
             Text(
                 text = infoBottomSheetItem.title,
                 style = MaterialTheme.typography.headlineMedium.copy(color = Color.Black),
                 modifier = Modifier.padding(20.dp)
             )
-            Text(
-                text = infoBottomSheetItem.description,
-                style = MaterialTheme.typography.bodyMedium.copy(color = Color.Black),
-                modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 20.dp)
+            HtmlText(
+                modifier = Modifier
+                    .padding(start = 20.dp, end = 20.dp, bottom = 20.dp)
+                    .verticalScroll(scrollState),
+                html = infoBottomSheetItem.description
             )
         }
     }

@@ -10,7 +10,7 @@ class ConfigRemoteDataSourceImpl @Inject constructor(private val config: Firebas
     override suspend fun getConfig(): Result<FirebaseRemoteConfig> {
         return runCatching {
             val configSettings = remoteConfigSettings {
-                minimumFetchIntervalInSeconds = 3600
+                minimumFetchIntervalInSeconds = 60
             }
             config.setConfigSettingsAsync(configSettings)
             config.fetchAndActivate().await()

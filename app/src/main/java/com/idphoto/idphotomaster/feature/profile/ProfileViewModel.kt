@@ -86,7 +86,19 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             when (event) {
                 is ProfileViewTriggeredEvent.ShowInfoBottomSheet -> {
-                    updateState { copy(infoBottomSheet = InfoBottomSheetItem(event.title, event.description)) }
+                    updateState {
+                        copy(
+                            infoBottomSheet = InfoBottomSheetItem(
+                                event.title,
+                                description = when (event.type) {
+                                    GeneralInfoType.About -> config?.getString("about_app").orEmpty()
+                                    GeneralInfoType.PrivacyPolicy -> config?.getString("privacy_policy").orEmpty()
+                                    GeneralInfoType.TermsAndConditions -> config?.getString("terms_and_conditions")
+                                        .orEmpty()
+                                }
+                            )
+                        )
+                    }
                 }
 
                 ProfileViewTriggeredEvent.InfoBottomSheetDismissed -> {
@@ -131,9 +143,15 @@ data class ProfileViewState(
 sealed class ProfileViewEvents : IViewEvents
 
 sealed class ProfileViewTriggeredEvent {
-    data class ShowInfoBottomSheet(val title: String, val description: String) : ProfileViewTriggeredEvent()
+    data class ShowInfoBottomSheet(val title: String, val type: GeneralInfoType) : ProfileViewTriggeredEvent()
     data object ShowLanguageBottomSheet : ProfileViewTriggeredEvent()
     data object InfoBottomSheetDismissed : ProfileViewTriggeredEvent()
     data object LanguageBottomSheetDismissed : ProfileViewTriggeredEvent()
     data class ChangeLanguage(val context: Context, val languageCode: String) : ProfileViewTriggeredEvent()
+}
+
+sealed interface GeneralInfoType {
+    data object About : GeneralInfoType
+    data object PrivacyPolicy : GeneralInfoType
+    data object TermsAndConditions : GeneralInfoType
 }
