@@ -19,6 +19,7 @@ import com.idphoto.idphotomaster.core.domain.model.InfoBottomSheetItem
 import com.idphoto.idphotomaster.core.domain.model.User
 import com.idphoto.idphotomaster.core.domain.usecase.config.GetConfigUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.profile.GetUserUseCase
+import com.idphoto.idphotomaster.core.domain.usecase.profile.LogoutUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -30,7 +31,8 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val getUserUseCase: GetUserUseCase,
-    private val getConfigUseCase: GetConfigUseCase
+    private val getConfigUseCase: GetConfigUseCase,
+    private val logoutUseCase: LogoutUseCase
 ) : BaseViewModel<ProfileViewState>() {
     override fun createInitialState(): ProfileViewState = ProfileViewState()
 
@@ -115,6 +117,10 @@ class ProfileViewModel @Inject constructor(
                     changeLanguage(event.context, event.languageCode)
                     updateState { copy(showLanguageBottomSheet = false) }
                 }
+
+                ProfileViewTriggeredEvent.Logout -> {
+                    logout()
+                }
             }
         }
     }
@@ -124,6 +130,23 @@ class ProfileViewModel @Inject constructor(
             context.getSystemService(LocaleManager::class.java).applicationLocales = LocaleList.forLanguageTags(code)
         } else {
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(code))
+        }
+    }
+
+    private fun logout() {
+        viewModelScope.launch {
+            logoutUseCase.invoke().asResource().onEach {
+                when (it) {
+                    is Resource.Error -> {
+                        updateState { copy(loading = false) }
+                    }
+
+                    Resource.Loading -> updateState { copy(loading = true) }
+                    is Resource.Success -> {
+                        updateState { copy(loading = false, loggedIn = false, user = null) }
+                    }
+                }
+            }.launchIn(this)
         }
     }
 }
@@ -144,6 +167,7 @@ sealed class ProfileViewTriggeredEvent {
     data object InfoBottomSheetDismissed : ProfileViewTriggeredEvent()
     data object LanguageBottomSheetDismissed : ProfileViewTriggeredEvent()
     data class ChangeLanguage(val context: Context, val languageCode: String) : ProfileViewTriggeredEvent()
+    data object Logout : ProfileViewTriggeredEvent()
 }
 
 sealed interface GeneralInfoType {

@@ -17,6 +17,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.FilePresent
 import androidx.compose.material.icons.filled.Language
@@ -121,6 +122,10 @@ private fun ScreenContent(
                     infoBottomSheetItem = viewState.infoBottomSheet
                 )
             }
+            if (viewState.loggedIn) {
+                Spacer(modifier = Modifier.height(20.dp))
+                ProfileOtherSection(onViewEvent = onViewEvent)
+            }
         }
     }
 }
@@ -212,6 +217,14 @@ fun ProfileGeneralInfo(onViewEvent: (ProfileViewTriggeredEvent) -> Unit) {
                 )
             )
         }
+    }
+}
+
+@Composable
+fun ProfileOtherSection(onViewEvent: (ProfileViewTriggeredEvent) -> Unit) {
+    ProfileSectionHeader(stringResource(id = R.string.other))
+    ProfileSectionItem(Icons.AutoMirrored.Default.Logout, stringResource(id = R.string.logout)) {
+        onViewEvent(ProfileViewTriggeredEvent.Logout)
     }
 }
 

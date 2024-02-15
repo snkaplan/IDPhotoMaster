@@ -54,4 +54,6 @@
     <string name="turkish">Türkçe</string>
     <string name="english">İngilizce</string>
     <string name="error_google_sign_in">Google ile giriş başarısız</string>
+    <string name="other">Diğer</string>
+    <string name="logout">Çıkış Yap</string>
 </resources>
