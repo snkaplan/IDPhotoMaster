@@ -9,11 +9,11 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.Cancel
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,8 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -153,11 +151,10 @@ fun PasswordTextField(
 
 @Preview
 @Composable
-fun Google(
+fun GoogleSignInButton(
     modifier: Modifier = Modifier,
-    text: String = "Google ile giriş",
+    text: String = "",
     enabled: Boolean = true,
-    shape: Shape = MaterialTheme.shapes.medium,
     onClick: () -> Unit = {},
     onSuccess: (String) -> Unit = {},
     onError: (String?) -> Unit = {}
@@ -189,7 +186,6 @@ fun Google(
         onClick = {
             // Side effect on click (optional)
             onClick()
-
             // Sign in with Google
             client.beginSignIn(request).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
@@ -201,17 +197,12 @@ fun Google(
                 }
             }
         },
-        shape = shape,
-        modifier = modifier
-            .defaultMinSize(minHeight = 100.dp)
-            .fillMaxWidth()
-            .clip(MaterialTheme.shapes.medium),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.onBackground
-        )
+        shape = RoundedCornerShape(10.dp),
+        modifier = modifier.padding(horizontal = 10.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color.White),
     ) {
         Image(
-            imageVector = ImageVector.vectorResource(id = R.drawable.ic_check),
+            imageVector = ImageVector.vectorResource(id = R.drawable.ic_logo_google),
             contentDescription = null,
             modifier = Modifier.size(20.dp),
         )
@@ -220,7 +211,7 @@ fun Google(
             modifier = Modifier.padding(vertical = 5.dp),
             text = text,
             style = TextStyle(
-                color = MaterialTheme.colorScheme.background
+                color = Color.Black
             )
         )
     }

@@ -53,7 +53,7 @@ import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.Blue
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.LightGrey
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.White
-import com.idphoto.idphotomaster.feature.login.components.Google
+import com.idphoto.idphotomaster.feature.login.components.GoogleSignInButton
 import com.idphoto.idphotomaster.feature.login.contents.LoginScreenContent
 import com.idphoto.idphotomaster.feature.login.contents.SignupScreenContent
 import de.palm.composestateevents.EventEffect
@@ -213,14 +213,14 @@ fun ScreenContent(
                 )
             }
             Spacer(modifier = Modifier.height(5.dp))
-            ClickableText(text = buildAnnotatedString {
+            ClickableText(style = TextStyle(textAlign = TextAlign.Center), text = buildAnnotatedString {
                 withStyle(
                     style = SpanStyle(
                         color = LightGrey,
                         fontSize = 10.sp
                     )
                 ) {
-                    append(stringResource(id = infoFirstTextId.intValue))
+                    append(stringResource(id = infoFirstTextId.intValue) + " ")
                 }
                 withStyle(
                     style = SpanStyle(
@@ -231,12 +231,21 @@ fun ScreenContent(
                 ) {
                     append(stringResource(id = infoSecondTextId.intValue))
                 }
+                withStyle(
+                    style = SpanStyle(
+                        color = LightGrey,
+                        fontSize = 10.sp,
+                    )
+                ) {
+                    append("\n \n" + stringResource(id = R.string.or))
+                }
             }) {
                 if (viewState.loading.not()) {
                     onStateChange(if (viewState.pageState == PageState.LOGIN) PageState.SIGNUP else PageState.LOGIN)
                 }
             }
-            Google(
+            Spacer(modifier = Modifier.height(5.dp))
+            GoogleSignInButton(
                 text = "Sign in with Google",
                 modifier = Modifier.fillMaxWidth(),
                 onSuccess = { idToken ->
