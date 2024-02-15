@@ -92,7 +92,8 @@ fun LoginScreen(
         onNameValueChange = viewModel::onNameChange,
         onLastnameValueChange = viewModel::onLastnameChange,
         onAction = if (viewState.pageState == PageState.LOGIN) viewModel::onLoginClick else viewModel::onSignupClick,
-        onCloseClick = onCloseClick
+        onCloseClick = onCloseClick,
+        onGoogleSignInClicked = viewModel::loginWithGoogle
     )
 }
 
@@ -106,7 +107,8 @@ fun ScreenContent(
     onLastnameValueChange: (String) -> Unit,
     onAction: () -> Unit,
     onCloseClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onGoogleSignInClicked: (String) -> Unit
 ) {
     val titleTextId = remember { mutableIntStateOf(-1) }
     val descriptionTextId = remember { mutableIntStateOf(-1) }
@@ -246,10 +248,10 @@ fun ScreenContent(
             }
             Spacer(modifier = Modifier.height(5.dp))
             GoogleSignInButton(
-                text = "Sign in with Google",
+                text = stringResource(id = R.string.sign_in_with_google),
                 modifier = Modifier.fillMaxWidth(),
                 onSuccess = { idToken ->
-                    // The user successfully signed in with Google
+                    onGoogleSignInClicked.invoke(idToken)
                 },
                 onError = { errorMessage ->
                     // The user failed to sign in with Google

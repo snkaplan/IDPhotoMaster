@@ -11,6 +11,7 @@ import com.idphoto.idphotomaster.core.domain.exceptions.MailRequiredException
 import com.idphoto.idphotomaster.core.domain.exceptions.NameRequiredException
 import com.idphoto.idphotomaster.core.domain.exceptions.PasswordLengthException
 import com.idphoto.idphotomaster.core.domain.exceptions.PasswordRequiredException
+import com.idphoto.idphotomaster.core.domain.usecase.login.GoogleLoginUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.login.LoginUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.login.SignupUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.login.ValidateAuthUseCase
@@ -28,6 +29,7 @@ import javax.inject.Inject
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
+    private val googleLoginUseCase: GoogleLoginUseCase,
     private val signupUseCase: SignupUseCase,
     private val validateAuthUseCase: ValidateAuthUseCase,
     private val validateSignupUseCase: ValidateSignupUseCase
@@ -141,6 +143,30 @@ class LoginViewModel @Inject constructor(
                         }
                     }
                 }.launchIn(this)
+        }
+    }
+
+    fun loginWithGoogle(idToken: String) {
+        viewModelScope.launch {
+            googleLoginUseCase.invoke(idToken).asResource().onEach { result ->
+                when (result) {
+                    Resource.Loading -> {
+                        updateState { copy(loading = true) }
+                    }
+
+                    is Resource.Error -> {
+                        result.exception?.let { handleError(it) } ?: run {
+                            updateState { copy(loading = false) }
+                        }
+                    }
+
+                    is Resource.Success -> {
+                        updateState {
+                            copy(loading = false, loginSuccessful = triggered)
+                        }
+                    }
+                }
+            }.launchIn(this)
         }
     }
 

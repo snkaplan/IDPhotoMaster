@@ -24,6 +24,10 @@ class UserRepositoryImpl @Inject constructor(
         return userRemoteDataSource.login(email, password)
     }
 
+    override suspend fun googleSignIn(token: String): Result<FirebaseUser> {
+        return userRemoteDataSource.googleSignIn(token)
+    }
+
     override suspend fun createUser(user: User): Result<Unit> {
         return userRemoteDataSource.createUser(user.toFirebaseMap(), user.userId)
     }

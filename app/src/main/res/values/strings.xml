@@ -57,4 +57,5 @@
     <string name="other">Diğer</string>
     <string name="logout">Çıkış Yap</string>
     <string name="or">ya da</string>
+    <string name="sign_in_with_google">Google ile giriş yap</string>
 </resources>
