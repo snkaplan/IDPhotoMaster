@@ -54,4 +54,5 @@
     <string name="change_language">Change Language</string>
     <string name="turkish">Turkish</string>
     <string name="english">English</string>
+    <string name="error_google_sign_in">Error happened while signing in with google</string>
 </resources>

@@ -53,6 +53,7 @@ import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.Blue
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.LightGrey
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.White
+import com.idphoto.idphotomaster.feature.login.components.Google
 import com.idphoto.idphotomaster.feature.login.contents.LoginScreenContent
 import com.idphoto.idphotomaster.feature.login.contents.SignupScreenContent
 import de.palm.composestateevents.EventEffect
@@ -235,6 +236,16 @@ fun ScreenContent(
                     onStateChange(if (viewState.pageState == PageState.LOGIN) PageState.SIGNUP else PageState.LOGIN)
                 }
             }
+            Google(
+                text = "Sign in with Google",
+                modifier = Modifier.fillMaxWidth(),
+                onSuccess = { idToken ->
+                    // The user successfully signed in with Google
+                },
+                onError = { errorMessage ->
+                    // The user failed to sign in with Google
+                }
+            )
         }
     }
 }

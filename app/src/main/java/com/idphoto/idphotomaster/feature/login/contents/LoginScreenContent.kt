@@ -11,7 +11,6 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
@@ -28,7 +27,6 @@ import com.idphoto.idphotomaster.feature.login.LoginViewState
 import com.idphoto.idphotomaster.feature.login.components.PasswordTextField
 import com.idphoto.idphotomaster.feature.login.components.UserInputTextField
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LoginScreenContent(
     viewState: LoginViewState,
