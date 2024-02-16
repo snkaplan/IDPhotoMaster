@@ -1,6 +1,7 @@
 package com.idphoto.idphotomaster.core.data.datasource.remote
 
 import android.net.Uri
+import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.storage.FirebaseStorage
 import com.idphoto.idphotomaster.core.common.Constants.PURCHASE_TABLE_NAME
@@ -16,10 +17,11 @@ class BasketRemoteDataSourceImpl @Inject constructor(
     private val firebaseStorage: FirebaseStorage,
     private val networkMonitor: NetworkMonitor,
 ) : BasketRemoteDataSource {
-    override suspend fun purchase(uid: String, purchase: MutableMap<String, Any?>): Result<Unit> {
+    override suspend fun purchase(
+        uid: String, purchase: MutableMap<String, Any?>, documentReference: DocumentReference
+    ): Result<Unit> {
         return runCatching {
-            firebaseFirestore.collection(USERS_TABLE_NAME).document(uid).collection(PURCHASE_TABLE_NAME).add(purchase)
-                .await(networkMonitor)
+            documentReference.set(purchase).await(networkMonitor)
         }
     }
 
@@ -29,6 +31,15 @@ class BasketRemoteDataSourceImpl @Inject constructor(
             val upload = storageRef.putBytes(image).await(networkMonitor)
             val uri = upload.storage.downloadUrl.await(networkMonitor)
             uri
+        }
+    }
+
+    override suspend fun deletePurchase(userId: String, id: String): Result<Unit> {
+        return runCatching {
+            val storageRef = firebaseStorage.reference.child(IMAGES_FOLDER).child(id)
+            firebaseFirestore.collection(USERS_TABLE_NAME).document(userId).collection(PURCHASE_TABLE_NAME).document(id)
+                .delete()
+            storageRef.delete()
         }
     }
 }

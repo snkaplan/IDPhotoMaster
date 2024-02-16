@@ -13,6 +13,7 @@ import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
 import com.idphoto.idphotomaster.core.common.safeLet
 import com.idphoto.idphotomaster.core.data.repository.UserRepository
 import com.idphoto.idphotomaster.core.domain.model.base.ExceptionModel
+import com.idphoto.idphotomaster.core.domain.usecase.basket.RollbackPurchaseUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.basket.StartPurchaseUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromDevice
 import com.idphoto.idphotomaster.core.domain.usecase.home.SavePhotoToGalleryUseCase
@@ -25,7 +26,6 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
@@ -35,7 +35,8 @@ class BasketViewModel @Inject constructor(
     @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
     private val userRepository: UserRepository,
     private val savePhotoToGalleryUseCase: SavePhotoToGalleryUseCase,
-    private val startPurchaseUseCase: StartPurchaseUseCase
+    private val startPurchaseUseCase: StartPurchaseUseCase,
+    private val rollbackPurchaseUseCase: RollbackPurchaseUseCase
 ) : BaseViewModel<BasketViewState>() {
     private val photoArgs: BasketArgs = BasketArgs(savedStateHandle)
     override fun createInitialState(): BasketViewState = BasketViewState()
@@ -118,13 +119,23 @@ class BasketViewModel @Inject constructor(
     }
 
     fun rollbackPurchase() {
-        // DELETE Purchase when user cancelled
+        viewModelScope.launch {
+            safeLet(userRepository.currentUser?.uid, uiState.value.lastPurchasedPhotoId) { uid, photoId ->
+                rollbackPurchaseUseCase.invoke(uid, photoId).asResource().onEach {
+                    when (it) {
+                        is Resource.Error -> updateState { copy(lastPurchasedPhotoId = null) }
+                        Resource.Loading -> {}
+                        is Resource.Success -> updateState { copy(lastPurchasedPhotoId = null) }
+                    }
+                }.launchIn(this)
+            }
+        }
     }
 
     private fun startPurchase() {
         viewModelScope.launch {
             safeLet(userRepository.currentUser?.uid, uiState.value.photo) { uid, photo ->
-                startPurchaseUseCase(uid, UUID.randomUUID().toString(), photo).asResource().onEach { result ->
+                startPurchaseUseCase(uid, photo).asResource().onEach { result ->
                     when (result) {
                         is Resource.Error -> {
                             updateState {
@@ -138,11 +149,20 @@ class BasketViewModel @Inject constructor(
                         }
 
                         Resource.Loading -> {
-                            updateState { copy(loading = true) }
+                            updateState {
+                                copy(
+                                    loading = true
+                                )
+                            }
                         }
 
                         is Resource.Success -> {
-                            updateState { copy(loading = false, startGooglePurchase = triggered) }
+                            updateState {
+                                copy(
+                                    loading = false, startGooglePurchase = triggered,
+                                    lastPurchasedPhotoId = result.data
+                                )
+                            }
                         }
                     }
                 }.launchIn(this)
@@ -173,5 +193,6 @@ data class BasketViewState(
     val navigateToLogin: StateEvent = consumed,
     val startGooglePurchase: StateEvent = consumed,
     val purchaseCompleted: StateEvent = consumed,
-    val exception: ExceptionModel? = null
+    val exception: ExceptionModel? = null,
+    val lastPurchasedPhotoId: String? = null
 ) : IViewState
