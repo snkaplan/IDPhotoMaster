@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Bitmap
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.common.BaseViewModel
 import com.idphoto.idphotomaster.core.common.IViewState
 import com.idphoto.idphotomaster.core.common.Resource
@@ -12,6 +13,7 @@ import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
 import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
 import com.idphoto.idphotomaster.core.common.extension.applyFilters
 import com.idphoto.idphotomaster.core.data.util.ImageSegmentationHelper
+import com.idphoto.idphotomaster.core.domain.model.base.ExceptionModel
 import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromDevice
 import com.idphoto.idphotomaster.core.domain.usecase.home.SaveImageToTempFile
 import com.idphoto.idphotomaster.core.domain.usecase.home.SavePhotoToCache
@@ -20,6 +22,7 @@ import de.palm.composestateevents.StateEvent
 import de.palm.composestateevents.StateEventWithContent
 import de.palm.composestateevents.consumed
 import de.palm.composestateevents.triggered
+import getExceptionModel
 import jp.co.cyberagent.android.gpuimage.GPUImage
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageBrightnessFilter
 import jp.co.cyberagent.android.gpuimage.filter.GPUImageFilterGroup
@@ -57,7 +60,14 @@ class EditPhotoViewModel @Inject constructor(
                         }
 
                         is Resource.Error -> {
-                            updateState { copy(loading = false) }
+                            updateState {
+                                copy(
+                                    loading = false, exception = result.exception?.getExceptionModel(
+                                        descriptionResId = R.string.exception_read_image,
+                                        primaryButtonTextResId = null
+                                    )
+                                )
+                            }
                         }
 
                         is Resource.Success -> {
@@ -174,7 +184,13 @@ class EditPhotoViewModel @Inject constructor(
                             }
 
                             is Resource.Error -> {
-                                updateState { copy(loading = false) }
+                                updateState {
+                                    copy(
+                                        loading = false, exception = result.exception?.getExceptionModel(
+                                            descriptionResId = R.string.exception_save_image
+                                        )
+                                    )
+                                }
                             }
 
                             is Resource.Success -> {
@@ -199,7 +215,13 @@ class EditPhotoViewModel @Inject constructor(
                             }
 
                             is Resource.Error -> {
-                                updateState { copy(loading = false) }
+                                updateState {
+                                    copy(
+                                        loading = false, exception = result.exception?.getExceptionModel(
+                                            descriptionResId = R.string.exception_save_image
+                                        )
+                                    )
+                                }
                             }
 
                             is Resource.Success -> {
@@ -227,6 +249,10 @@ class EditPhotoViewModel @Inject constructor(
     fun onNavigateToBasketConsumed() {
         updateState { copy(navigateToBasket = consumed()) }
     }
+
+    fun onErrorDialogDismiss() {
+        updateState { copy(exception = null) }
+    }
 }
 
 data class EditPhotoViewState(
@@ -241,5 +267,6 @@ data class EditPhotoViewState(
     val heat: Float = 5000f,
     val photoReadCompleted: StateEvent = consumed,
     val resetImage: StateEvent = consumed,
-    val navigateToBasket: StateEventWithContent<String> = consumed()
+    val navigateToBasket: StateEventWithContent<String> = consumed(),
+    val exception: ExceptionModel? = null
 ) : IViewState

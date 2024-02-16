@@ -60,8 +60,7 @@ fun AppNavHost(
             navController.navigateToEditPhoto(capturedImagePath = it)
         })
         loginScreen(
-            onCloseClick = navController::popBackStack,
-            mainViewModel = mainViewModel
+            onCloseClick = navController::popBackStack
         )
         tutorialScreen(navigateToHome = {
             navController.navigateToHome(

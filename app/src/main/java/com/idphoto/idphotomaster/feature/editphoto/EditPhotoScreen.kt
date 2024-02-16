@@ -46,6 +46,7 @@ import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.systemdesign.components.AppScaffold
 import com.idphoto.idphotomaster.core.systemdesign.components.AppTopBar
 import com.idphoto.idphotomaster.core.systemdesign.components.DrawLineWithDot
+import com.idphoto.idphotomaster.core.systemdesign.components.ErrorDialog
 import com.idphoto.idphotomaster.core.systemdesign.components.PhotoView
 import com.idphoto.idphotomaster.core.systemdesign.components.ScreenButton
 import com.idphoto.idphotomaster.core.systemdesign.icon.AppIcons
@@ -83,6 +84,15 @@ fun EditPhotoScreen(
     )
 
     DisableScreenshot(activity)
+    ErrorDialog(
+        exception = viewState.exception,
+        onDismissRequest = {
+            viewModel.onErrorDialogDismiss()
+        },
+        onButtonClick = {
+            viewModel.onErrorDialogDismiss()
+        },
+    )
     viewState.updatedPhoto?.let {
         ScreenContent(
             viewState = viewState,

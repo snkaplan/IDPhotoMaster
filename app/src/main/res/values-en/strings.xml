@@ -42,7 +42,7 @@
     <string name="purchase_success_description">Successful Purchase</string>
     <string name="purchase_user_cancelled_description">You Cancelled the Purchase</string>
     <string name="purchase_failed_description">An Error Occurred During the Purchase :/</string>
-    <string name="purchase_failed_title">Error happened</string>
+    <string name="exception_title">Error happened</string>
     <string name="ok">OK</string>
     <string name="general_settings">General Settings</string>
     <string name="language">Language</string>
@@ -63,4 +63,14 @@
     <string name="network_exception_description">We have detected a problem with your internet connection.\nPlease check your settings and try reconnecting.</string>
     <string name="close">Close</string>
     <string name="retry">Try Again</string>
+    <string name="exception_read_image">There was a problem reading the image.</string>
+    <string name="exception_save_image_to_gallery">An error occurred while saving the image to the gallery. You can access the image from my profile.</string>
+    <string name="exception_start_purchase">There was an error starting the purchase. Please try again.</string>
+    <string name="exception_save_image">Image could not be saved.</string>
+    <string name="exception_fetch_config">There was a problem fetching the configuration settings.</string>
+    <string name="exception_fetch_user">There was an error fetching user information.</string>
+    <string name="exception_fetch_user_purchases">There was a problem fetching user purchases.</string>
+    <string name="exception_login_google">There was a problem logging in with Google.</string>
+    <string name="exception_signup">There was a problem signing up. Please check your information and make sure that there is no user registered with this email.</string>
+    <string name="exception_login">There was a problem logging in. Please check your username and password.</string>
 </resources>

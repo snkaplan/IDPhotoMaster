@@ -7,6 +7,7 @@ import android.net.Uri
 import androidx.lifecycle.viewModelScope
 import coil.ImageLoader
 import coil.request.ImageRequest
+import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.common.BaseViewModel
 import com.idphoto.idphotomaster.core.common.IViewState
 import com.idphoto.idphotomaster.core.common.Resource
@@ -15,12 +16,14 @@ import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
 import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
 import com.idphoto.idphotomaster.core.data.repository.UserRepository
 import com.idphoto.idphotomaster.core.domain.model.UserSavedPhoto
+import com.idphoto.idphotomaster.core.domain.model.base.ExceptionModel
 import com.idphoto.idphotomaster.core.domain.usecase.home.SaveImageToTempFile
 import com.idphoto.idphotomaster.core.domain.usecase.profile.GetUserPurchases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.palm.composestateevents.StateEventWithContent
 import de.palm.composestateevents.consumed
 import de.palm.composestateevents.triggered
+import getExceptionModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
@@ -54,7 +57,13 @@ class SavedPhotosViewModel @Inject constructor(
                     }
 
                     is Resource.Error -> {
-                        updateState { copy(loading = false) }
+                        updateState {
+                            copy(
+                                loading = false, exception = result.exception?.getExceptionModel(
+                                    descriptionResId = R.string.exception_fetch_user_purchases
+                                )
+                            )
+                        }
                     }
 
                     is Resource.Success -> {
@@ -95,7 +104,13 @@ class SavedPhotosViewModel @Inject constructor(
                     }
 
                     is Resource.Error -> {
-                        updateState { copy(loading = false) }
+                        updateState {
+                            copy(
+                                loading = false, exception = result.exception?.getExceptionModel(
+                                    descriptionResId = R.string.exception_save_image
+                                )
+                            )
+                        }
                     }
 
                     is Resource.Success -> {
@@ -108,10 +123,15 @@ class SavedPhotosViewModel @Inject constructor(
     fun onNavigateEditPhotoConsumed() {
         updateState { copy(navigateToEditPhoto = consumed()) }
     }
+
+    fun onErrorDialogDismiss() {
+        updateState { copy(exception = null) }
+    }
 }
 
 data class SavedPhotosViewState(
     val loading: Boolean = false,
     val savedPhotos: List<UserSavedPhoto>? = null,
-    val navigateToEditPhoto: StateEventWithContent<String> = consumed()
+    val navigateToEditPhoto: StateEventWithContent<String> = consumed(),
+    val exception: ExceptionModel? = null
 ) : IViewState

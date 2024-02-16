@@ -11,6 +11,7 @@ import com.idphoto.idphotomaster.core.domain.exceptions.MailRequiredException
 import com.idphoto.idphotomaster.core.domain.exceptions.NameRequiredException
 import com.idphoto.idphotomaster.core.domain.exceptions.PasswordLengthException
 import com.idphoto.idphotomaster.core.domain.exceptions.PasswordRequiredException
+import com.idphoto.idphotomaster.core.domain.model.base.ExceptionModel
 import com.idphoto.idphotomaster.core.domain.usecase.login.GoogleLoginUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.login.LoginUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.login.SignupUseCase
@@ -18,9 +19,9 @@ import com.idphoto.idphotomaster.core.domain.usecase.login.ValidateAuthUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.login.ValidateSignupUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.palm.composestateevents.StateEvent
-import de.palm.composestateevents.StateEventWithContent
 import de.palm.composestateevents.consumed
 import de.palm.composestateevents.triggered
+import getExceptionModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -72,8 +73,13 @@ class LoginViewModel @Inject constructor(
                         }
 
                         is Resource.Error -> {
-                            result.exception?.let { handleError(it) } ?: run {
-                                updateState { copy(loading = false) }
+                            updateState {
+                                copy(
+                                    loading = false, exception = result.exception?.getExceptionModel(
+                                        descriptionResId = R.string.exception_login,
+                                        primaryButtonTextResId = null
+                                    )
+                                )
                             }
                         }
 
@@ -131,8 +137,13 @@ class LoginViewModel @Inject constructor(
                         }
 
                         is Resource.Error -> {
-                            result.exception?.let { handleError(it) } ?: run {
-                                updateState { copy(loading = false) }
+                            updateState {
+                                copy(
+                                    loading = false, exception = result.exception?.getExceptionModel(
+                                        descriptionResId = R.string.exception_signup,
+                                        primaryButtonTextResId = null
+                                    )
+                                )
                             }
                         }
 
@@ -155,8 +166,13 @@ class LoginViewModel @Inject constructor(
                     }
 
                     is Resource.Error -> {
-                        result.exception?.let { handleError(it) } ?: run {
-                            updateState { copy(loading = false) }
+                        updateState {
+                            copy(
+                                loading = false, exception = result.exception?.getExceptionModel(
+                                    descriptionResId = R.string.exception_login_google,
+                                    primaryButtonTextResId = null
+                                )
+                            )
                         }
                     }
 
@@ -231,7 +247,7 @@ class LoginViewModel @Inject constructor(
                 updateState {
                     copy(
                         loading = false,
-                        exceptionEvent = triggered(th.localizedMessage ?: "General Exception")
+                        exception = th.getExceptionModel()
                     )
                 }
             }
@@ -242,8 +258,8 @@ class LoginViewModel @Inject constructor(
         updateState { copy(loginSuccessful = consumed) }
     }
 
-    fun onExceptionConsumed() {
-        updateState { copy(exceptionEvent = consumed()) }
+    fun onErrorDialogDismiss() {
+        updateState { copy(exception = null) }
     }
 }
 
@@ -259,7 +275,7 @@ data class LoginViewState(
     val lastNameErrorMessage: Int? = null,
     val pageState: PageState = PageState.LOGIN,
     val loginSuccessful: StateEvent = consumed,
-    val exceptionEvent: StateEventWithContent<String> = consumed()
+    val exception: ExceptionModel? = null
 ) : IViewState
 
 enum class PageState {

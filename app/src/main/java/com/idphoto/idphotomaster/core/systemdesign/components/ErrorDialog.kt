@@ -28,7 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -40,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import com.idphoto.idphotomaster.core.domain.model.base.ExceptionModel
+import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.Blue
 
 private const val DIALOG_WIDTH = 0.80f
@@ -51,7 +51,7 @@ fun ErrorDialog(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
     onButtonClick: () -> Unit,
-    onButtonSecondClick: () -> Unit = {}
+    onButtonSecondClick: () -> Unit = onDismissRequest
 ) {
     if (exception != null)
         BasicAlertDialog(
@@ -91,9 +91,8 @@ fun ErrorDialog(
                                     .size(68.dp)
                                     .background(
                                         shape = CircleShape,
-                                        color = Blue
+                                        color = BackgroundColor
                                     )
-                                    .clip(CircleShape)
                             ) {
                                 Image(
                                     imageVector = it as ImageVector,
@@ -103,7 +102,6 @@ fun ErrorDialog(
                             }
                             Spacer(modifier = Modifier.height(24.dp))
                         }
-
                         TextAndDescContainer(exception = exception)
                         Spacer(modifier = Modifier.height(24.dp))
                         ButtonContainer(exception, onButtonClick, onButtonSecondClick)
@@ -162,7 +160,7 @@ private fun ButtonContainer(
                         text = exception.secondButtonTextResId?.let { stringResource(id = it) }
                             ?: exception.secondButtonText.orEmpty(),
                         style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
-                        color = MaterialTheme.colorScheme.primary,
+                        color = Color.Black,
                         textAlign = TextAlign.Center
                     )
                 })
@@ -174,6 +172,7 @@ private fun ButtonContainer(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f),
+                colors = ButtonDefaults.buttonColors(containerColor = Blue),
                 shape = MaterialTheme.shapes.small,
                 onClick = { onPrimaryButtonClick.invoke() },
                 content = {
@@ -200,7 +199,7 @@ private fun TextAndDescContainer(modifier: Modifier = Modifier, exception: Excep
             text = exception.titleResId?.let { stringResource(id = it) }
                 ?: exception.title.orEmpty(),
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.primary,
+            color = Color.Black,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(12.dp))
@@ -211,7 +210,7 @@ private fun TextAndDescContainer(modifier: Modifier = Modifier, exception: Excep
             style = MaterialTheme.typography.bodyMedium.merge(
                 TextStyle(lineHeight = 18.sp)
             ),
-            color = MaterialTheme.colorScheme.primary,
+            color = Color.Black.copy(alpha = 0.6f),
             textAlign = TextAlign.Center
         )
     }

@@ -35,6 +35,7 @@ import com.idphoto.idphotomaster.core.domain.model.UserSavedPhoto
 import com.idphoto.idphotomaster.core.systemdesign.components.AppScaffold
 import com.idphoto.idphotomaster.core.systemdesign.components.AppTopBar
 import com.idphoto.idphotomaster.core.systemdesign.components.CoilImageComponent
+import com.idphoto.idphotomaster.core.systemdesign.components.ErrorDialog
 import com.idphoto.idphotomaster.core.systemdesign.icon.AppIcons
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.Blue
@@ -61,6 +62,15 @@ fun SavedPhotosScreen(
     }
 
     DisableScreenshot(activity)
+    ErrorDialog(
+        exception = uiState.exception,
+        onDismissRequest = {
+            viewModel.onErrorDialogDismiss()
+        },
+        onButtonClick = {
+            viewModel.onErrorDialogDismiss()
+        },
+    )
     ScreenContent(
         viewState = uiState,
         modifier = modifier.fillMaxSize(),

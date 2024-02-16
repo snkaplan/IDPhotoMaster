@@ -108,7 +108,7 @@ fun BasketScreen(
         onConsumed = googlePurchaseViewModel::onPurchaseFailedConsumed,
         action = {
             mainViewModel.showCustomDialog(
-                title = context.getString(R.string.purchase_failed_title),
+                title = context.getString(R.string.exception_title),
                 message = context.getString(R.string.purchase_failed_description),
                 confirmText = context.getString(R.string.ok)
             )
@@ -120,7 +120,7 @@ fun BasketScreen(
         onConsumed = googlePurchaseViewModel::onUserCancelledPurchaseConsumed,
         action = {
             mainViewModel.showCustomDialog(
-                title = context.getString(R.string.purchase_failed_title),
+                title = context.getString(R.string.exception_title),
                 message = context.getString(R.string.purchase_user_cancelled_description),
                 confirmText = context.getString(R.string.ok)
             )

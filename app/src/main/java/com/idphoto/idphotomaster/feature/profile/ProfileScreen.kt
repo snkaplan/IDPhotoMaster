@@ -48,6 +48,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.domain.model.AppLanguageItem
+import com.idphoto.idphotomaster.core.systemdesign.components.ErrorDialog
 import com.idphoto.idphotomaster.core.systemdesign.components.InformationBottomSheet
 import com.idphoto.idphotomaster.core.systemdesign.components.LoadingView
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
@@ -61,14 +62,23 @@ fun ProfileScreen(
     navigateToSavedPhotos: () -> Unit,
     viewModel: ProfileViewModel = hiltViewModel()
 ) {
-    val splashUiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val profileState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val locale = getLocale()
     LaunchedEffect(key1 = true) {
         viewModel.init(context, locale)
     }
+    ErrorDialog(
+        exception = profileState.exception,
+        onDismissRequest = {
+            viewModel.onErrorDialogDismiss()
+        },
+        onButtonClick = {
+            viewModel.onErrorDialogDismiss()
+        },
+    )
     ScreenContent(
-        viewState = splashUiState,
+        viewState = profileState,
         modifier = modifier.fillMaxSize(),
         navigateToLogin = navigateToLogin,
         navigateToSavedPhotos = navigateToSavedPhotos,

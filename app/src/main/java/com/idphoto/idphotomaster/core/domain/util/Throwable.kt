@@ -5,15 +5,15 @@ import com.idphoto.idphotomaster.core.domain.model.base.ExceptionModel
 import com.idphoto.idphotomaster.core.domain.model.base.ExceptionType
 import com.idphoto.idphotomaster.core.domain.util.getIcon
 
-private fun Throwable?.getErrorMessage(
+fun Throwable?.getExceptionModel(
     title: String? = null,
     description: String? = null,
     primaryButtonText: String? = null,
     secondButtonText: String? = null,
-    @StringRes titleResId: Int? = null,
+    @StringRes titleResId: Int? = R.string.exception_title,
     @StringRes descriptionResId: Int? = null,
-    @StringRes primaryButtonTextResId: Int? = null,
-    @StringRes secondButtonTextResId: Int? = null,
+    @StringRes primaryButtonTextResId: Int? = R.string.retry,
+    @StringRes secondButtonTextResId: Int? = R.string.close,
 ): ExceptionModel {
     return when (this) {
         is NetworkException -> ExceptionModel(
@@ -22,7 +22,9 @@ private fun Throwable?.getErrorMessage(
             primaryButtonTextResId = R.string.retry,
             secondButtonTextResId = R.string.close,
             exceptionType = ExceptionType.NETWORK
-        )
+        ).apply {
+            icon = this.getIcon()
+        }
 
         else -> ExceptionModel(
             title = title,
@@ -34,13 +36,6 @@ private fun Throwable?.getErrorMessage(
             secondButtonText = secondButtonText,
             secondButtonTextResId = secondButtonTextResId,
             exceptionType = ExceptionType.GENERAL
-        )
+        ).apply { icon = this.getIcon() }
     }
-}
-
-fun Throwable.getExceptionModel(): ExceptionModel {
-    val model = this.getErrorMessage()
-    return model.copy(
-        icon = model.getIcon(),
-    )
 }

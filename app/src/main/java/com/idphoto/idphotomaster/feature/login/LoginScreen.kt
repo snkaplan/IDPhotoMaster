@@ -46,8 +46,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.idphoto.idphotomaster.R
-import com.idphoto.idphotomaster.app.MainViewModel
 import com.idphoto.idphotomaster.core.systemdesign.components.AppScaffold
+import com.idphoto.idphotomaster.core.systemdesign.components.ErrorDialog
 import com.idphoto.idphotomaster.core.systemdesign.ui.LocalDim
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.Blue
@@ -56,15 +56,13 @@ import com.idphoto.idphotomaster.core.systemdesign.ui.theme.White
 import com.idphoto.idphotomaster.feature.login.components.GoogleSignInButton
 import com.idphoto.idphotomaster.feature.login.contents.LoginScreenContent
 import com.idphoto.idphotomaster.feature.login.contents.SignupScreenContent
-import de.palm.composestateevents.EventEffect
 import de.palm.composestateevents.NavigationEventEffect
 
 @Composable
 fun LoginScreen(
     onCloseClick: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: LoginViewModel = hiltViewModel(),
-    mainViewModel: MainViewModel
+    viewModel: LoginViewModel = hiltViewModel()
 ) {
     val viewState by viewModel.uiState.collectAsStateWithLifecycle()
     NavigationEventEffect(
@@ -72,16 +70,15 @@ fun LoginScreen(
         onConsumed = viewModel::onLoginSuccessfulConsumed,
         action = onCloseClick
     )
-    EventEffect(
-        event = viewState.exceptionEvent,
-        onConsumed = viewModel::onExceptionConsumed,
-        action = {
-            mainViewModel.showCustomDialog(
-                title = "Error occured :/",
-                message = it,
-                confirmText = "ok"
-            )
-        }
+
+    ErrorDialog(
+        exception = viewState.exception,
+        onDismissRequest = {
+            viewModel.onErrorDialogDismiss()
+        },
+        onButtonClick = {
+            viewModel.onErrorDialogDismiss()
+        },
     )
     ScreenContent(
         viewState = viewState,

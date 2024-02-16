@@ -54,6 +54,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.idphoto.idphotomaster.core.common.extension.rotateBitmap
 import com.idphoto.idphotomaster.core.systemdesign.components.AppScaffold
+import com.idphoto.idphotomaster.core.systemdesign.components.ErrorDialog
 import com.idphoto.idphotomaster.core.systemdesign.components.LoadingView
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 import de.palm.composestateevents.NavigationEventEffect
@@ -69,6 +70,15 @@ fun CameraScreen(
         event = cameraState.navigateToEditPhoto,
         onConsumed = viewModel::onNavigateToEditPhotoConsumed,
         action = navigateToEditPhoto
+    )
+    ErrorDialog(
+        exception = cameraState.exception,
+        onDismissRequest = {
+            viewModel.onErrorDialogDismiss()
+        },
+        onButtonClick = {
+            viewModel.onErrorDialogDismiss()
+        },
     )
     CameraContent(
         onPhotoCaptured = viewModel::saveTempImage,

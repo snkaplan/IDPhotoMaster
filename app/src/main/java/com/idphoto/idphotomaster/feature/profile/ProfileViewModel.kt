@@ -17,10 +17,12 @@ import com.idphoto.idphotomaster.core.data.repository.UserRepository
 import com.idphoto.idphotomaster.core.domain.model.AppLanguageItem
 import com.idphoto.idphotomaster.core.domain.model.InfoBottomSheetItem
 import com.idphoto.idphotomaster.core.domain.model.User
+import com.idphoto.idphotomaster.core.domain.model.base.ExceptionModel
 import com.idphoto.idphotomaster.core.domain.usecase.config.GetConfigUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.profile.GetUserUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.profile.LogoutUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import getExceptionModel
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -52,7 +54,16 @@ class ProfileViewModel @Inject constructor(
         viewModelScope.launch {
             getConfigUseCase.invoke().asResource().onEach { result ->
                 when (result) {
-                    is Resource.Error -> {}
+                    is Resource.Error -> {
+                        updateState {
+                            copy(
+                                exception = result.exception?.getExceptionModel(
+                                    descriptionResId = R.string.exception_fetch_config
+                                )
+                            )
+                        }
+                    }
+
                     Resource.Loading -> {}
                     is Resource.Success -> {
                         updateState { copy(config = result.data) }
@@ -71,7 +82,13 @@ class ProfileViewModel @Inject constructor(
                     }
 
                     is Resource.Error -> {
-                        updateState { copy(loading = false) }
+                        updateState {
+                            copy(
+                                loading = false, exception = result.exception?.getExceptionModel(
+                                    descriptionResId = R.string.exception_fetch_user
+                                )
+                            )
+                        }
                     }
 
                     is Resource.Success -> {
@@ -149,6 +166,10 @@ class ProfileViewModel @Inject constructor(
             }.launchIn(this)
         }
     }
+
+    fun onErrorDialogDismiss() {
+        updateState { copy(exception = null) }
+    }
 }
 
 data class ProfileViewState(
@@ -158,7 +179,8 @@ data class ProfileViewState(
     val infoBottomSheet: InfoBottomSheetItem? = null,
     val showLanguageBottomSheet: Boolean? = false,
     val languageList: List<AppLanguageItem>? = null,
-    val config: FirebaseRemoteConfig? = null
+    val config: FirebaseRemoteConfig? = null,
+    val exception: ExceptionModel? = null
 ) : IViewState
 
 sealed class ProfileViewTriggeredEvent {

@@ -41,7 +41,7 @@
     <string name="purchase_success_description">Alışveriş Başarılı</string>
     <string name="purchase_user_cancelled_description">Alışverişi İptal Ettiniz</string>
     <string name="purchase_failed_description">Alışverişi Esnasında Bir Hata Oluştu :/</string>
-    <string name="purchase_failed_title">Bir Hata Oluştu</string>
+    <string name="exception_title">Bir Hata Oluştu</string>
     <string name="ok">Tamam</string>
     <string name="general_settings">Genel Ayarlar</string>
     <string name="language">Dil</string>
@@ -62,4 +62,14 @@
     <string name="network_exception_description">İnternet bağlantınızda bir sorun tespit ettik.\nLütfen ayarlarınızı kontrol edin ve tekrar bağlanmayı deneyin.</string>
     <string name="close">Kapat</string>
     <string name="retry">Tekrar Dene</string>
+    <string name="exception_read_image">Resim okunurken sorun oluştu.</string>
+    <string name="exception_save_image_to_gallery">Resim galeriye kaydedilirken hata yaşandı. Resme profilim altından erişebilirsiniz.</string>
+    <string name="exception_start_purchase">Satın alım başlatılırken hata oluştu tekrar deneyiniz.</string>
+    <string name="exception_save_image">Resim kaydedilemedi.</string>
+    <string name="exception_fetch_config">Konfigürasyon ayarları alınırken sorun oluştu.</string>
+    <string name="exception_fetch_user">Kullanıcı bilgileri alınırken hata oluştu.</string>
+    <string name="exception_fetch_user_purchases">Kullanıcı satın alımları alınırken sorun oluştu.</string>
+    <string name="exception_login_google">Google ile oturum açılırken sorun oluştu.</string>
+    <string name="exception_signup">Kayıt olunurken sorun oluştu. Bilgileri kontrol ediniz. Bu mail ile kayıtlı kullanıcı olmadığından emin olunuz.</string>
+    <string name="exception_login">Giriş yaparken sorun oluştu. Kullanıcı adı ve şifrenizi kontrol ediniz.</string>
 </resources>

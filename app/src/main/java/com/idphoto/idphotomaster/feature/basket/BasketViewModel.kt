@@ -3,6 +3,7 @@ package com.idphoto.idphotomaster.feature.basket
 import android.graphics.Bitmap
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.common.BaseViewModel
 import com.idphoto.idphotomaster.core.common.IViewState
 import com.idphoto.idphotomaster.core.common.Resource
@@ -53,7 +54,13 @@ class BasketViewModel @Inject constructor(
                         }
 
                         is Resource.Error -> {
-                            updateState { copy(loading = false, exception = result.exception?.getExceptionModel()) }
+                            updateState {
+                                copy(
+                                    loading = false, exception = result.exception?.getExceptionModel(
+                                        descriptionResId = R.string.exception_read_image
+                                    )
+                                )
+                            }
                         }
 
                         is Resource.Success -> {
@@ -88,7 +95,13 @@ class BasketViewModel @Inject constructor(
                 savePhotoToGalleryUseCase(capturePhotoBitmap = it).asResource().onEach { result ->
                     when (result) {
                         is Resource.Error -> {
-                            updateState { copy(loading = false, exception = result.exception?.getExceptionModel()) }
+                            updateState {
+                                copy(
+                                    loading = false, exception = result.exception?.getExceptionModel(
+                                        descriptionResId = R.string.exception_save_image_to_gallery
+                                    )
+                                )
+                            }
                         }
 
                         Resource.Loading -> {
@@ -114,7 +127,14 @@ class BasketViewModel @Inject constructor(
                 startPurchaseUseCase(uid, UUID.randomUUID().toString(), photo).asResource().onEach { result ->
                     when (result) {
                         is Resource.Error -> {
-                            updateState { copy(loading = false, exception = result.exception?.getExceptionModel()) }
+                            updateState {
+                                copy(
+                                    loading = false, exception = result.exception?.getExceptionModel(
+                                        descriptionResId = R.string.exception_start_purchase,
+                                        primaryButtonTextResId = null
+                                    )
+                                )
+                            }
                         }
 
                         Resource.Loading -> {
@@ -153,5 +173,5 @@ data class BasketViewState(
     val navigateToLogin: StateEvent = consumed,
     val startGooglePurchase: StateEvent = consumed,
     val purchaseCompleted: StateEvent = consumed,
-    val exception: ExceptionModel? = null,
+    val exception: ExceptionModel? = null
 ) : IViewState
