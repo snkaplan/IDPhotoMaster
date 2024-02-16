@@ -8,13 +8,10 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
-import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
-import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
+import com.idphoto.idphotomaster.core.domain.exceptions.GeneralException
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.withContext
 import java.io.OutputStream
 import javax.inject.Inject
 
@@ -79,9 +76,9 @@ class SavePhotoToGalleryUseCase @Inject constructor(
                     Result.failure(exception)
                 }
             } ?: run {
-                throw Exception("Couldn't create file for gallery")
+                throw GeneralException()
             }
-            (result.getOrNull() ?: throw Exception("Couldn't create file for gallery")).also {
+            (result.getOrNull() ?: throw GeneralException()).also {
                 emit(it)
             }
         }

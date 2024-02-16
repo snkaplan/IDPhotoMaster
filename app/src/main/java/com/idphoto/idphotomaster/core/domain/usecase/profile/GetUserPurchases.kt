@@ -3,6 +3,7 @@ package com.idphoto.idphotomaster.core.domain.usecase.profile
 import android.content.Context
 import com.idphoto.idphotomaster.core.common.Constants.CachedFileName
 import com.idphoto.idphotomaster.core.data.repository.OrdersRepository
+import com.idphoto.idphotomaster.core.domain.exceptions.GeneralException
 import com.idphoto.idphotomaster.core.domain.model.Purchase
 import com.idphoto.idphotomaster.core.domain.model.UserSavedPhoto
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -26,7 +27,7 @@ class GetUserPurchases @Inject constructor(
                 val files = getCachedPhotos()
                 val result = purchases.await()
                 val filesResponse = files.await()
-                (result.getOrNull() ?: throw IllegalArgumentException("error message")).also {
+                (result.getOrNull() ?: throw GeneralException()).also {
                     val list = mutableListOf<UserSavedPhoto>()
                     it.forEach { item ->
                         item.data?.let { safeData ->

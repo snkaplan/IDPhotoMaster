@@ -49,6 +49,7 @@ import com.idphoto.idphotomaster.app.handler.BackHandler
 import com.idphoto.idphotomaster.core.systemdesign.components.AppScaffold
 import com.idphoto.idphotomaster.core.systemdesign.components.AppTopBar
 import com.idphoto.idphotomaster.core.systemdesign.components.DrawLineWithDot
+import com.idphoto.idphotomaster.core.systemdesign.components.ErrorDialog
 import com.idphoto.idphotomaster.core.systemdesign.components.LoadingView
 import com.idphoto.idphotomaster.core.systemdesign.components.PhotoView
 import com.idphoto.idphotomaster.core.systemdesign.components.ScreenButton
@@ -131,6 +132,15 @@ fun BasketScreen(
         googlePurchaseViewModel.checkProducts()
     }
     DisableScreenshot(activity)
+    ErrorDialog(
+        exception = viewState.exception,
+        onDismissRequest = {
+            viewModel.onErrorDialogDismiss()
+        },
+        onButtonClick = {
+            viewModel.onErrorDialogDismiss()
+        },
+    )
     viewState.photo?.let {
         ScreenContent(
             viewState = viewState,

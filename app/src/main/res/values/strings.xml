@@ -58,4 +58,8 @@
     <string name="logout">Çıkış Yap</string>
     <string name="or">ya da</string>
     <string name="sign_in_with_google">Google ile giriş yap</string>
+    <string name="network_exception_title">Bağlantı hatası</string>
+    <string name="network_exception_description">İnternet bağlantınızda bir sorun tespit ettik.\nLütfen ayarlarınızı kontrol edin ve tekrar bağlanmayı deneyin.</string>
+    <string name="close">Kapat</string>
+    <string name="retry">Tekrar Dene</string>
 </resources>

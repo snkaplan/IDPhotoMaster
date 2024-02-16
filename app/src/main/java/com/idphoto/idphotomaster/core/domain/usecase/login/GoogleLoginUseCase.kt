@@ -1,6 +1,7 @@
 package com.idphoto.idphotomaster.core.domain.usecase.login
 
 import com.idphoto.idphotomaster.core.data.repository.UserRepository
+import com.idphoto.idphotomaster.core.domain.exceptions.GeneralException
 import com.idphoto.idphotomaster.core.domain.model.LoginResult
 import com.idphoto.idphotomaster.core.domain.model.User
 import kotlinx.coroutines.flow.Flow
@@ -22,11 +23,11 @@ class GoogleLoginUseCase @Inject constructor(private val userRepository: UserRep
                         mail = user?.email.orEmpty()
                     )
                 )
-                (user ?: throw IllegalArgumentException("error message")).also {
+                (user ?: throw GeneralException()).also {
                     emit(LoginResult(user.uid, user.uid))
                 }
             } else {
-                throw IllegalArgumentException("error message")
+                throw GeneralException()
             }
         }
     }

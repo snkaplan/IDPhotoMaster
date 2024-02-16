@@ -1,6 +1,7 @@
 package com.idphoto.idphotomaster.core.domain.usecase.login
 
 import com.idphoto.idphotomaster.core.data.repository.UserRepository
+import com.idphoto.idphotomaster.core.domain.exceptions.GeneralException
 import com.idphoto.idphotomaster.core.domain.model.User
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -24,11 +25,11 @@ class SignupUseCase @Inject constructor(private val userRepository: UserReposito
                         mail = mail
                     )
                 )
-                (create.getOrNull() ?: throw IllegalArgumentException("error message")).also {
+                (create.getOrNull() ?: throw GeneralException()).also {
                     emit(it)
                 }
             } else {
-                throw IllegalArgumentException("error message")
+                throw GeneralException()
             }
         }
     }

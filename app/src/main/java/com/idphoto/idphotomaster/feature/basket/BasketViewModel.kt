@@ -11,6 +11,7 @@ import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
 import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
 import com.idphoto.idphotomaster.core.common.safeLet
 import com.idphoto.idphotomaster.core.data.repository.UserRepository
+import com.idphoto.idphotomaster.core.domain.model.base.ExceptionModel
 import com.idphoto.idphotomaster.core.domain.usecase.basket.StartPurchaseUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromDevice
 import com.idphoto.idphotomaster.core.domain.usecase.home.SavePhotoToGalleryUseCase
@@ -18,6 +19,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.palm.composestateevents.StateEvent
 import de.palm.composestateevents.consumed
 import de.palm.composestateevents.triggered
+import getExceptionModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -51,7 +53,7 @@ class BasketViewModel @Inject constructor(
                         }
 
                         is Resource.Error -> {
-                            updateState { copy(loading = false) }
+                            updateState { copy(loading = false, exception = result.exception?.getExceptionModel()) }
                         }
 
                         is Resource.Success -> {
@@ -86,7 +88,7 @@ class BasketViewModel @Inject constructor(
                 savePhotoToGalleryUseCase(capturePhotoBitmap = it).asResource().onEach { result ->
                     when (result) {
                         is Resource.Error -> {
-                            updateState { copy(loading = false) }
+                            updateState { copy(loading = false, exception = result.exception?.getExceptionModel()) }
                         }
 
                         Resource.Loading -> {
@@ -112,7 +114,7 @@ class BasketViewModel @Inject constructor(
                 startPurchaseUseCase(uid, UUID.randomUUID().toString(), photo).asResource().onEach { result ->
                     when (result) {
                         is Resource.Error -> {
-                            updateState { copy(loading = false) }
+                            updateState { copy(loading = false, exception = result.exception?.getExceptionModel()) }
                         }
 
                         Resource.Loading -> {
@@ -139,6 +141,10 @@ class BasketViewModel @Inject constructor(
     fun onPurchaseCompletedConsumed() {
         updateState { copy(purchaseCompleted = consumed) }
     }
+
+    fun onErrorDialogDismiss() {
+        updateState { copy(exception = null) }
+    }
 }
 
 data class BasketViewState(
@@ -146,5 +152,6 @@ data class BasketViewState(
     val photo: Bitmap? = null,
     val navigateToLogin: StateEvent = consumed,
     val startGooglePurchase: StateEvent = consumed,
-    val purchaseCompleted: StateEvent = consumed
+    val purchaseCompleted: StateEvent = consumed,
+    val exception: ExceptionModel? = null,
 ) : IViewState

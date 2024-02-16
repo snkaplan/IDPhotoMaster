@@ -1,20 +1,27 @@
 package com.idphoto.idphotomaster.core.common
 
 import com.google.android.gms.tasks.Task
+import com.idphoto.idphotomaster.core.data.util.NetworkMonitor
+import com.idphoto.idphotomaster.core.domain.exceptions.NetworkException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resumeWithException
 
 @OptIn(ExperimentalCoroutinesApi::class)
-suspend fun <T> Task<T>.await(): T {
-    return suspendCancellableCoroutine { cont ->
-        addOnCompleteListener {
-            if (it.exception != null) {
-                cont.resumeWithException(it.exception!!)
-            } else {
-                cont.resume(it.result, null)
+suspend fun <T> Task<T>.await(networkMonitor: NetworkMonitor): T {
+    if (networkMonitor.isOnline.first()) {
+        return suspendCancellableCoroutine { cont ->
+            addOnCompleteListener {
+                if (it.exception != null) {
+                    cont.resumeWithException(it.exception!!)
+                } else {
+                    cont.resume(it.result, null)
+                }
             }
         }
+    } else {
+        throw NetworkException()
     }
 }
 

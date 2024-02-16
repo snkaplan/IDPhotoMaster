@@ -3,9 +3,13 @@ package com.idphoto.idphotomaster.core.data.datasource.remote
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.remoteconfig.remoteConfigSettings
 import com.idphoto.idphotomaster.core.common.await
+import com.idphoto.idphotomaster.core.data.util.NetworkMonitor
 import javax.inject.Inject
 
-class ConfigRemoteDataSourceImpl @Inject constructor(private val config: FirebaseRemoteConfig) :
+class ConfigRemoteDataSourceImpl @Inject constructor(
+    private val config: FirebaseRemoteConfig,
+    private val networkMonitor: NetworkMonitor
+) :
     ConfigRemoteDataSource {
     override suspend fun getConfig(): Result<FirebaseRemoteConfig> {
         return runCatching {
@@ -13,7 +17,7 @@ class ConfigRemoteDataSourceImpl @Inject constructor(private val config: Firebas
                 minimumFetchIntervalInSeconds = 60
             }
             config.setConfigSettingsAsync(configSettings)
-            config.fetchAndActivate().await()
+            config.fetchAndActivate().await(networkMonitor)
             config
         }
     }

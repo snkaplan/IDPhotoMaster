@@ -59,4 +59,8 @@
     <string name="logout">Log Out</string>
     <string name="or">or</string>
     <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="network_exception_title">Connection Error</string>
+    <string name="network_exception_description">We have detected a problem with your internet connection.\nPlease check your settings and try reconnecting.</string>
+    <string name="close">Close</string>
+    <string name="retry">Try Again</string>
 </resources>

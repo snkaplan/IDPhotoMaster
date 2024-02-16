@@ -2,6 +2,7 @@ package com.idphoto.idphotomaster.core.domain.usecase.basket
 
 import android.graphics.Bitmap
 import com.idphoto.idphotomaster.core.data.repository.BasketRepository
+import com.idphoto.idphotomaster.core.domain.exceptions.GeneralException
 import com.idphoto.idphotomaster.core.domain.model.Purchase
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -19,11 +20,11 @@ class StartPurchaseUseCase @Inject constructor(private val basketRepository: Bas
             if (upload.isSuccess) {
                 val result =
                     basketRepository.purchase(userId, Purchase(userId, purchaseId, upload.getOrNull().toString()))
-                (result.getOrNull() ?: throw IllegalArgumentException("error message")).also {
+                (result.getOrNull() ?: throw GeneralException()).also {
                     emit(it)
                 }
             } else {
-                throw IllegalArgumentException("error message")
+                throw GeneralException()
             }
         }
     }
