@@ -11,10 +11,9 @@ class OrdersRemoteDataSourceImpl @Inject constructor(
 ) : OrdersRemoteDataSource {
     override suspend fun getUserPurchases(uid: String): Result<List<DocumentSnapshot>> {
         return runCatching {
-            val result = firebaseFirestore.collection(Constants.PURCHASE_TABLE_NAME)
-                .whereEqualTo("user_id", uid).get().await()
+            val result = firebaseFirestore.collection(Constants.USERS_TABLE_NAME).document(uid)
+                .collection(Constants.PURCHASE_TABLE_NAME).get().await()
             result.documents
         }
-
     }
 }

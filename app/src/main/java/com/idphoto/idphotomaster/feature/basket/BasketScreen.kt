@@ -111,6 +111,7 @@ fun BasketScreen(
                 message = context.getString(R.string.purchase_failed_description),
                 confirmText = context.getString(R.string.ok)
             )
+            viewModel.rollbackPurchase()
         }
     )
     EventEffect(
@@ -122,6 +123,7 @@ fun BasketScreen(
                 message = context.getString(R.string.purchase_user_cancelled_description),
                 confirmText = context.getString(R.string.ok)
             )
+            viewModel.rollbackPurchase()
         }
     )
     LaunchedEffect(key1 = true) {

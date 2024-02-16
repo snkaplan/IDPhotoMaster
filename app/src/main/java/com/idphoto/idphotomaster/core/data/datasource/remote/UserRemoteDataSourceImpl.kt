@@ -4,10 +4,9 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.firestore.FirebaseFirestore
+import com.idphoto.idphotomaster.core.common.Constants.USERS_TABLE_NAME
 import com.idphoto.idphotomaster.core.common.await
 import javax.inject.Inject
-
-private const val USERS_TABLE_NAME = "users"
 
 class UserRemoteDataSourceImpl @Inject constructor(
     private val auth: FirebaseAuth,

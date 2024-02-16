@@ -7,8 +7,8 @@ import javax.inject.Inject
 
 class BasketRepositoryImpl @Inject constructor(private val basketRemoteDataSource: BasketRemoteDataSource) :
     BasketRepository {
-    override suspend fun purchase(purchase: Purchase): Result<Unit> {
-        return basketRemoteDataSource.purchase(purchase.toFirebaseMap())
+    override suspend fun purchase(uid: String, purchase: Purchase): Result<Unit> {
+        return basketRemoteDataSource.purchase(uid, purchase.toFirebaseMap())
     }
 
     override suspend fun uploadPhoto(fileName: String, image: ByteArray): Result<Uri> {

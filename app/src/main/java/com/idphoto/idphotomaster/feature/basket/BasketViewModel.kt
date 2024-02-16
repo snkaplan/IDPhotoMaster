@@ -11,7 +11,7 @@ import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
 import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
 import com.idphoto.idphotomaster.core.common.safeLet
 import com.idphoto.idphotomaster.core.data.repository.UserRepository
-import com.idphoto.idphotomaster.core.domain.usecase.basket.PurchaseSuccessUseCase
+import com.idphoto.idphotomaster.core.domain.usecase.basket.StartPurchaseUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromDevice
 import com.idphoto.idphotomaster.core.domain.usecase.home.SavePhotoToGalleryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -19,8 +19,6 @@ import de.palm.composestateevents.StateEvent
 import de.palm.composestateevents.consumed
 import de.palm.composestateevents.triggered
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -34,7 +32,7 @@ class BasketViewModel @Inject constructor(
     @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
     private val userRepository: UserRepository,
     private val savePhotoToGalleryUseCase: SavePhotoToGalleryUseCase,
-    private val purchaseSuccessUseCase: PurchaseSuccessUseCase
+    private val startPurchaseUseCase: StartPurchaseUseCase
 ) : BaseViewModel<BasketViewState>() {
     private val photoArgs: BasketArgs = BasketArgs(savedStateHandle)
     override fun createInitialState(): BasketViewState = BasketViewState()
@@ -74,32 +72,58 @@ class BasketViewModel @Inject constructor(
         if (userRepository.currentUser == null) {
             updateState { copy(navigateToLogin = triggered) }
         } else {
-            updateState { copy(startGooglePurchase = triggered) }
+            startPurchase()
         }
     }
 
     fun purchaseSuccess() {
+        savePhotoToGallery()
+    }
+
+    private fun savePhotoToGallery() {
         viewModelScope.launch {
-            updateState { copy(loading = true) }
-            val savePhotoToGallery = async { savePhotoToGallery() }
-            val purchaseComplete = async { purchaseComplete() }
-            awaitAll(savePhotoToGallery, purchaseComplete)
-            updateState { copy(loading = false, purchaseCompleted = triggered) }
+            uiState.value.photo?.let {
+                savePhotoToGalleryUseCase(capturePhotoBitmap = it).asResource().onEach { result ->
+                    when (result) {
+                        is Resource.Error -> {
+                            updateState { copy(loading = false) }
+                        }
+
+                        Resource.Loading -> {
+                            updateState { copy(loading = true) }
+                        }
+
+                        is Resource.Success -> {
+                            updateState { copy(loading = false, purchaseCompleted = triggered) }
+                        }
+                    }
+                }.launchIn(this)
+            }
         }
     }
 
-    private suspend fun savePhotoToGallery() {
-        uiState.value.photo?.let {
-            savePhotoToGalleryUseCase(capturePhotoBitmap = it).asResource().launchIn(viewModelScope).join()
-        }
+    fun rollbackPurchase() {
+        // DELETE Purchase when user cancelled
     }
 
-    private suspend fun purchaseComplete() {
-        uiState.value.photo?.let {
+    private fun startPurchase() {
+        viewModelScope.launch {
             safeLet(userRepository.currentUser?.uid, uiState.value.photo) { uid, photo ->
-                purchaseSuccessUseCase(
-                    uid, UUID.randomUUID().toString(), photo
-                ).asResource().launchIn(viewModelScope).join()
+                startPurchaseUseCase(uid, UUID.randomUUID().toString(), photo).asResource().onEach { result ->
+                    when (result) {
+                        is Resource.Error -> {
+                            updateState { copy(loading = false) }
+                        }
+
+                        Resource.Loading -> {
+                            updateState { copy(loading = true) }
+                        }
+
+                        is Resource.Success -> {
+                            updateState { copy(loading = false, startGooglePurchase = triggered) }
+                        }
+                    }
+                }.launchIn(this)
             }
         }
     }

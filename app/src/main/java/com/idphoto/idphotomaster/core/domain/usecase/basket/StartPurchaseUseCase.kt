@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.flow
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
-class PurchaseSuccessUseCase @Inject constructor(private val basketRepository: BasketRepository) {
+class StartPurchaseUseCase @Inject constructor(private val basketRepository: BasketRepository) {
     operator fun invoke(userId: String, purchaseId: String, image: Bitmap): Flow<Unit> {
         return flow {
             val stream = ByteArrayOutputStream()
@@ -17,7 +17,8 @@ class PurchaseSuccessUseCase @Inject constructor(private val basketRepository: B
             val filename = "$userId-$purchaseId.png"
             val upload = basketRepository.uploadPhoto(filename, data)
             if (upload.isSuccess) {
-                val result = basketRepository.purchase(Purchase(userId, purchaseId, upload.getOrNull().toString()))
+                val result =
+                    basketRepository.purchase(userId, Purchase(userId, purchaseId, upload.getOrNull().toString()))
                 (result.getOrNull() ?: throw IllegalArgumentException("error message")).also {
                     emit(it)
                 }
