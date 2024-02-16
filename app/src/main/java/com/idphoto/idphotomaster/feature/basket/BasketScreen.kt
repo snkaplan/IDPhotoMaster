@@ -71,8 +71,13 @@ fun BasketScreen(
     mainViewModel: MainViewModel
 ) {
     val viewState by viewModel.uiState.collectAsStateWithLifecycle()
+    val googleViewState by googlePurchaseViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val activity = context.findActivity()
+    LaunchedEffect(key1 = true) {
+        googlePurchaseViewModel.billingSetup(context)
+        googlePurchaseViewModel.checkProducts()
+    }
     NavigationEventEffect(
         event = viewState.navigateToLogin,
         onConsumed = viewModel::onNavigateToLoginConsumed,
@@ -99,14 +104,15 @@ fun BasketScreen(
         }
     )
     EventEffect(
-        event = googlePurchaseViewModel.uiState.value.purchaseSuccess,
+        event = googleViewState.purchaseSuccess,
         onConsumed = googlePurchaseViewModel::onPurchaseSuccessConsumed,
         action = { viewModel.purchaseSuccess() }
     )
     EventEffect(
-        event = googlePurchaseViewModel.uiState.value.purchaseFailed,
+        event = googleViewState.purchaseFailed,
         onConsumed = googlePurchaseViewModel::onPurchaseFailedConsumed,
         action = {
+            println("PurchaseTest show custom dialog!!")
             mainViewModel.showCustomDialog(
                 title = context.getString(R.string.exception_title),
                 message = context.getString(R.string.purchase_failed_description),
@@ -116,9 +122,10 @@ fun BasketScreen(
         }
     )
     EventEffect(
-        event = googlePurchaseViewModel.uiState.value.userCancelledPurchase,
+        event = googleViewState.userCancelledPurchase,
         onConsumed = googlePurchaseViewModel::onUserCancelledPurchaseConsumed,
         action = {
+            println("PurchaseTest cancelled show custom dialog!!")
             mainViewModel.showCustomDialog(
                 title = context.getString(R.string.exception_title),
                 message = context.getString(R.string.purchase_user_cancelled_description),
@@ -127,10 +134,6 @@ fun BasketScreen(
             viewModel.rollbackPurchase()
         }
     )
-    LaunchedEffect(key1 = true) {
-        googlePurchaseViewModel.billingSetup(context)
-        googlePurchaseViewModel.checkProducts()
-    }
     DisableScreenshot(activity)
     ErrorDialog(
         exception = viewState.exception,
