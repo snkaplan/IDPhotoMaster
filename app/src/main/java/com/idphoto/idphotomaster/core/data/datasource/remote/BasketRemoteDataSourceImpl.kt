@@ -38,8 +38,8 @@ class BasketRemoteDataSourceImpl @Inject constructor(
         return runCatching {
             val storageRef = firebaseStorage.reference.child(IMAGES_FOLDER).child(id)
             firebaseFirestore.collection(USERS_TABLE_NAME).document(userId).collection(PURCHASE_TABLE_NAME).document(id)
-                .delete()
-            storageRef.delete()
+                .delete().await(networkMonitor)
+            storageRef.delete().await(networkMonitor)
         }
     }
 }
