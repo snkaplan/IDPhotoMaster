@@ -18,6 +18,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -31,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomStart
+import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
@@ -40,10 +43,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -52,6 +55,7 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.common.extension.rotateBitmap
 import com.idphoto.idphotomaster.core.systemdesign.components.AppScaffold
 import com.idphoto.idphotomaster.core.systemdesign.components.ErrorDialog
@@ -130,32 +134,24 @@ private fun CameraContent(
                 height = 472.dp,
                 offsetY = 150.dp
             )
-            val currentDensity = LocalDensity.current
-            val configuration = LocalConfiguration.current
+            Image(
+                painter = painterResource(id = R.drawable.ic_camera_overlay),
+                contentDescription = "",
+                modifier = Modifier
+                    .align(Center)
+                    .fillMaxWidth()
+                    .height(472.dp)
+            )
             Surface(
                 shape = CircleShape, modifier = Modifier
                     .padding(20.dp)
                     .size(60.dp)
                     .align(Alignment.BottomCenter)
                     .clickable {
-                        val offsetInPx: Float
-                        val widthInPx: Float
-                        val heightInPx: Float
-                        val width: Float
-                        with(currentDensity) {
-                            offsetInPx = 150.dp.toPx()
-                            widthInPx = 354.dp.toPx()
-                            heightInPx = 472.dp.toPx()
-                            width = configuration.screenWidthDp.dp.toPx()
-                        }
                         capturePhoto(
                             context,
                             cameraController,
                             onPhotoCaptured,
-                            cropX = (width - widthInPx).toInt() / 2,
-                            cropY = offsetInPx.toInt(),
-                            cropWidth = widthInPx.toInt(),
-                            cropHeight = heightInPx.toInt()
                         )
                     }, color = Color.White
             ) {
@@ -179,8 +175,7 @@ private fun CameraContent(
 private fun capturePhoto(
     context: Context,
     cameraController: LifecycleCameraController,
-    onPhotoCaptured: (Bitmap) -> Unit,
-    cropX: Int, cropY: Int, cropWidth: Int, cropHeight: Int
+    onPhotoCaptured: (Bitmap) -> Unit
 ) {
     val mainExecutor: Executor = ContextCompat.getMainExecutor(context)
     cameraController.takePicture(mainExecutor, object : ImageCapture.OnImageCapturedCallback() {
@@ -189,13 +184,6 @@ private fun capturePhoto(
             val correctedBitmap: Bitmap = image
                 .toBitmap()
                 .rotateBitmap(image.imageInfo.rotationDegrees)
-            val croppedBitmap = Bitmap.createBitmap(
-                correctedBitmap,
-                cropX,
-                cropY,
-                cropWidth,
-                cropHeight
-            )
             cameraController.unbind()
             onPhotoCaptured(correctedBitmap)
             image.close()
