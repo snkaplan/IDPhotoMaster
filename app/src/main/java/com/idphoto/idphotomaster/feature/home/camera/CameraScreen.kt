@@ -88,7 +88,7 @@ fun CameraScreen(
         onDismissRequest = {
             viewModel.onErrorDialogDismiss()
         },
-        onButtonClick = {
+        onPrimaryButtonClick = {
             viewModel.onErrorDialogDismiss()
         },
     )

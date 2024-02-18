@@ -76,7 +76,7 @@ fun LoginScreen(
         onDismissRequest = {
             viewModel.onErrorDialogDismiss()
         },
-        onButtonClick = {
+        onPrimaryButtonClick = {
             viewModel.onErrorDialogDismiss()
         },
     )

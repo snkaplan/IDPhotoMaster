@@ -22,6 +22,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
+import androidx.compose.material.icons.filled.DoneAll
+import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -98,6 +100,7 @@ fun BasketScreen(
                 title = context.getString(R.string.purchase_success_description),
                 message = context.getString(R.string.purchase_success_title),
                 confirmText = context.getString(R.string.ok),
+                icon = Icons.Default.DoneAll,
                 confirmCallback = { onCompletePurchase.invoke() },
                 onDismissCallback = { onCompletePurchase.invoke() }
             )
@@ -112,10 +115,10 @@ fun BasketScreen(
         event = googleViewState.purchaseFailed,
         onConsumed = googlePurchaseViewModel::onPurchaseFailedConsumed,
         action = {
-            println("PurchaseTest show custom dialog!!")
             mainViewModel.showCustomDialog(
                 title = context.getString(R.string.exception_title),
                 message = context.getString(R.string.purchase_failed_description),
+                icon = Icons.Default.WarningAmber,
                 confirmText = context.getString(R.string.ok)
             )
             viewModel.rollbackPurchase()
@@ -125,10 +128,10 @@ fun BasketScreen(
         event = googleViewState.userCancelledPurchase,
         onConsumed = googlePurchaseViewModel::onUserCancelledPurchaseConsumed,
         action = {
-            println("PurchaseTest cancelled show custom dialog!!")
             mainViewModel.showCustomDialog(
                 title = context.getString(R.string.exception_title),
                 message = context.getString(R.string.purchase_user_cancelled_description),
+                icon = Icons.Default.WarningAmber,
                 confirmText = context.getString(R.string.ok)
             )
             viewModel.rollbackPurchase()
@@ -140,7 +143,7 @@ fun BasketScreen(
         onDismissRequest = {
             viewModel.onErrorDialogDismiss()
         },
-        onButtonClick = {
+        onPrimaryButtonClick = {
             viewModel.onErrorDialogDismiss()
         },
     )

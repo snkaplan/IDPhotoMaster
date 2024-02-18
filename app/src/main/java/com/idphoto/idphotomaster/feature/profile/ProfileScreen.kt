@@ -73,7 +73,7 @@ fun ProfileScreen(
         onDismissRequest = {
             viewModel.onErrorDialogDismiss()
         },
-        onButtonClick = {
+        onPrimaryButtonClick = {
             viewModel.onErrorDialogDismiss()
         },
     )

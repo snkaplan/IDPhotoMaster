@@ -89,7 +89,7 @@ fun EditPhotoScreen(
         onDismissRequest = {
             viewModel.onErrorDialogDismiss()
         },
-        onButtonClick = {
+        onPrimaryButtonClick = {
             viewModel.onErrorDialogDismiss()
         },
     )

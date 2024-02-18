@@ -18,8 +18,8 @@ import com.idphoto.idphotomaster.core.common.Constants
 import com.idphoto.idphotomaster.core.common.Constants.KEY_TEMP_FILE_START_PREFIX
 import com.idphoto.idphotomaster.core.data.util.NetworkMonitor
 import com.idphoto.idphotomaster.core.data.worker.DeleteTempFilesWorker
-import com.idphoto.idphotomaster.core.systemdesign.components.CustomDialog
-import com.idphoto.idphotomaster.core.systemdesign.components.DialogItem
+import com.idphoto.idphotomaster.core.domain.model.base.DialogModel
+import com.idphoto.idphotomaster.core.systemdesign.components.Dialog
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.IDPhotoMasterTheme
 import dagger.hilt.android.AndroidEntryPoint
 import de.palm.composestateevents.EventEffect
@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         deleteTempFiles()
         setContent {
-            val dialogItem = remember { mutableStateOf<DialogItem?>(null) }
+            val dialogItem = remember { mutableStateOf<DialogModel?>(null) }
             val mainState by viewModel.uiState.collectAsStateWithLifecycle()
             EventEffect(
                 event = mainState.showDialogEvent,
@@ -46,8 +46,21 @@ class MainActivity : ComponentActivity() {
                 }
             )
             IDPhotoMasterTheme {
-                if (dialogItem.value != null) {
-                    CustomDialog(dialogItem = dialogItem)
+                dialogItem.value?.let { safeItem ->
+                    Dialog(
+                        title = safeItem.title,
+                        description = safeItem.description,
+                        primaryButtonText = safeItem.confirmText,
+                        secondaryButtonText = safeItem.dismissText,
+                        primaryButtonClick = {
+                            safeItem.confirmCallback?.invoke()
+                            dialogItem.value = null
+                        },
+                        onDismissRequest = {
+                            safeItem.onDismissCallback?.invoke()
+                            dialogItem.value = null
+                        }
+                    )
                 }
                 AppWrapper(networkMonitor = networkMonitor, mainViewModel = viewModel)
             }

@@ -20,7 +20,7 @@ fun Throwable?.getExceptionModel(
             titleResId = R.string.network_exception_title,
             descriptionResId = R.string.network_exception_description,
             primaryButtonTextResId = R.string.retry,
-            secondButtonTextResId = R.string.close,
+            secondaryButtonTextResId = R.string.close,
             exceptionType = ExceptionType.NETWORK
         ).apply {
             icon = this.getIcon()
@@ -33,8 +33,8 @@ fun Throwable?.getExceptionModel(
             descriptionResId = descriptionResId,
             primaryButtonText = primaryButtonText,
             primaryButtonTextResId = primaryButtonTextResId,
-            secondButtonText = secondButtonText,
-            secondButtonTextResId = secondButtonTextResId,
+            secondaryButtonText = secondButtonText,
+            secondaryButtonTextResId = secondButtonTextResId,
             exceptionType = ExceptionType.GENERAL
         ).apply { icon = this.getIcon() }
     }
