@@ -12,4 +12,5 @@ interface UserRepository {
     suspend fun signOut(): Result<Unit>
     suspend fun getUser(uid: String): Result<Map<String, Any?>>
     suspend fun deleteUser(): Result<Unit>
+    suspend fun forgotPassword(email: String): Result<Unit>
 }

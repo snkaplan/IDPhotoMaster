@@ -1,9 +1,10 @@
 package com.idphoto.idphotomaster.core.domain.model.base
 
 import androidx.annotation.StringRes
+import androidx.compose.ui.graphics.vector.ImageVector
 
 data class ExceptionModel(
-    var icon: Any? = null,
+    var icon: ImageVector? = null,
     var title: String? = null,
     var description: String? = null,
     var primaryButtonText: String? = null,

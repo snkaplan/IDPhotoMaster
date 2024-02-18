@@ -3,6 +3,7 @@ package com.idphoto.idphotomaster.feature.login.contents
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -36,6 +37,7 @@ fun SignupScreenContent(
         UserInputTextField(
             value = viewState.name,
             errorMessageRes = viewState.nameErrorMessage,
+            modifier = Modifier.padding(horizontal = 16.dp),
             onValueChange = onNameValeChange,
             placeholder = R.string.name,
             enabled = viewState.loading.not(),
@@ -44,6 +46,7 @@ fun SignupScreenContent(
         UserInputTextField(
             value = viewState.lastName,
             errorMessageRes = viewState.lastNameErrorMessage,
+            modifier = Modifier.padding(horizontal = 16.dp),
             onValueChange = onLastnameValueChange,
             placeholder = R.string.surname,
             enabled = viewState.loading.not(),
@@ -52,6 +55,7 @@ fun SignupScreenContent(
         UserInputTextField(
             value = viewState.mail,
             errorMessageRes = viewState.mailErrorMessage,
+            modifier = Modifier.padding(horizontal = 16.dp),
             onValueChange = onMailValueChange,
             placeholder = R.string.mail_hint,
             enabled = viewState.loading.not(),

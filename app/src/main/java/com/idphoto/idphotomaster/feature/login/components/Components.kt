@@ -58,8 +58,7 @@ fun UserInputTextField(
 ) {
     CustomTextField(
         modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .fillMaxWidth(),
         value = value,
         onValueChange = onValueChange,
         isError = errorMessageRes != null,

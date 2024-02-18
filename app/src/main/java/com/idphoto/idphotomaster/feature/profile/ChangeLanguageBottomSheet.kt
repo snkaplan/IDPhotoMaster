@@ -2,19 +2,15 @@ package com.idphoto.idphotomaster.feature.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
@@ -56,25 +52,11 @@ fun ChangeLanguageBottomSheet(
                 .background(color = BackgroundColor)
                 .padding(horizontal = 24.dp, vertical = 12.dp),
         ) {
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = stringResource(id = R.string.change_language),
-                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Medium),
-                    color = Color.Black
-                )
-                Icon(
-                    modifier = Modifier.clickable {
-                        onDismissRequest.invoke()
-                    },
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Close"
-                )
-            }
+            Text(
+                text = stringResource(id = R.string.change_language),
+                style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Medium),
+                color = Color.Black
+            )
             Column {
                 options?.forEach { option ->
                     LanguageItem(
@@ -90,7 +72,7 @@ fun ChangeLanguageBottomSheet(
                     colors = ButtonDefaults.buttonColors(containerColor = Blue),
                     onClick = { onConfirm.invoke(selectedOptionCode) }) {
                     Text(
-                        text = "Confirm",
+                        text = stringResource(id = R.string.confirm),
                         style = MaterialTheme.typography.labelLarge,
                         modifier = Modifier.padding(vertical = 10.dp)
                     )

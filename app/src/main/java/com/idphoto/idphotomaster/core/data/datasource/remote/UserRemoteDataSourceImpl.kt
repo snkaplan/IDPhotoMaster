@@ -60,6 +60,13 @@ class UserRemoteDataSourceImpl @Inject constructor(
         }
     }
 
+    override suspend fun forgotPassword(email: String): Result<Unit> {
+        return runCatching {
+            println("Send password mail $email")
+            auth.sendPasswordResetEmail(email)
+        }
+    }
+
     override suspend fun signOut(): Result<Unit> {
         return runCatching {
             auth.signOut()

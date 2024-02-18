@@ -12,6 +12,7 @@ import com.idphoto.idphotomaster.core.domain.exceptions.NameRequiredException
 import com.idphoto.idphotomaster.core.domain.exceptions.PasswordLengthException
 import com.idphoto.idphotomaster.core.domain.exceptions.PasswordRequiredException
 import com.idphoto.idphotomaster.core.domain.model.base.ExceptionModel
+import com.idphoto.idphotomaster.core.domain.usecase.login.ForgotPasswordUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.login.GoogleLoginUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.login.LoginUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.login.SignupUseCase
@@ -32,6 +33,7 @@ class LoginViewModel @Inject constructor(
     private val loginUseCase: LoginUseCase,
     private val googleLoginUseCase: GoogleLoginUseCase,
     private val signupUseCase: SignupUseCase,
+    private val forgotPasswordUseCase: ForgotPasswordUseCase,
     private val validateAuthUseCase: ValidateAuthUseCase,
     private val validateSignupUseCase: ValidateSignupUseCase
 ) : BaseViewModel<LoginViewState>() {
@@ -261,6 +263,39 @@ class LoginViewModel @Inject constructor(
     fun onErrorDialogDismiss() {
         updateState { copy(exception = null) }
     }
+
+    fun onResetPasswordMailConsumed() {
+        updateState { copy(passwordResetMailSent = consumed) }
+    }
+
+    fun onSendResetPasswordMail(mail: String) {
+        viewModelScope.launch {
+            forgotPasswordUseCase.invoke(mail).asResource().onEach { result ->
+                when (result) {
+                    Resource.Loading -> {
+                        updateState { copy(loading = true) }
+                    }
+
+                    is Resource.Error -> {
+                        updateState {
+                            copy(
+                                loading = false, exception = result.exception?.getExceptionModel(
+                                    descriptionResId = R.string.exception_send_password_reset_email,
+                                    primaryButtonTextResId = null
+                                )
+                            )
+                        }
+                    }
+
+                    is Resource.Success -> {
+                        updateState {
+                            copy(loading = false, passwordResetMailSent = triggered)
+                        }
+                    }
+                }
+            }.launchIn(this)
+        }
+    }
 }
 
 data class LoginViewState(
@@ -275,6 +310,7 @@ data class LoginViewState(
     val lastNameErrorMessage: Int? = null,
     val pageState: PageState = PageState.LOGIN,
     val loginSuccessful: StateEvent = consumed,
+    val passwordResetMailSent: StateEvent = consumed,
     val exception: ExceptionModel? = null
 ) : IViewState
 

@@ -25,6 +25,7 @@ fun ErrorDialog(
                 ?: exception.primaryButtonText.orEmpty(),
             secondaryButtonText = exception.secondaryButtonTextResId?.let { stringResource(id = it) }
                 ?: exception.secondaryButtonText.orEmpty(),
+            icon = exception.icon,
             primaryButtonClick = onPrimaryButtonClick,
             secondaryButtonClick = onSecondaryButtonSecondClick,
             onDismissRequest = onDismissRequest

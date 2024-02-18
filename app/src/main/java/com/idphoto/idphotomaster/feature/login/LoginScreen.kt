@@ -90,7 +90,9 @@ fun LoginScreen(
         onLastnameValueChange = viewModel::onLastnameChange,
         onAction = if (viewState.pageState == PageState.LOGIN) viewModel::onLoginClick else viewModel::onSignupClick,
         onCloseClick = onCloseClick,
-        onGoogleSignInClicked = viewModel::loginWithGoogle
+        onGoogleSignInClicked = viewModel::loginWithGoogle,
+        onSendResetPasswordMail = viewModel::onSendResetPasswordMail,
+        onResetMailSentConsumed = viewModel::onResetPasswordMailConsumed
     )
 }
 
@@ -105,7 +107,9 @@ fun ScreenContent(
     onAction: () -> Unit,
     onCloseClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onGoogleSignInClicked: (String) -> Unit
+    onGoogleSignInClicked: (String) -> Unit,
+    onSendResetPasswordMail: (String) -> Unit,
+    onResetMailSentConsumed: () -> Unit
 ) {
     val titleTextId = remember { mutableIntStateOf(-1) }
     val descriptionTextId = remember { mutableIntStateOf(-1) }
@@ -185,7 +189,9 @@ fun ScreenContent(
                 LoginScreenContent(
                     viewState,
                     onMailValueChange,
-                    onPasswordValueChange
+                    onPasswordValueChange,
+                    onSendResetPasswordMail,
+                    onResetMailSentConsumed
                 )
             } else {
                 SignupScreenContent(

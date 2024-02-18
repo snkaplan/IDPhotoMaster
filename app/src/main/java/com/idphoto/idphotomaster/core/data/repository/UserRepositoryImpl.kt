@@ -43,4 +43,8 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun deleteUser(): Result<Unit> {
         return userRemoteDataSource.deleteUser()
     }
+
+    override suspend fun forgotPassword(email: String): Result<Unit> {
+        return userRemoteDataSource.forgotPassword(email)
+    }
 }

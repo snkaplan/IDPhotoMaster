@@ -52,9 +52,9 @@ fun Dialog(
     icon: ImageVector? = null,
     title: String,
     description: String,
-    primaryButtonText: String,
+    primaryButtonText: String?,
     secondaryButtonText: String? = null,
-    primaryButtonClick: () -> Unit,
+    primaryButtonClick: (() -> Unit)? = null,
     secondaryButtonClick: (() -> Unit)? = null,
     primaryButtonColor: Color = Blue,
     onDismissRequest: () -> Unit
@@ -144,9 +144,9 @@ private fun CloseButtonContainer(
 
 @Composable
 private fun ButtonContainer(
-    primaryButtonText: String,
+    primaryButtonText: String?,
     secondaryButtonText: String? = null,
-    onPrimaryButtonClick: () -> Unit,
+    onPrimaryButtonClick: (() -> Unit)? = null,
     onSecondaryButtonClick: (() -> Unit)? = null,
     primaryButtonColor: Color
 ) {
@@ -154,7 +154,7 @@ private fun ButtonContainer(
         modifier = Modifier
             .fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
     ) {
-        if (secondaryButtonText != null) {
+        secondaryButtonText.takeIf { it.isNullOrEmpty().not() }?.let { safeSecondaryButtonText ->
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -171,7 +171,7 @@ private fun ButtonContainer(
                 ),
                 content = {
                     Text(
-                        text = secondaryButtonText,
+                        text = safeSecondaryButtonText,
                         style = MaterialTheme.typography.bodyLarge.copy(
                             fontWeight = FontWeight.Medium,
                             fontSize = 10.sp
@@ -182,23 +182,27 @@ private fun ButtonContainer(
                 })
             Spacer(modifier = Modifier.width(8.dp))
         }
-
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(IntrinsicSize.Max)
-                .weight(1f),
-            colors = ButtonDefaults.buttonColors(containerColor = primaryButtonColor),
-            shape = MaterialTheme.shapes.small,
-            onClick = { onPrimaryButtonClick.invoke() },
-            content = {
-                Text(
-                    text = primaryButtonText,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium, fontSize = 10.sp),
-                    color = Color.White,
-                    textAlign = TextAlign.Center
-                )
-            })
+        primaryButtonText.takeIf { it.isNullOrEmpty().not() }?.let { safePrimaryButtonText ->
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Max)
+                    .weight(1f),
+                colors = ButtonDefaults.buttonColors(containerColor = primaryButtonColor),
+                shape = MaterialTheme.shapes.small,
+                onClick = { onPrimaryButtonClick?.invoke() },
+                content = {
+                    Text(
+                        text = safePrimaryButtonText,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 10.sp
+                        ),
+                        color = Color.White,
+                        textAlign = TextAlign.Center
+                    )
+                })
+        }
     }
 }
 

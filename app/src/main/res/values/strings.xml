@@ -74,8 +74,13 @@
     <string name="exception_login">Giriş yaparken sorun oluştu. Kullanıcı adı ve şifrenizi kontrol ediniz.</string>
     <string name="exception_delete_user">Kullanıcı silinirken hata oluştu daha sonra tekrar deneyiniz.</string>
     <string name="exception_delete_user_re_authenticate">Hesabını silmeden önce tekrar giriş yapmalısın.</string>
+    <string name="exception_send_password_reset_email">Şifre sıfırlama maili gönderilirken sorun oluştu.</string>
     <string name="delete_account">Hesabı Sil</string>
     <string name="delete_account_title">Emin misin ?</string>
     <string name="cancel">İptal</string>
     <string name="delete_account_description">Hesabın kalıcı olarak silinecek ve bu işlem geri alınamaz.</string>
+    <string name="reset_password_description">Şifre sıfırlama mailinin gönderileceği adresi giriniz.</string>
+    <string name="reset_password_sent">Şifre sıfırlama maili gönderildi. Mailinizi kontrol edin</string>
+    <string name="confirm">Onayla</string>
+    <string name="send">Gönder</string>
 </resources>

@@ -1,6 +1,8 @@
 package com.idphoto.idphotomaster.feature.login.contents
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -10,9 +12,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -26,15 +31,38 @@ import com.idphoto.idphotomaster.core.systemdesign.ui.theme.LightGrey
 import com.idphoto.idphotomaster.feature.login.LoginViewState
 import com.idphoto.idphotomaster.feature.login.components.PasswordTextField
 import com.idphoto.idphotomaster.feature.login.components.UserInputTextField
+import com.idphoto.idphotomaster.feature.profile.EnterEmailBottomSheet
+import de.palm.composestateevents.EventEffect
 
 @Composable
 fun LoginScreenContent(
     viewState: LoginViewState,
     onMailValueChange: (String) -> Unit,
-    onPasswordValueChange: (String) -> Unit
+    onPasswordValueChange: (String) -> Unit,
+    onSendResetPasswordMail: (String) -> Unit,
+    onResetMailSentConsumed: () -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
+    val showForgotPasswordBottomSheet = remember { mutableStateOf(false) }
+    EventEffect(
+        event = viewState.passwordResetMailSent,
+        onConsumed = onResetMailSentConsumed,
+        action = {
+            Toast.makeText(context, context.getString(R.string.mail_error), Toast.LENGTH_LONG).show()
+        }
+    )
+    if (showForgotPasswordBottomSheet.value) {
+        EnterEmailBottomSheet(
+            modifier = Modifier,
+            onDismissRequest = { showForgotPasswordBottomSheet.value = false },
+            onConfirm = {
+                showForgotPasswordBottomSheet.value = false
+                onSendResetPasswordMail.invoke(it)
+            }
+        )
+    }
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Spacer(modifier = Modifier.height(20.dp))
         Image(
@@ -47,6 +75,7 @@ fun LoginScreenContent(
         Spacer(modifier = Modifier.height(20.dp))
         UserInputTextField(
             value = viewState.mail,
+            modifier = Modifier.padding(horizontal = 16.dp),
             errorMessageRes = viewState.mailErrorMessage,
             onValueChange = onMailValueChange,
             placeholder = R.string.mail_hint,
@@ -68,7 +97,10 @@ fun LoginScreenContent(
             style = TextStyle(color = LightGrey, fontSize = 12.sp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 40.dp),
+                .padding(horizontal = 40.dp)
+                .clickable {
+                    showForgotPasswordBottomSheet.value = true
+                },
             textAlign = TextAlign.Start,
         )
     }
