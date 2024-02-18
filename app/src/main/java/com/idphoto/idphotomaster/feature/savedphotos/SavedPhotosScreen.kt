@@ -171,11 +171,12 @@ fun PhotoItem(
             .border(4.dp, BackgroundColor, RoundedCornerShape(10.dp))
             .padding(4.dp)
             .clickable {
-                if (savedPhoto.bought.not()) {
+                // TODO We removed this feature for now.
+                /* if (savedPhoto.bought.not()) {
                     onSavedPhotoClicked.invoke(savedPhoto.cdnUrl)
                 } else {
                     onBoughtPhotoClicked(context, savedPhoto.cdnUrl)
-                }
+                } */
             }
     ) {
         CoilImageComponent(imageUrl = savedPhoto.cdnUrl)
