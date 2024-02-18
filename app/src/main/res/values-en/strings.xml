@@ -73,4 +73,10 @@
     <string name="exception_login_google">There was a problem logging in with Google.</string>
     <string name="exception_signup">There was a problem signing up. Please check your information and make sure that there is no user registered with this email.</string>
     <string name="exception_login">There was a problem logging in. Please check your username and password.</string>
+    <string name="exception_delete_user">Something went wrong while deleting account. Try again later.</string>
+    <string name="exception_delete_user_re_authenticate">You have to re authenticate before delete account.</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="delete_account_title">Are you sure ?</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete_account_description">Your account will be permanently deleted, this process is irreversible.</string>
 </resources>

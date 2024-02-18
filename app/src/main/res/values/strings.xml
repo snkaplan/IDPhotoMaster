@@ -72,4 +72,10 @@
     <string name="exception_login_google">Google ile oturum açılırken sorun oluştu.</string>
     <string name="exception_signup">Kayıt olunurken sorun oluştu. Bilgileri kontrol ediniz. Bu mail ile kayıtlı kullanıcı olmadığından emin olunuz.</string>
     <string name="exception_login">Giriş yaparken sorun oluştu. Kullanıcı adı ve şifrenizi kontrol ediniz.</string>
+    <string name="exception_delete_user">Kullanıcı silinirken hata oluştu daha sonra tekrar deneyiniz.</string>
+    <string name="exception_delete_user_re_authenticate">Hesabını silmeden önce tekrar giriş yapmalısın.</string>
+    <string name="delete_account">Hesabı Sil</string>
+    <string name="delete_account_title">Emin misin ?</string>
+    <string name="cancel">İptal</string>
+    <string name="delete_account_description">Hesabın kalıcı olarak silinecek ve bu işlem geri alınamaz.</string>
 </resources>

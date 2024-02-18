@@ -19,6 +19,7 @@ import com.idphoto.idphotomaster.core.domain.model.InfoBottomSheetItem
 import com.idphoto.idphotomaster.core.domain.model.User
 import com.idphoto.idphotomaster.core.domain.model.base.ExceptionModel
 import com.idphoto.idphotomaster.core.domain.usecase.config.GetConfigUseCase
+import com.idphoto.idphotomaster.core.domain.usecase.profile.DeleteUserUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.profile.GetUserUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.profile.LogoutUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -34,7 +35,8 @@ class ProfileViewModel @Inject constructor(
     private val userRepository: UserRepository,
     private val getUserUseCase: GetUserUseCase,
     private val getConfigUseCase: GetConfigUseCase,
-    private val logoutUseCase: LogoutUseCase
+    private val logoutUseCase: LogoutUseCase,
+    private val deleteUserUseCase: DeleteUserUseCase
 ) : BaseViewModel<ProfileViewState>() {
     override fun createInitialState(): ProfileViewState = ProfileViewState()
 
@@ -138,6 +140,10 @@ class ProfileViewModel @Inject constructor(
                 ProfileViewTriggeredEvent.Logout -> {
                     logout()
                 }
+
+                ProfileViewTriggeredEvent.DeleteAccountConfirmed -> {
+                    deleteAccount()
+                }
             }
         }
     }
@@ -147,6 +153,32 @@ class ProfileViewModel @Inject constructor(
             context.getSystemService(LocaleManager::class.java).applicationLocales = LocaleList.forLanguageTags(code)
         } else {
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(code))
+        }
+    }
+
+    private fun deleteAccount() {
+        viewModelScope.launch {
+            deleteUserUseCase.invoke().asResource().onEach { result ->
+                when (result) {
+                    Resource.Loading -> {
+                        updateState { copy(loading = true) }
+                    }
+
+                    is Resource.Error -> {
+                        updateState {
+                            copy(
+                                loading = false, exception = result.exception?.getExceptionModel(
+                                    descriptionResId = R.string.exception_delete_user
+                                )
+                            )
+                        }
+                    }
+
+                    is Resource.Success -> {
+                        updateState { copy(loading = false, user = null, loggedIn = false) }
+                    }
+                }
+            }.launchIn(this)
         }
     }
 
@@ -190,6 +222,7 @@ sealed class ProfileViewTriggeredEvent {
     data object LanguageBottomSheetDismissed : ProfileViewTriggeredEvent()
     data class ChangeLanguage(val context: Context, val languageCode: String) : ProfileViewTriggeredEvent()
     data object Logout : ProfileViewTriggeredEvent()
+    data object DeleteAccountConfirmed : ProfileViewTriggeredEvent()
 }
 
 sealed interface GeneralInfoType {

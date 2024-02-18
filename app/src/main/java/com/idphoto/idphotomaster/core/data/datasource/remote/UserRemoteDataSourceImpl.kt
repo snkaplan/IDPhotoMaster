@@ -54,6 +54,12 @@ class UserRemoteDataSourceImpl @Inject constructor(
         }
     }
 
+    override suspend fun deleteUser(): Result<Unit> {
+        return runCatching {
+            auth.currentUser?.delete()?.await(networkMonitor)
+        }
+    }
+
     override suspend fun signOut(): Result<Unit> {
         return runCatching {
             auth.signOut()

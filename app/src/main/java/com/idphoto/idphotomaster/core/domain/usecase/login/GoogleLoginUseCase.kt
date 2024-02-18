@@ -1,9 +1,9 @@
 package com.idphoto.idphotomaster.core.domain.usecase.login
 
 import com.idphoto.idphotomaster.core.data.repository.UserRepository
-import com.idphoto.idphotomaster.core.domain.exceptions.GeneralException
 import com.idphoto.idphotomaster.core.domain.model.LoginResult
 import com.idphoto.idphotomaster.core.domain.model.User
+import getExceptionOrDefault
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -15,7 +15,7 @@ class GoogleLoginUseCase @Inject constructor(private val userRepository: UserRep
             if (result.isSuccess) {
                 val user = result.getOrNull()
                 val nameList = user?.displayName?.split(" ")
-                userRepository.createUser(
+                val create = userRepository.createUser(
                     User(
                         userId = user?.uid,
                         name = nameList?.first().orEmpty(),
@@ -23,11 +23,11 @@ class GoogleLoginUseCase @Inject constructor(private val userRepository: UserRep
                         mail = user?.email.orEmpty()
                     )
                 )
-                (user ?: throw GeneralException()).also {
+                (user ?: throw create.getExceptionOrDefault()).also {
                     emit(LoginResult(user.uid, user.uid))
                 }
             } else {
-                throw GeneralException()
+                throw result.getExceptionOrDefault()
             }
         }
     }

@@ -1,6 +1,9 @@
 import androidx.annotation.StringRes
+import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.idphoto.idphotomaster.R
+import com.idphoto.idphotomaster.core.domain.exceptions.GeneralException
 import com.idphoto.idphotomaster.core.domain.exceptions.NetworkException
+import com.idphoto.idphotomaster.core.domain.exceptions.RequiresAuthorizationException
 import com.idphoto.idphotomaster.core.domain.model.base.ExceptionModel
 import com.idphoto.idphotomaster.core.domain.model.base.ExceptionType
 import com.idphoto.idphotomaster.core.domain.util.getIcon
@@ -26,6 +29,16 @@ fun Throwable?.getExceptionModel(
             icon = this.getIcon()
         }
 
+        is RequiresAuthorizationException -> ExceptionModel(
+            titleResId = R.string.exception_title,
+            descriptionResId = R.string.exception_delete_user_re_authenticate,
+            primaryButtonTextResId = R.string.login,
+            secondaryButtonTextResId = R.string.close,
+            exceptionType = ExceptionType.REQUIRES_AUTHORIZATION
+        ).apply {
+            icon = this.getIcon()
+        }
+
         else -> ExceptionModel(
             title = title,
             titleResId = titleResId,
@@ -38,4 +51,12 @@ fun Throwable?.getExceptionModel(
             exceptionType = ExceptionType.GENERAL
         ).apply { icon = this.getIcon() }
     }
+}
+
+fun Result<Any>.getExceptionOrDefault(): Throwable {
+    val exception = this.exceptionOrNull()
+    if (exception is FirebaseAuthRecentLoginRequiredException) {
+        return RequiresAuthorizationException()
+    }
+    return exception ?: GeneralException()
 }

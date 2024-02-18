@@ -1,18 +1,17 @@
 package com.idphoto.idphotomaster.core.domain.usecase.profile
 
 import com.idphoto.idphotomaster.core.data.repository.UserRepository
-import com.idphoto.idphotomaster.core.domain.model.User
 import getExceptionOrDefault
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
-class GetUserUseCase @Inject constructor(private val userRepository: UserRepository) {
-    operator fun invoke(uid: String): Flow<User> {
+class DeleteUserUseCase @Inject constructor(private val userRepository: UserRepository) {
+    operator fun invoke(): Flow<Unit> {
         return flow {
-            val result = userRepository.getUser(uid)
+            val result = userRepository.deleteUser()
             (result.getOrNull() ?: throw result.getExceptionOrDefault()).also {
-                emit(User.fromFirebaseMap(it))
+                emit(it)
             }
         }
     }

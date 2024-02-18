@@ -39,4 +39,8 @@ class UserRepositoryImpl @Inject constructor(
     override suspend fun getUser(uid: String): Result<Map<String, Any?>> {
         return userRemoteDataSource.getUser(uid)
     }
+
+    override suspend fun deleteUser(): Result<Unit> {
+        return userRemoteDataSource.deleteUser()
+    }
 }

@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -55,6 +56,7 @@ fun Dialog(
     secondaryButtonText: String? = null,
     primaryButtonClick: () -> Unit,
     secondaryButtonClick: (() -> Unit)? = null,
+    primaryButtonColor: Color = Blue,
     onDismissRequest: () -> Unit
 ) {
     BasicAlertDialog(
@@ -77,7 +79,7 @@ fun Dialog(
             Box(
                 modifier = Modifier
                     .background(Color.White)
-                    .padding(vertical = 16.dp, horizontal = 24.dp)
+                    .padding(vertical = 16.dp, horizontal = 10.dp)
             ) {
                 CloseButtonContainer(
                     hasCloseButton = dismissible,
@@ -111,7 +113,8 @@ fun Dialog(
                         primaryButtonText = primaryButtonText,
                         secondaryButtonText = secondaryButtonText,
                         onPrimaryButtonClick = primaryButtonClick,
-                        onSecondaryButtonClick = secondaryButtonClick
+                        onSecondaryButtonClick = secondaryButtonClick,
+                        primaryButtonColor = primaryButtonColor
                     )
                 }
             }
@@ -144,7 +147,8 @@ private fun ButtonContainer(
     primaryButtonText: String,
     secondaryButtonText: String? = null,
     onPrimaryButtonClick: () -> Unit,
-    onSecondaryButtonClick: (() -> Unit)? = null
+    onSecondaryButtonClick: (() -> Unit)? = null,
+    primaryButtonColor: Color
 ) {
     Row(
         modifier = Modifier
@@ -154,6 +158,7 @@ private fun ButtonContainer(
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(IntrinsicSize.Max)
                     .weight(1f),
                 shape = MaterialTheme.shapes.small,
                 onClick = {
@@ -167,7 +172,10 @@ private fun ButtonContainer(
                 content = {
                     Text(
                         text = secondaryButtonText,
-                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 10.sp
+                        ),
                         color = Color.Black,
                         textAlign = TextAlign.Center
                     )
@@ -178,14 +186,15 @@ private fun ButtonContainer(
         Button(
             modifier = Modifier
                 .fillMaxWidth()
+                .height(IntrinsicSize.Max)
                 .weight(1f),
-            colors = ButtonDefaults.buttonColors(containerColor = Blue),
+            colors = ButtonDefaults.buttonColors(containerColor = primaryButtonColor),
             shape = MaterialTheme.shapes.small,
             onClick = { onPrimaryButtonClick.invoke() },
             content = {
                 Text(
                     text = primaryButtonText,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium),
+                    style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium, fontSize = 10.sp),
                     color = Color.White,
                     textAlign = TextAlign.Center
                 )
@@ -230,7 +239,7 @@ fun DialogPreview() {
         exception = ExceptionModel(
             title = "Bir Sorun Oluştu",
             description = "Daha sonra tekrar deneyin",
-            primaryButtonText = "Retry",
+            primaryButtonText = "Delete Account",
             secondaryButtonText = "Vazgeç"
         ),
         onDismissRequest = {},

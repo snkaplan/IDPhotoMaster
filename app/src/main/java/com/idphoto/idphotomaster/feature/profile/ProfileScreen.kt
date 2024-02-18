@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material.icons.filled.FilePresent
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.NoAccounts
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.StarOutline
@@ -31,6 +32,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -48,6 +52,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.domain.model.AppLanguageItem
+import com.idphoto.idphotomaster.core.domain.model.base.ExceptionType
+import com.idphoto.idphotomaster.core.systemdesign.components.Dialog
 import com.idphoto.idphotomaster.core.systemdesign.components.ErrorDialog
 import com.idphoto.idphotomaster.core.systemdesign.components.InformationBottomSheet
 import com.idphoto.idphotomaster.core.systemdesign.components.LoadingView
@@ -75,6 +81,9 @@ fun ProfileScreen(
         },
         onPrimaryButtonClick = {
             viewModel.onErrorDialogDismiss()
+            if (profileState.exception?.exceptionType == ExceptionType.REQUIRES_AUTHORIZATION) {
+                navigateToLogin.invoke()
+            }
         },
     )
     ScreenContent(
@@ -97,7 +106,12 @@ private fun ScreenContent(
     val scrollState = rememberScrollState()
     Column(modifier = modifier, verticalArrangement = Arrangement.Top) {
         if (viewState.loading) {
-            LoadingView(modifier = Modifier.fillMaxHeight(), backgroundColor = BackgroundColor)
+            LoadingView(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .align(Alignment.CenterHorizontally),
+                backgroundColor = BackgroundColor
+            )
         } else {
             Spacer(modifier = Modifier.height(20.dp))
             Icon(
@@ -232,9 +246,28 @@ fun ProfileGeneralInfo(onViewEvent: (ProfileViewTriggeredEvent) -> Unit) {
 
 @Composable
 fun ProfileOtherSection(onViewEvent: (ProfileViewTriggeredEvent) -> Unit) {
+    var showDeleteAccountPopUp by remember { mutableStateOf(false) }
     ProfileSectionHeader(stringResource(id = R.string.other))
     ProfileSectionItem(Icons.AutoMirrored.Default.Logout, stringResource(id = R.string.logout)) {
         onViewEvent(ProfileViewTriggeredEvent.Logout)
+    }
+    ProfileSectionItem(Icons.Default.NoAccounts, stringResource(id = R.string.delete_account)) {
+        showDeleteAccountPopUp = true
+    }
+    if (showDeleteAccountPopUp) {
+        Dialog(
+            title = stringResource(id = R.string.delete_account_title),
+            description = stringResource(id = R.string.delete_account_description),
+            primaryButtonText = stringResource(id = R.string.delete_account),
+            secondaryButtonText = stringResource(id = R.string.cancel),
+            primaryButtonClick = {
+                onViewEvent.invoke(ProfileViewTriggeredEvent.DeleteAccountConfirmed)
+                showDeleteAccountPopUp = false
+            },
+            primaryButtonColor = Color.Red,
+            secondaryButtonClick = { showDeleteAccountPopUp = false }) {
+            showDeleteAccountPopUp = false
+        }
     }
 }
 

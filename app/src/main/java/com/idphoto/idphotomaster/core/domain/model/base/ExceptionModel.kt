@@ -19,5 +19,6 @@ data class ExceptionModel(
 
 enum class ExceptionType {
     GENERAL,
-    NETWORK
+    NETWORK,
+    REQUIRES_AUTHORIZATION
 }

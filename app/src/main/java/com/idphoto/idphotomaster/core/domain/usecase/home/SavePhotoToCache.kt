@@ -6,8 +6,8 @@ import android.net.Uri
 import androidx.core.net.toUri
 import com.idphoto.idphotomaster.core.common.Constants.CachedFileName
 import com.idphoto.idphotomaster.core.common.Constants.TempFileExtension
-import com.idphoto.idphotomaster.core.domain.exceptions.GeneralException
 import dagger.hilt.android.qualifiers.ApplicationContext
+import getExceptionOrDefault
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -38,7 +38,7 @@ class SavePhotoToCache @Inject constructor(
                 e.printStackTrace()
                 Result.failure(e)
             }
-            (result.getOrNull() ?: throw GeneralException()).also {
+            (result.getOrNull() ?: throw result.getExceptionOrDefault()).also {
                 emit(it)
             }
         }.flowOn(Dispatchers.IO)

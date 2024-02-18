@@ -10,6 +10,7 @@ import android.os.Environment
 import android.provider.MediaStore
 import com.idphoto.idphotomaster.core.domain.exceptions.GeneralException
 import dagger.hilt.android.qualifiers.ApplicationContext
+import getExceptionOrDefault
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import java.io.OutputStream
@@ -78,7 +79,7 @@ class SavePhotoToGalleryUseCase @Inject constructor(
             } ?: run {
                 throw GeneralException()
             }
-            (result.getOrNull() ?: throw GeneralException()).also {
+            (result.getOrNull() ?: throw result.getExceptionOrDefault()).also {
                 emit(it)
             }
         }

@@ -7,8 +7,8 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import com.idphoto.idphotomaster.core.domain.exceptions.GeneralException
 import dagger.hilt.android.qualifiers.ApplicationContext
+import getExceptionOrDefault
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
@@ -36,7 +36,7 @@ class ReadImageFromDevice @Inject constructor(
                     )
                 )
             }
-            (result.getOrNull() ?: throw GeneralException()).also {
+            (result.getOrNull() ?: throw result.getExceptionOrDefault()).also {
                 emit(it)
             }
         }
