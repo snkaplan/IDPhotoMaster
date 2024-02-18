@@ -10,6 +10,7 @@ import com.idphoto.idphotomaster.core.common.Resource
 import com.idphoto.idphotomaster.core.common.asResource
 import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
 import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
+import com.idphoto.idphotomaster.core.data.datasource.local.LocalDataStore
 import com.idphoto.idphotomaster.core.domain.model.base.ExceptionModel
 import com.idphoto.idphotomaster.core.domain.usecase.home.SaveImageToTempFile
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,6 +19,7 @@ import de.palm.composestateevents.consumed
 import de.palm.composestateevents.triggered
 import getExceptionModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -26,9 +28,21 @@ import javax.inject.Inject
 @HiltViewModel
 class CameraViewModel @Inject constructor(
     private val saveImageToTempFile: SaveImageToTempFile,
-    @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher
+    @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
+    private val localDataStore: LocalDataStore
 ) : BaseViewModel<CameraViewState>() {
     override fun createInitialState(): CameraViewState = CameraViewState()
+
+    init {
+        viewModelScope.launch {
+            localDataStore.isUserSawTutorial().collectLatest {
+                if (!it) {
+                    updateState { copy(showTutorialDialog = true) }
+                }
+                return@collectLatest
+            }
+        }
+    }
 
     fun saveTempImage(bitmap: Bitmap) {
         viewModelScope.launch(ioDispatcher) {
@@ -69,6 +83,18 @@ class CameraViewModel @Inject constructor(
         super.onCleared()
     }
 
+    fun onTriggerViewEvent(viewEvent: CameraViewEvent) {
+        when (viewEvent) {
+            CameraViewEvent.OnClickTutorial -> updateState { copy(showTutorialDialog = true) }
+            CameraViewEvent.OnTutorialClosed -> {
+                viewModelScope.launch {
+                    localDataStore.setUserSawCameraTutorial(true)
+                    updateState { copy(showTutorialDialog = false) }
+                }
+            }
+        }
+    }
+
     fun onNavigateToEditPhotoConsumed() {
         updateState { copy(navigateToEditPhoto = consumed()) }
     }
@@ -83,5 +109,11 @@ data class CameraViewState(
     val capturedImageUri: Uri? = null,
     val capturedImage: Bitmap? = null,
     val navigateToEditPhoto: StateEventWithContent<String> = consumed(),
+    val showTutorialDialog: Boolean = false,
     val exception: ExceptionModel? = null
 ) : IViewState
+
+sealed interface CameraViewEvent {
+    data object OnClickTutorial : CameraViewEvent
+    data object OnTutorialClosed : CameraViewEvent
+}

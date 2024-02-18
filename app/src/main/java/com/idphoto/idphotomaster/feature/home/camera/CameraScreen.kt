@@ -17,6 +17,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,8 +25,14 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -35,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -43,11 +51,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -87,7 +95,9 @@ fun CameraScreen(
     CameraContent(
         onPhotoCaptured = viewModel::saveTempImage,
         lastCapturedPhoto = cameraState.capturedImage,
-        isLoading = cameraState.loading
+        isLoading = cameraState.loading,
+        showTutorialDialog = cameraState.showTutorialDialog,
+        onViewEvent = viewModel::onTriggerViewEvent
     )
 }
 
@@ -95,7 +105,9 @@ fun CameraScreen(
 private fun CameraContent(
     onPhotoCaptured: (Bitmap) -> Unit,
     lastCapturedPhoto: Bitmap? = null,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    showTutorialDialog: Boolean = false,
+    onViewEvent: (CameraViewEvent) -> Unit
 ) {
     val context: Context = LocalContext.current
     val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
@@ -155,6 +167,21 @@ private fun CameraContent(
                         )
                     }, color = Color.White
             ) {
+            }
+            Surface(
+                shape = CircleShape, modifier = Modifier
+                    .padding(20.dp)
+                    .size(60.dp)
+                    .align(Alignment.TopEnd)
+                    .clickable {
+                        onViewEvent.invoke(CameraViewEvent.OnClickTutorial)
+                    }, color = Color.Transparent
+            ) {
+                Image(painterResource(id = R.drawable.ic_tutorial_icon), contentDescription = "Tutorial")
+            }
+
+            if (showTutorialDialog) {
+                TutorialDialog(onViewEvent)
             }
 
             if (lastCapturedPhoto != null) {
@@ -216,7 +243,7 @@ private fun LastPhotoPreview(
         Image(
             bitmap = capturedPhoto,
             contentDescription = "Last captured photo",
-            contentScale = androidx.compose.ui.layout.ContentScale.Crop
+            contentScale = ContentScale.Crop
         )
     }
 }
@@ -257,10 +284,41 @@ fun TransparentClipLayout(
     }
 }
 
-@Preview
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Preview_CameraContent() {
-    CameraContent(
-        onPhotoCaptured = {}
-    )
+fun TutorialDialog(onViewEvent: (CameraViewEvent) -> Unit) {
+    BasicAlertDialog(onDismissRequest = {
+        onViewEvent.invoke(CameraViewEvent.OnTutorialClosed)
+    }) {
+        Column(
+            modifier = Modifier
+                .clip(RoundedCornerShape(15.dp))
+                .background(Color.White),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Icon(
+                modifier = Modifier
+                    .padding(top = 10.dp, end = 10.dp)
+                    .clip(CircleShape)
+                    .background(Color.Black)
+                    .clickable {
+                        onViewEvent.invoke(CameraViewEvent.OnTutorialClosed)
+                    }
+                    .align(Alignment.End),
+                imageVector = Icons.Filled.Close,
+                contentDescription = "Close",
+                tint = Color.White
+            )
+            Image(
+                modifier = Modifier
+                    .padding(10.dp)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.Red)
+                    .size(400.dp),
+                contentScale = ContentScale.FillBounds,
+                painter = painterResource(id = R.drawable.ic_camera_tutorial),
+                contentDescription = "Tutorial Image"
+            )
+        }
+    }
 }
