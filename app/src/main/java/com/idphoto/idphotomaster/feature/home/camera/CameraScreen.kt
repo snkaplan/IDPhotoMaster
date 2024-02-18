@@ -4,20 +4,19 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.util.Log
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.ImageProxy
-import androidx.camera.view.LifecycleCameraController
+import androidx.camera.core.Preview
+import androidx.camera.core.resolutionselector.AspectRatioStrategy
+import androidx.camera.core.resolutionselector.ResolutionSelector
+import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,14 +24,8 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -42,7 +35,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.BottomStart
 import androidx.compose.ui.Alignment.Companion.Center
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -69,8 +61,8 @@ import com.idphoto.idphotomaster.core.systemdesign.components.AppScaffold
 import com.idphoto.idphotomaster.core.systemdesign.components.ErrorDialog
 import com.idphoto.idphotomaster.core.systemdesign.components.LoadingView
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
+import com.idphoto.idphotomaster.core.systemdesign.utils.takePicture
 import de.palm.composestateevents.NavigationEventEffect
-import java.util.concurrent.Executor
 
 @Composable
 fun CameraScreen(
@@ -111,9 +103,6 @@ private fun CameraContent(
 ) {
     val context: Context = LocalContext.current
     val lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current
-    val cameraController: LifecycleCameraController =
-        remember { LifecycleCameraController(context) }
-
     AppScaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {},
@@ -124,22 +113,7 @@ private fun CameraContent(
                 .padding(padding)
                 .imePadding()
         ) {
-            AndroidView(
-                modifier = Modifier
-                    .fillMaxSize(),
-                factory = { context ->
-                    PreviewView(context).apply {
-                        layoutParams = LinearLayout.LayoutParams(MATCH_PARENT, MATCH_PARENT)
-                        setBackgroundColor(android.graphics.Color.BLACK)
-                        implementationMode = PreviewView.ImplementationMode.COMPATIBLE
-                        scaleType = PreviewView.ScaleType.FILL_START
-                    }.also { previewView ->
-                        previewView.controller = cameraController
-                        cameraController.cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
-                        cameraController.bindToLifecycle(lifecycleOwner)
-                    }
-                }
-            )
+            CameraPreview()
             TransparentClipLayout(
                 modifier = Modifier.fillMaxSize(),
                 width = 354.dp,
@@ -160,11 +134,17 @@ private fun CameraContent(
                     .size(60.dp)
                     .align(Alignment.BottomCenter)
                     .clickable {
-                        capturePhoto(
-                            context,
-                            cameraController,
-                            onPhotoCaptured,
-                        )
+                        takePicture(context, onImageCaptured = { image ->
+                            image.setCropRect(Rect())
+                            val correctedBitmap: Bitmap = image
+                                .toBitmap()
+                                .rotateBitmap(image.imageInfo.rotationDegrees)
+                            onPhotoCaptured(correctedBitmap)
+                            image.close()
+                        },
+                            lifecycleOwner = lifecycleOwner, onError = {
+
+                            })
                     }, color = Color.White
             ) {
             }
@@ -199,28 +179,6 @@ private fun CameraContent(
     }
 }
 
-private fun capturePhoto(
-    context: Context,
-    cameraController: LifecycleCameraController,
-    onPhotoCaptured: (Bitmap) -> Unit
-) {
-    val mainExecutor: Executor = ContextCompat.getMainExecutor(context)
-    cameraController.takePicture(mainExecutor, object : ImageCapture.OnImageCapturedCallback() {
-        override fun onCaptureSuccess(image: ImageProxy) {
-            image.setCropRect(Rect())
-            val correctedBitmap: Bitmap = image
-                .toBitmap()
-                .rotateBitmap(image.imageInfo.rotationDegrees)
-            cameraController.unbind()
-            onPhotoCaptured(correctedBitmap)
-            image.close()
-        }
-
-        override fun onError(exception: ImageCaptureException) {
-            Log.e("CameraContent", "Error capturing image", exception)
-        }
-    })
-}
 
 @Composable
 private fun LastPhotoPreview(
@@ -284,41 +242,38 @@ fun TransparentClipLayout(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TutorialDialog(onViewEvent: (CameraViewEvent) -> Unit) {
-    BasicAlertDialog(onDismissRequest = {
-        onViewEvent.invoke(CameraViewEvent.OnTutorialClosed)
-    }) {
-        Column(
-            modifier = Modifier
-                .clip(RoundedCornerShape(15.dp))
-                .background(Color.White),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                modifier = Modifier
-                    .padding(top = 10.dp, end = 10.dp)
-                    .clip(CircleShape)
-                    .background(Color.Black)
-                    .clickable {
-                        onViewEvent.invoke(CameraViewEvent.OnTutorialClosed)
-                    }
-                    .align(Alignment.End),
-                imageVector = Icons.Filled.Close,
-                contentDescription = "Close",
-                tint = Color.White
-            )
-            Image(
-                modifier = Modifier
-                    .padding(10.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(Color.Red)
-                    .size(400.dp),
-                contentScale = ContentScale.FillBounds,
-                painter = painterResource(id = R.drawable.ic_camera_tutorial),
-                contentDescription = "Tutorial Image"
+fun CameraPreview() {
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val cameraProviderFuture = ProcessCameraProvider.getInstance(context)
+    AndroidView(factory = { ctx ->
+        val previewView = PreviewView(ctx).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
             )
         }
-    }
+        val preview = Preview.Builder()
+            .setResolutionSelector(
+                ResolutionSelector.Builder()
+                    .setAspectRatioStrategy(AspectRatioStrategy.RATIO_16_9_FALLBACK_AUTO_STRATEGY)
+                    .build()
+            )
+            .build()
+            .also {
+                it.setSurfaceProvider(previewView.surfaceProvider)
+            }
+        cameraProviderFuture.addListener({
+            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+            val cameraSelector = CameraSelector.DEFAULT_FRONT_CAMERA
+            try {
+                cameraProvider.unbindAll()
+                cameraProvider.bindToLifecycle(lifecycleOwner, cameraSelector, preview)
+            } catch (e: Exception) {
+                Log.e("CameraPreview", "Use case binding failed", e)
+            }
+        }, ContextCompat.getMainExecutor(ctx))
+        previewView
+    })
 }
