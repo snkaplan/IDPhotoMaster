@@ -5,6 +5,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -102,6 +103,9 @@ dependencies {
     implementation("com.google.firebase:firebase-storage:20.3.0")
     implementation("com.google.firebase:firebase-auth-ktx") // No Version needed because the BOM manages that
     implementation("com.google.android.gms:play-services-auth:20.7.0")
+
+    // Add the dependencies for the Crashlytics libraries
+    implementation("com.google.firebase:firebase-crashlytics")
 
     // Add the dependencies for the Remote Config and Analytics libraries
     // When using the BoM, you don't specify versions in Firebase library dependencies
