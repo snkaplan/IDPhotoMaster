@@ -147,14 +147,12 @@ fun BasketScreen(
             viewModel.onErrorDialogDismiss()
         },
     )
-    viewState.photo?.let {
-        ScreenContent(
-            viewState = viewState,
-            modifier = modifier.fillMaxSize(),
-            onBackClick = onBackClick,
-            onCompletePurchase = viewModel::onCompletePurchase
-        )
-    }
+    ScreenContent(
+        viewState = viewState,
+        modifier = modifier.fillMaxSize(),
+        onBackClick = onBackClick,
+        onCompletePurchase = viewModel::onCompletePurchase
+    )
 }
 
 @Composable

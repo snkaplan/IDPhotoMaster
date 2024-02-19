@@ -23,7 +23,7 @@ class StartPurchaseUseCase @Inject constructor(
             val ref = firebaseFirestore.collection(Constants.USERS_TABLE_NAME).document(userId)
                 .collection(Constants.PURCHASE_TABLE_NAME).document()
             val filename = "$userId-${ref.id}${Constants.TempFileExtension}"
-            val upload = basketRepository.uploadPhoto(filename, data)
+            val upload = basketRepository.uploadPhoto(userId, filename, data)
             if (upload.isSuccess) {
                 val result =
                     basketRepository.purchase(userId, Purchase(userId, ref.id, upload.getOrNull().toString()), ref)

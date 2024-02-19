@@ -25,9 +25,9 @@ class BasketRemoteDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun uploadPhoto(fileName: String, image: ByteArray): Result<Uri> {
+    override suspend fun uploadPhoto(uid: String, fileName: String, image: ByteArray): Result<Uri> {
         return runCatching {
-            val storageRef = firebaseStorage.reference.child(IMAGES_FOLDER).child(fileName)
+            val storageRef = firebaseStorage.reference.child("$IMAGES_FOLDER/$uid").child(fileName)
             val upload = storageRef.putBytes(image).await(networkMonitor)
             val uri = upload.storage.downloadUrl.await(networkMonitor)
             uri
@@ -36,7 +36,7 @@ class BasketRemoteDataSourceImpl @Inject constructor(
 
     override suspend fun deletePurchase(userId: String, id: String): Result<Unit> {
         return runCatching {
-            val storageRef = firebaseStorage.reference.child(IMAGES_FOLDER).child(id)
+            val storageRef = firebaseStorage.reference.child("$IMAGES_FOLDER/$userId").child(id)
             firebaseFirestore.collection(USERS_TABLE_NAME).document(userId).collection(PURCHASE_TABLE_NAME).document(id)
                 .delete().await(networkMonitor)
             storageRef.delete().await(networkMonitor)

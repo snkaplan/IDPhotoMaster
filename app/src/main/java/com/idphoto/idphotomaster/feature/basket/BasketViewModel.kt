@@ -149,11 +149,7 @@ class BasketViewModel @Inject constructor(
                         }
 
                         Resource.Loading -> {
-                            updateState {
-                                copy(
-                                    loading = true
-                                )
-                            }
+                            updateState { copy(loading = true) }
                         }
 
                         is Resource.Success -> {
