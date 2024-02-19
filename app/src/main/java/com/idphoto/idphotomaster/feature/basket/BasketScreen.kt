@@ -141,9 +141,15 @@ fun BasketScreen(
     ErrorDialog(
         exception = viewState.exception,
         onDismissRequest = {
+            if (viewState.exception?.descriptionResId == R.string.exception_save_image_to_gallery) {
+                onCompletePurchase.invoke()
+            }
             viewModel.onErrorDialogDismiss()
         },
         onPrimaryButtonClick = {
+            if (viewState.exception?.descriptionResId == R.string.exception_save_image_to_gallery) {
+                onCompletePurchase.invoke()
+            }
             viewModel.onErrorDialogDismiss()
         },
     )
