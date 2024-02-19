@@ -15,7 +15,7 @@ fun Throwable?.getExceptionModel(
     secondButtonText: String? = null,
     @StringRes titleResId: Int? = R.string.exception_title,
     @StringRes descriptionResId: Int? = null,
-    @StringRes primaryButtonTextResId: Int? = R.string.retry,
+    @StringRes primaryButtonTextResId: Int? = null,
     @StringRes secondButtonTextResId: Int? = R.string.close,
 ): ExceptionModel {
     return when (this) {
