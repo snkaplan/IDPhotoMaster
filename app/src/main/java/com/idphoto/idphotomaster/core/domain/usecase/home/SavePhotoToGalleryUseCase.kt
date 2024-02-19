@@ -33,13 +33,13 @@ class SavePhotoToGalleryUseCase @Inject constructor(
             val nowTimestamp: Long = System.currentTimeMillis()
 
             val imageContentValues: ContentValues = ContentValues().apply {
-                put(MediaStore.Images.Media.DISPLAY_NAME, "Your image name" + ".jpg")
-                put(MediaStore.Images.Media.MIME_TYPE, "image/jpg")
+                put(MediaStore.Images.Media.DISPLAY_NAME, "IDPhoto-${System.currentTimeMillis()}" + ".png")
+                put(MediaStore.Images.Media.MIME_TYPE, "image/png")
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     put(MediaStore.MediaColumns.DATE_TAKEN, nowTimestamp)
                     put(
                         MediaStore.MediaColumns.RELATIVE_PATH,
-                        Environment.DIRECTORY_DCIM + "/YourAppNameOrAnyOtherSubFolderName"
+                        Environment.DIRECTORY_DCIM + "/IDPhotoMaster"
                     )
                     put(MediaStore.MediaColumns.IS_PENDING, 1)
                 }
