@@ -182,8 +182,8 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    private fun loginWithGoogle(idToken: String) {
-        viewModelScope.launch {
+    private suspend fun loginWithGoogle(idToken: String) {
+        withContext(currentCoroutineContext()) {
             googleLoginUseCase.invoke(idToken).asResource().onEach { result ->
                 when (result) {
                     Resource.Loading -> {
