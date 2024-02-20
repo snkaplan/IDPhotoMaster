@@ -21,9 +21,11 @@ class TutorialViewModel @Inject constructor(
     override fun createInitialState(): TutorialViewState = TutorialViewState()
 
     fun onTriggerViewEvent(event: TutorialViewEvent) {
-        when (event) {
-            TutorialViewEvent.OnNavigateHomeConsumed -> onNavigateToHomeConsumed()
-            TutorialViewEvent.OnSkipClicked -> onSkipClicked()
+        viewModelScope.launch {
+            when (event) {
+                TutorialViewEvent.OnNavigateHomeConsumed -> onNavigateToHomeConsumed()
+                TutorialViewEvent.OnSkipClicked -> onSkipClicked()
+            }
         }
     }
 

@@ -35,9 +35,11 @@ class SplashViewModel @Inject constructor(
     }
 
     fun onTriggerViewEvent(event: SplashViewEvent) {
-        when (event) {
-            SplashViewEvent.OnNavigateToHomeConsumed -> onNavigateToHomeConsumed()
-            SplashViewEvent.OnNavigateToTutorialConsumed -> onNavigateToTutorialConsumed()
+        viewModelScope.launch {
+            when (event) {
+                SplashViewEvent.OnNavigateToHomeConsumed -> onNavigateToHomeConsumed()
+                SplashViewEvent.OnNavigateToTutorialConsumed -> onNavigateToTutorialConsumed()
+            }
         }
     }
 

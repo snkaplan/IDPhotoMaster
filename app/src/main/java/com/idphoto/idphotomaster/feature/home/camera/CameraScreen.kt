@@ -72,20 +72,21 @@ fun CameraScreen(
     val cameraState: CameraViewState by viewModel.uiState.collectAsStateWithLifecycle()
     NavigationEventEffect(
         event = cameraState.navigateToEditPhoto,
-        onConsumed = viewModel::onNavigateToEditPhotoConsumed,
+        onConsumed = {
+            viewModel.onTriggerViewEvent(CameraViewEvent.OnNavigateToEditPhotoConsumed)
+        },
         action = navigateToEditPhoto
     )
     ErrorDialog(
         exception = cameraState.exception,
         onDismissRequest = {
-            viewModel.onErrorDialogDismiss()
+            viewModel.onTriggerViewEvent(CameraViewEvent.DismissErrorDialog)
         },
         onPrimaryButtonClick = {
-            viewModel.onErrorDialogDismiss()
+            viewModel.onTriggerViewEvent(CameraViewEvent.DismissErrorDialog)
         },
     )
     CameraContent(
-        onPhotoCaptured = viewModel::saveTempImage,
         lastCapturedPhoto = cameraState.capturedImage,
         isLoading = cameraState.loading,
         showTutorialDialog = cameraState.showTutorialDialog,
@@ -95,7 +96,6 @@ fun CameraScreen(
 
 @Composable
 private fun CameraContent(
-    onPhotoCaptured: (Bitmap) -> Unit,
     lastCapturedPhoto: Bitmap? = null,
     isLoading: Boolean = false,
     showTutorialDialog: Boolean = false,
@@ -139,7 +139,7 @@ private fun CameraContent(
                             val correctedBitmap: Bitmap = image
                                 .toBitmap()
                                 .rotateBitmap(image.imageInfo.rotationDegrees)
-                            onPhotoCaptured(correctedBitmap)
+                            onViewEvent.invoke(CameraViewEvent.SaveImageAndNavigate(correctedBitmap))
                             image.close()
                         },
                             lifecycleOwner = lifecycleOwner, onError = {
@@ -168,7 +168,7 @@ private fun CameraContent(
                 LastPhotoPreview(
                     modifier = Modifier.align(alignment = BottomStart),
                     lastCapturedPhoto = lastCapturedPhoto,
-                    onPhotoCaptured
+                    onViewEvent = onViewEvent
                 )
             }
 
@@ -184,7 +184,7 @@ private fun CameraContent(
 private fun LastPhotoPreview(
     modifier: Modifier = Modifier,
     lastCapturedPhoto: Bitmap,
-    onPhotoCaptured: (Bitmap) -> Unit
+    onViewEvent: (CameraViewEvent) -> Unit
 ) {
     val capturedPhoto: ImageBitmap =
         remember(lastCapturedPhoto.hashCode()) { lastCapturedPhoto.asImageBitmap() }
@@ -193,7 +193,7 @@ private fun LastPhotoPreview(
             .size(128.dp)
             .padding(16.dp)
             .clickable {
-                onPhotoCaptured.invoke(lastCapturedPhoto)
+                onViewEvent.invoke(CameraViewEvent.SaveImageAndNavigate(lastCapturedPhoto))
             },
         elevation = CardDefaults.elevatedCardElevation(defaultElevation = 8.dp),
         shape = MaterialTheme.shapes.large

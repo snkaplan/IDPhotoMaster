@@ -60,6 +60,7 @@ import com.idphoto.idphotomaster.core.systemdesign.components.LoadingView
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.Pink
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.SectionTextColor
+import de.palm.composestateevents.NavigationEventEffect
 
 @Composable
 fun ProfileScreen(
@@ -74,13 +75,27 @@ fun ProfileScreen(
     LaunchedEffect(key1 = true) {
         viewModel.init(context, locale)
     }
+    NavigationEventEffect(
+        event = profileState.navigateToSavedPhotos,
+        onConsumed = {
+            viewModel.onTriggerEvent(ProfileViewTriggeredEvent.NavigateToSavedPhotosConsumed)
+        },
+        action = navigateToSavedPhotos
+    )
+    NavigationEventEffect(
+        event = profileState.navigateToLogin,
+        onConsumed = {
+            viewModel.onTriggerEvent(ProfileViewTriggeredEvent.NavigateToLoginConsumed)
+        },
+        action = navigateToLogin
+    )
     ErrorDialog(
         exception = profileState.exception,
         onDismissRequest = {
-            viewModel.onErrorDialogDismiss()
+            viewModel.onTriggerEvent(ProfileViewTriggeredEvent.DismissErrorDialog)
         },
         onPrimaryButtonClick = {
-            viewModel.onErrorDialogDismiss()
+            viewModel.onTriggerEvent(ProfileViewTriggeredEvent.DismissErrorDialog)
             if (profileState.exception?.exceptionType == ExceptionType.REQUIRES_AUTHORIZATION) {
                 navigateToLogin.invoke()
             }
@@ -89,8 +104,6 @@ fun ProfileScreen(
     ScreenContent(
         viewState = profileState,
         modifier = modifier.fillMaxSize(),
-        navigateToLogin = navigateToLogin,
-        navigateToSavedPhotos = navigateToSavedPhotos,
         onViewEvent = viewModel::onTriggerEvent
     )
 }
@@ -99,8 +112,6 @@ fun ProfileScreen(
 private fun ScreenContent(
     viewState: ProfileViewState,
     modifier: Modifier,
-    navigateToLogin: () -> Unit,
-    navigateToSavedPhotos: () -> Unit,
     onViewEvent: (ProfileViewTriggeredEvent) -> Unit,
 ) {
     val scrollState = rememberScrollState()
@@ -129,12 +140,11 @@ private fun ScreenContent(
                 viewState.user?.name,
                 viewState.user?.lastName,
                 viewState.user?.mail,
-                navigateToLogin
+                onViewEvent
             )
             Spacer(modifier = Modifier.height(20.dp))
             ProfileGeneralSettings(
                 viewState.showLanguageBottomSheet,
-                navigateToSavedPhotos,
                 viewState.languageList,
                 onViewEvent
             )
@@ -155,7 +165,13 @@ private fun ScreenContent(
 }
 
 @Composable
-fun UserInfo(isLoggedIn: Boolean, name: String?, lastName: String?, email: String?, navigateToLogin: () -> Unit) {
+fun UserInfo(
+    isLoggedIn: Boolean,
+    name: String?,
+    lastName: String?,
+    email: String?,
+    onViewEvent: (ProfileViewTriggeredEvent) -> Unit
+) {
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         if (isLoggedIn) {
             if (name != null) {
@@ -165,7 +181,9 @@ fun UserInfo(isLoggedIn: Boolean, name: String?, lastName: String?, email: Strin
                 Text(text = email, style = TextStyle(fontWeight = FontWeight.Normal, fontSize = 16.sp))
             }
         } else {
-            Button(onClick = navigateToLogin) {
+            Button(onClick = {
+                onViewEvent.invoke(ProfileViewTriggeredEvent.NavigateToLogin)
+            }) {
                 Text(text = stringResource(id = R.string.login))
             }
         }
@@ -175,7 +193,6 @@ fun UserInfo(isLoggedIn: Boolean, name: String?, lastName: String?, email: Strin
 @Composable
 fun ProfileGeneralSettings(
     showLanguageBottomSheet: Boolean?,
-    navigateToSavedPhotos: () -> Unit,
     languageList: List<AppLanguageItem>?,
     onViewEvent: (ProfileViewTriggeredEvent) -> Unit
 ) {
@@ -187,7 +204,9 @@ fun ProfileGeneralSettings(
         ProfileSectionItem(
             Icons.Default.StarOutline,
             stringResource(id = R.string.saved_photos),
-            onClick = navigateToSavedPhotos
+            onClick = {
+                onViewEvent.invoke(ProfileViewTriggeredEvent.NavigateToSavedPhotos)
+            }
         )
     }
     if (showLanguageBottomSheet == true) {

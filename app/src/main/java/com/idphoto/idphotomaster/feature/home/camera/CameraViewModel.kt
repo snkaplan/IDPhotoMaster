@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -44,8 +45,24 @@ class CameraViewModel @Inject constructor(
         }
     }
 
-    fun saveTempImage(bitmap: Bitmap) {
-        viewModelScope.launch(ioDispatcher) {
+    fun onTriggerViewEvent(viewEvent: CameraViewEvent) {
+        viewModelScope.launch {
+            when (viewEvent) {
+                CameraViewEvent.OnClickTutorial -> updateState { copy(showTutorialDialog = true) }
+                CameraViewEvent.OnTutorialClosed -> {
+                    localDataStore.setUserSawCameraTutorial(true)
+                    updateState { copy(showTutorialDialog = false) }
+                }
+
+                CameraViewEvent.DismissErrorDialog -> updateState { copy(exception = null) }
+                is CameraViewEvent.SaveImageAndNavigate -> saveTempImage(viewEvent.bitmap)
+                CameraViewEvent.OnNavigateToEditPhotoConsumed -> updateState { copy(navigateToEditPhoto = consumed()) }
+            }
+        }
+    }
+
+    private suspend fun saveTempImage(bitmap: Bitmap) {
+        withContext(ioDispatcher) {
             saveImageToTempFile(photoBitmap = bitmap).asResource()
                 .onEach { result ->
                     when (result) {
@@ -82,26 +99,6 @@ class CameraViewModel @Inject constructor(
         uiState.value.capturedImage?.recycle()
         super.onCleared()
     }
-
-    fun onTriggerViewEvent(viewEvent: CameraViewEvent) {
-        when (viewEvent) {
-            CameraViewEvent.OnClickTutorial -> updateState { copy(showTutorialDialog = true) }
-            CameraViewEvent.OnTutorialClosed -> {
-                viewModelScope.launch {
-                    localDataStore.setUserSawCameraTutorial(true)
-                    updateState { copy(showTutorialDialog = false) }
-                }
-            }
-        }
-    }
-
-    fun onNavigateToEditPhotoConsumed() {
-        updateState { copy(navigateToEditPhoto = consumed()) }
-    }
-
-    fun onErrorDialogDismiss() {
-        updateState { copy(exception = null) }
-    }
 }
 
 data class CameraViewState(
@@ -116,4 +113,7 @@ data class CameraViewState(
 sealed interface CameraViewEvent {
     data object OnClickTutorial : CameraViewEvent
     data object OnTutorialClosed : CameraViewEvent
+    data object DismissErrorDialog : CameraViewEvent
+    data class SaveImageAndNavigate(val bitmap: Bitmap) : CameraViewEvent
+    data object OnNavigateToEditPhotoConsumed : CameraViewEvent
 }
