@@ -234,13 +234,15 @@ fun getLocale(): java.util.Locale {
 @Composable
 fun ProfileGeneralInfo(onViewEvent: (ProfileViewTriggeredEvent) -> Unit) {
     val context = LocalContext.current
+    val currentLanguage = getLocale().language
     Column {
         ProfileSectionHeader(stringResource(id = R.string.information))
         ProfileSectionItem(Icons.Default.PhoneAndroid, stringResource(id = R.string.about)) {
             onViewEvent(
                 ProfileViewTriggeredEvent.ShowInfoBottomSheet(
                     context.getString(R.string.about),
-                    GeneralInfoType.About
+                    GeneralInfoType.About,
+                    currentLanguage
                 )
             )
         }
@@ -248,7 +250,8 @@ fun ProfileGeneralInfo(onViewEvent: (ProfileViewTriggeredEvent) -> Unit) {
             onViewEvent(
                 ProfileViewTriggeredEvent.ShowInfoBottomSheet(
                     context.getString(R.string.terms_and_conditions),
-                    GeneralInfoType.TermsAndConditions
+                    GeneralInfoType.TermsAndConditions,
+                    currentLanguage
                 )
             )
         }
@@ -256,7 +259,8 @@ fun ProfileGeneralInfo(onViewEvent: (ProfileViewTriggeredEvent) -> Unit) {
             onViewEvent(
                 ProfileViewTriggeredEvent.ShowInfoBottomSheet(
                     context.getString(R.string.privacy_policy),
-                    GeneralInfoType.PrivacyPolicy
+                    GeneralInfoType.PrivacyPolicy,
+                    currentLanguage
                 )
             )
         }

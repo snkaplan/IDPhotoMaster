@@ -9,7 +9,6 @@
     <string name="password_error">Please check your password</string>
     <string name="password_length_error">Password must be at least 6 characters</string>
     <string name="login_title">Welcome</string>
-    <string name="login_description">The embodied form of instant photography :D</string>
     <string name="signup_title">Sign Up</string>
     <string name="signup_description">In order to create a personalized experience for you, you need to register.</string>
     <string name="login">Log In</string>

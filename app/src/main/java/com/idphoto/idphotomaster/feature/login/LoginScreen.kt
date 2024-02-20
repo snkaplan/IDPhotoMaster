@@ -112,7 +112,7 @@ fun ScreenContent(
             when (viewState.pageState) {
                 PageState.LOGIN -> {
                     titleTextId.intValue = R.string.login_title
-                    descriptionTextId.intValue = R.string.login_description
+                    descriptionTextId.intValue = R.string.tutorial_biometric_description
                     infoFirstTextId.intValue = R.string.dont_have_an_account
                     infoSecondTextId.intValue = R.string.signup
                     R.string.login

@@ -64,10 +64,22 @@ class ProfileViewModel @Inject constructor(
                             infoBottomSheet = InfoBottomSheetItem(
                                 event.title,
                                 description = when (event.type) {
-                                    GeneralInfoType.About -> config?.getString("about_app").orEmpty()
-                                    GeneralInfoType.PrivacyPolicy -> config?.getString("privacy_policy").orEmpty()
-                                    GeneralInfoType.TermsAndConditions -> config?.getString("terms_and_conditions")
-                                        .orEmpty()
+                                    GeneralInfoType.About -> {
+                                        val key = if (event.currentLanguage == "en") "about_app" else "about_app_tr"
+                                        config?.getString(key).orEmpty()
+                                    }
+
+                                    GeneralInfoType.PrivacyPolicy -> {
+                                        val key =
+                                            if (event.currentLanguage == "en") "privacy_policy" else "privacy_policy_tr"
+                                        config?.getString(key).orEmpty()
+                                    }
+
+                                    GeneralInfoType.TermsAndConditions -> {
+                                        val key =
+                                            if (event.currentLanguage == "en") "terms_and_conditions" else "terms_and_conditions_tr"
+                                        config?.getString(key).orEmpty()
+                                    }
                                 }
                             )
                         )
@@ -223,7 +235,9 @@ data class ProfileViewState(
 ) : IViewState
 
 sealed class ProfileViewTriggeredEvent {
-    data class ShowInfoBottomSheet(val title: String, val type: GeneralInfoType) : ProfileViewTriggeredEvent()
+    data class ShowInfoBottomSheet(val title: String, val type: GeneralInfoType, val currentLanguage: String) :
+        ProfileViewTriggeredEvent()
+
     data object ShowLanguageBottomSheet : ProfileViewTriggeredEvent()
     data object InfoBottomSheetDismissed : ProfileViewTriggeredEvent()
     data object LanguageBottomSheetDismissed : ProfileViewTriggeredEvent()
