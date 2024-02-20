@@ -35,7 +35,6 @@
     <string name="brightness">Parlaklık</string>
     <string name="heat">Sıcaklık</string>
     <string name="remove_background">Arkaplanı kaldır</string>
-    <string name="select">SEÇ</string>
     <string name="complete_purchase">ALIŞVERİŞİ TAMAMLA</string>
     <string name="purchase_success_title">Alışverişi tamamlandı. Satın alımlara profilin altından ve galeriden erişebilirsiniz.</string>
     <string name="purchase_success_description">Alışveriş Başarılı</string>
@@ -83,4 +82,5 @@
     <string name="reset_password_sent">Şifre sıfırlama maili gönderildi. Mailinizi kontrol edin</string>
     <string name="confirm">Onayla</string>
     <string name="send">Gönder</string>
+    <string name="biometric_photo">Biyometrik Fotoğraf</string>
 </resources>

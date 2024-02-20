@@ -36,7 +36,6 @@
     <string name="brightness">Brightness</string>
     <string name="heat">Heat</string>
     <string name="remove_background">Remove Background</string>
-    <string name="select">SELECT</string>
     <string name="complete_purchase">COMPLETE PURCHASE</string>
     <string name="purchase_success_title">Purchase completed. You can access purchases from under your profile and from the gallery.</string>
     <string name="purchase_success_description">Successful Purchase</string>
@@ -84,4 +83,5 @@
     <string name="reset_password_sent">Reset password mail has been sent. Check your email.</string>
     <string name="confirm">Confirm</string>
     <string name="send">Send</string>
+    <string name="biometric_photo">Biometric Photo</string>
 </resources>

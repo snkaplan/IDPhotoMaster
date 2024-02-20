@@ -156,6 +156,7 @@ fun BasketScreen(
     ScreenContent(
         viewState = viewState,
         modifier = modifier.fillMaxSize(),
+        price = googleViewState.photoPrice,
         onBackClick = onBackClick,
         onCompletePurchase = viewModel::onCompletePurchase
     )
@@ -165,6 +166,7 @@ fun BasketScreen(
 private fun ScreenContent(
     viewState: BasketViewState,
     modifier: Modifier,
+    price: String?,
     onBackClick: () -> Unit,
     onCompletePurchase: () -> Unit
 ) {
@@ -221,7 +223,7 @@ private fun ScreenContent(
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     ScreenButton(
-                        text = stringResource(id = R.string.complete_purchase),
+                        text = price ?: stringResource(id = R.string.complete_purchase),
                         onAction = onCompletePurchase
                     )
                     Spacer(modifier = Modifier.height(10.dp))
@@ -237,7 +239,10 @@ private fun ScreenContent(
 @Composable
 fun DropDown(modifier: Modifier = Modifier) {
     var expanded by remember { mutableStateOf(false) }
-    val items = listOf("")
+    val items = listOf(LocalContext.current.getString(R.string.biometric_photo))
+    var selectedText by remember {
+        mutableStateOf(items.first())
+    }
     Box(
         contentAlignment = Alignment.CenterStart,
         modifier = modifier
@@ -252,7 +257,7 @@ fun DropDown(modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                stringResource(id = R.string.select),
+                selectedText,
                 color = Color.Black,
                 fontSize = 16.sp
             )
@@ -267,7 +272,9 @@ fun DropDown(modifier: Modifier = Modifier) {
             onDismissRequest = { expanded = false }
         ) {
             items.forEach { label ->
-                DropdownMenuItem(text = { Text(text = label) }, onClick = { })
+                DropdownMenuItem(text = { Text(text = label) }, onClick = {
+                    selectedText = label
+                })
             }
         }
     }

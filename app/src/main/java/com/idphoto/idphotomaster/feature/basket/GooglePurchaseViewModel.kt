@@ -53,6 +53,7 @@ class GooglePurchaseViewModel @Inject constructor() : BaseViewModel<GooglePurcha
             override fun onBillingSetupFinished(result: BillingResult) {
                 if (result.responseCode == BillingClient.BillingResponseCode.OK) {
                     println("Purchase: billing setup completed")
+                    getPrice()
                 }
             }
 
@@ -131,6 +132,31 @@ class GooglePurchaseViewModel @Inject constructor() : BaseViewModel<GooglePurcha
         }
     }
 
+    private fun getPrice() {
+        val queryProductDetailsParams =
+            QueryProductDetailsParams.newBuilder()
+                .setProductList(
+                    ImmutableList.of(
+                        QueryProductDetailsParams.Product.newBuilder()
+                            .setProductId("id_photo")
+                            .setProductType(BillingClient.ProductType.INAPP)
+                            .build()
+                    )
+                ).build()
+        billingClient.queryProductDetailsAsync(queryProductDetailsParams) { billingResult, productDetailsList ->
+            println("Billing-> ${billingResult.responseCode}")
+            println("Billing-> ${productDetailsList}")
+            if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                val productDetails = productDetailsList.firstOrNull { productDetails ->
+                    productDetails.productId == "id_photo"
+                }
+                productDetails?.let {
+                    updateState { copy(photoPrice = it.oneTimePurchaseOfferDetails?.formattedPrice) }
+                }
+            }
+        }
+    }
+
     override fun createInitialState(): GooglePurchaseViewState {
         return GooglePurchaseViewState()
     }
@@ -151,5 +177,6 @@ class GooglePurchaseViewModel @Inject constructor() : BaseViewModel<GooglePurcha
 data class GooglePurchaseViewState(
     val purchaseSuccess: StateEvent = consumed,
     val purchaseFailed: StateEvent = consumed,
-    val userCancelledPurchase: StateEvent = consumed
+    val userCancelledPurchase: StateEvent = consumed,
+    val photoPrice: String? = null
 ) : IViewState
