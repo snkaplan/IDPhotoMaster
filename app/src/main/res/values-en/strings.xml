@@ -84,4 +84,7 @@
     <string name="confirm">Confirm</string>
     <string name="send">Send</string>
     <string name="biometric_photo">Biometric Photo</string>
+    <string name="save_to_gallery">Save to Gallery</string>
+    <string name="save_to_gallery_desc">Save photo to gallery?</string>
+    <string name="photo_saved_to_gallery">Photo Saved to Gallery</string>
 </resources>

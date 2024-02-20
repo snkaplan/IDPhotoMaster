@@ -27,6 +27,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,28 +49,22 @@ import com.idphoto.idphotomaster.core.domain.model.UserSavedPhoto
 import com.idphoto.idphotomaster.core.systemdesign.components.AppScaffold
 import com.idphoto.idphotomaster.core.systemdesign.components.AppTopBar
 import com.idphoto.idphotomaster.core.systemdesign.components.CoilImageComponent
+import com.idphoto.idphotomaster.core.systemdesign.components.Dialog
 import com.idphoto.idphotomaster.core.systemdesign.components.ErrorDialog
 import com.idphoto.idphotomaster.core.systemdesign.icon.AppIcons
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.Blue
 import com.idphoto.idphotomaster.core.systemdesign.utils.DisableScreenshot
 import com.idphoto.idphotomaster.core.systemdesign.utils.findActivity
-import de.palm.composestateevents.NavigationEventEffect
 
 @Composable
 fun SavedPhotosScreen(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
-    navigateToEditScreen: (String) -> Unit,
     viewModel: SavedPhotosViewModel = hiltViewModel()
 ) {
     val activity = LocalContext.current.findActivity()
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    NavigationEventEffect(
-        event = uiState.navigateToEditPhoto,
-        onConsumed = viewModel::onNavigateEditPhotoConsumed,
-        action = navigateToEditScreen
-    )
     LaunchedEffect(key1 = true) {
         viewModel.init()
     }
@@ -106,6 +103,16 @@ private fun ScreenContent(
             )
         },
     ) { padding ->
+        if (viewState.showPhotoSavedDialog) {
+            Dialog(
+                title = stringResource(id = R.string.photo_saved_to_gallery),
+                description = "",
+                primaryButtonText = stringResource(id = R.string.ok),
+                primaryButtonClick = { onViewEvent.invoke(SavedPhotosViewEvent.PhotoSavedDialogDismissed) }
+            ) {
+                onViewEvent.invoke(SavedPhotosViewEvent.PhotoSavedDialogDismissed)
+            }
+        }
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -199,6 +206,24 @@ fun PhotoItem(
     onViewEvent: (SavedPhotosViewEvent) -> Unit
 ) {
     val context = LocalContext.current
+    var showSaveDialog by remember { mutableStateOf(false) }
+    if (showSaveDialog) {
+        Dialog(
+            title = stringResource(id = R.string.save_to_gallery),
+            description = stringResource(id = R.string.save_to_gallery_desc),
+            primaryButtonText = stringResource(id = R.string.ok),
+            secondaryButtonText = stringResource(id = R.string.cancel),
+            primaryButtonClick = {
+                showSaveDialog = false
+                onViewEvent.invoke(SavedPhotosViewEvent.OnBoughtPhotoClicked(savedPhoto.cdnUrl, context))
+            },
+            secondaryButtonClick = {
+                showSaveDialog = false
+            }
+        ) {
+            showSaveDialog = false
+        }
+    }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -207,12 +232,9 @@ fun PhotoItem(
             .border(4.dp, BackgroundColor, RoundedCornerShape(10.dp))
             .padding(4.dp)
             .clickable {
-                // TODO We removed this feature for now.
-                /* if (savedPhoto.bought.not()) {
-                    onViewEvent.invoke(SavedPhotosViewEvent.OnSavedPhotoClicked(savedPhoto.cdnUrl))
-                } else {
-                    onViewEvent.invoke(SavedPhotosViewEvent.OnBoughtPhotoClicked(savedPhoto.cdnUrl, context))
-                } */
+                if (savedPhoto.bought) {
+                    showSaveDialog = true
+                }
             }
     ) {
         CoilImageComponent(imageUrl = savedPhoto.cdnUrl)
