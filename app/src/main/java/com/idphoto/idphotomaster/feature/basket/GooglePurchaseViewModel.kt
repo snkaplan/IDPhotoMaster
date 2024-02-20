@@ -28,7 +28,6 @@ import javax.inject.Inject
 class GooglePurchaseViewModel @Inject constructor() : BaseViewModel<GooglePurchaseViewState>() {
 
     private val purchaseUpdateListener = PurchasesUpdatedListener { result, purchases ->
-        println("PurchaseTest listener updated -> ${result.responseCode}")
         if (result.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
             for (purchase in purchases) {
                 updateState { copy(purchaseSuccess = triggered) }

@@ -23,9 +23,11 @@ import de.palm.composestateevents.consumed
 import de.palm.composestateevents.triggered
 import getExceptionModel
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -43,6 +45,20 @@ class BasketViewModel @Inject constructor(
 
     init {
         readImageAndUpdateState(photoArgs.selectedPhotoPath)
+    }
+
+    fun onTriggerViewEvent(event: BasketViewEvent) {
+        viewModelScope.launch {
+            when (event) {
+                BasketViewEvent.OnCompletePurchase -> onCompletePurchase()
+                BasketViewEvent.OnPurchaseSuccess -> purchaseSuccess()
+                BasketViewEvent.RollbackPurchase -> rollbackPurchase()
+                BasketViewEvent.OnErrorDialogDismiss -> updateState { copy(exception = null) }
+                BasketViewEvent.OnNavigateToLoginConsumed -> updateState { copy(navigateToLogin = consumed) }
+                BasketViewEvent.OnPurchaseCompletedConsumed -> updateState { copy(purchaseCompleted = consumed) }
+                BasketViewEvent.OnStartGooglePurchaseConsumed -> updateState { copy(startGooglePurchase = consumed) }
+            }
+        }
     }
 
     private fun readImageAndUpdateState(photoPath: String) {
@@ -78,7 +94,7 @@ class BasketViewModel @Inject constructor(
         }
     }
 
-    fun onCompletePurchase() {
+    private fun onCompletePurchase() {
         if (userRepository.currentUser == null) {
             updateState { copy(navigateToLogin = triggered) }
         } else {
@@ -86,12 +102,8 @@ class BasketViewModel @Inject constructor(
         }
     }
 
-    fun purchaseSuccess() {
-        savePhotoToGallery()
-    }
-
-    private fun savePhotoToGallery() {
-        viewModelScope.launch {
+    private suspend fun purchaseSuccess() {
+        withContext(currentCoroutineContext()) {
             uiState.value.photo?.let {
                 savePhotoToGalleryUseCase(capturePhotoBitmap = it).asResource().onEach { result ->
                     when (result) {
@@ -118,8 +130,8 @@ class BasketViewModel @Inject constructor(
         }
     }
 
-    fun rollbackPurchase() {
-        viewModelScope.launch {
+    private suspend fun rollbackPurchase() {
+        withContext(currentCoroutineContext()) {
             safeLet(userRepository.currentUser?.uid, uiState.value.lastPurchasedPhotoId) { uid, photoId ->
                 rollbackPurchaseUseCase.invoke(uid, photoId).asResource().onEach {
                     when (it) {
@@ -165,22 +177,6 @@ class BasketViewModel @Inject constructor(
             }
         }
     }
-
-    fun onNavigateToLoginConsumed() {
-        updateState { copy(navigateToLogin = consumed) }
-    }
-
-    fun onStartGooglePurchaseConsumed() {
-        updateState { copy(startGooglePurchase = consumed) }
-    }
-
-    fun onPurchaseCompletedConsumed() {
-        updateState { copy(purchaseCompleted = consumed) }
-    }
-
-    fun onErrorDialogDismiss() {
-        updateState { copy(exception = null) }
-    }
 }
 
 data class BasketViewState(
@@ -192,3 +188,13 @@ data class BasketViewState(
     val exception: ExceptionModel? = null,
     val lastPurchasedPhotoId: String? = null
 ) : IViewState
+
+sealed interface BasketViewEvent {
+    data object OnCompletePurchase : BasketViewEvent
+    data object OnPurchaseSuccess : BasketViewEvent
+    data object RollbackPurchase : BasketViewEvent
+    data object OnNavigateToLoginConsumed : BasketViewEvent
+    data object OnStartGooglePurchaseConsumed : BasketViewEvent
+    data object OnPurchaseCompletedConsumed : BasketViewEvent
+    data object OnErrorDialogDismiss : BasketViewEvent
+}

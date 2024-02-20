@@ -82,19 +82,25 @@ fun BasketScreen(
     }
     NavigationEventEffect(
         event = viewState.navigateToLogin,
-        onConsumed = viewModel::onNavigateToLoginConsumed,
+        onConsumed = {
+            viewModel.onTriggerViewEvent(BasketViewEvent.OnNavigateToLoginConsumed)
+        },
         action = navigateToLogin
     )
     EventEffect(
         event = viewState.startGooglePurchase,
-        onConsumed = viewModel::onStartGooglePurchaseConsumed,
+        onConsumed = {
+            viewModel.onTriggerViewEvent(BasketViewEvent.OnStartGooglePurchaseConsumed)
+        },
         action = {
             googlePurchaseViewModel.purchase("id_photo", context as Activity)
         }
     )
     EventEffect(
         event = viewState.purchaseCompleted,
-        onConsumed = viewModel::onPurchaseCompletedConsumed,
+        onConsumed = {
+            viewModel.onTriggerViewEvent(BasketViewEvent.OnPurchaseCompletedConsumed)
+        },
         action = {
             mainViewModel.showCustomDialog(
                 title = context.getString(R.string.purchase_success_description),
@@ -109,7 +115,7 @@ fun BasketScreen(
     EventEffect(
         event = googleViewState.purchaseSuccess,
         onConsumed = googlePurchaseViewModel::onPurchaseSuccessConsumed,
-        action = { viewModel.purchaseSuccess() }
+        action = { viewModel.onTriggerViewEvent(BasketViewEvent.OnPurchaseSuccess) }
     )
     EventEffect(
         event = googleViewState.purchaseFailed,
@@ -121,7 +127,7 @@ fun BasketScreen(
                 icon = Icons.Default.WarningAmber,
                 confirmText = context.getString(R.string.ok)
             )
-            viewModel.rollbackPurchase()
+            viewModel.onTriggerViewEvent(BasketViewEvent.RollbackPurchase)
         }
     )
     EventEffect(
@@ -134,7 +140,7 @@ fun BasketScreen(
                 icon = Icons.Default.WarningAmber,
                 confirmText = context.getString(R.string.ok)
             )
-            viewModel.rollbackPurchase()
+            viewModel.onTriggerViewEvent(BasketViewEvent.RollbackPurchase)
         }
     )
     DisableScreenshot(activity)
@@ -144,13 +150,13 @@ fun BasketScreen(
             if (viewState.exception?.descriptionResId == R.string.exception_save_image_to_gallery) {
                 onCompletePurchase.invoke()
             }
-            viewModel.onErrorDialogDismiss()
+            viewModel.onTriggerViewEvent(BasketViewEvent.OnErrorDialogDismiss)
         },
         onPrimaryButtonClick = {
             if (viewState.exception?.descriptionResId == R.string.exception_save_image_to_gallery) {
                 onCompletePurchase.invoke()
             }
-            viewModel.onErrorDialogDismiss()
+            viewModel.onTriggerViewEvent(BasketViewEvent.OnErrorDialogDismiss)
         },
     )
     ScreenContent(
@@ -158,7 +164,7 @@ fun BasketScreen(
         modifier = modifier.fillMaxSize(),
         price = googleViewState.photoPrice,
         onBackClick = onBackClick,
-        onCompletePurchase = viewModel::onCompletePurchase
+        viewEvent = viewModel::onTriggerViewEvent
     )
 }
 
@@ -168,7 +174,7 @@ private fun ScreenContent(
     modifier: Modifier,
     price: String?,
     onBackClick: () -> Unit,
-    onCompletePurchase: () -> Unit
+    viewEvent: (BasketViewEvent) -> Unit
 ) {
     if (viewState.loading) {
         BackHandler {}
@@ -224,7 +230,9 @@ private fun ScreenContent(
                     Spacer(modifier = Modifier.weight(1f))
                     ScreenButton(
                         text = price ?: stringResource(id = R.string.complete_purchase),
-                        onAction = onCompletePurchase
+                        onAction = {
+                            viewEvent.invoke(BasketViewEvent.OnCompletePurchase)
+                        }
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                 }
