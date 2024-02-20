@@ -32,6 +32,7 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -48,6 +49,24 @@ class EditPhotoViewModel @Inject constructor(
 
     init {
         readImageAndUpdateState(photoArgs.photoPath)
+    }
+
+    fun onTriggerViewEvent(event: EditPhotoViewEvent) {
+        viewModelScope.launch {
+            when (event) {
+                is EditPhotoViewEvent.OnBrightnessChange -> onBrightnessChanged(event.brightness)
+                EditPhotoViewEvent.OnSavePhoto -> savePhoto()
+                is EditPhotoViewEvent.OnHeatChange -> onHeatChanged(event.heat)
+                is EditPhotoViewEvent.OnSharpnessChange -> onSharpnessChanged(event.sharpness)
+                is EditPhotoViewEvent.InitImage -> initImage(event.context)
+                is EditPhotoViewEvent.OnRemoveBackground -> onRemoveBackground(event.remove)
+                EditPhotoViewEvent.OnNavigateToBasket -> navigateToBasket()
+                EditPhotoViewEvent.OnErrorDialogDismissed -> updateState { copy(exception = null) }
+                EditPhotoViewEvent.OnNavigateToBasketConsumed -> updateState { copy(navigateToBasket = consumed()) }
+                EditPhotoViewEvent.OnPhotoReadConsumed -> updateState { copy(photoReadCompleted = consumed) }
+                EditPhotoViewEvent.OnResetImageConsumed -> updateState { copy(resetImage = consumed) }
+            }
+        }
     }
 
     private fun readImageAndUpdateState(photoPath: String) {
@@ -86,9 +105,9 @@ class EditPhotoViewModel @Inject constructor(
         }
     }
 
-    fun onBrightnessChanged(brightness: Float) {
+    private suspend fun onBrightnessChanged(brightness: Float) {
         uiState.value.gpuImage?.let { safeImage ->
-            viewModelScope.launch(ioDispatcher) {
+            withContext(ioDispatcher) {
                 safeImage.setFilter(getFilters(brightness = brightness))
                 updateState {
                     copy(
@@ -100,9 +119,9 @@ class EditPhotoViewModel @Inject constructor(
         }
     }
 
-    fun onSharpnessChanged(sharpness: Float) {
+    private suspend fun onSharpnessChanged(sharpness: Float) {
         uiState.value.gpuImage?.let { safeImage ->
-            viewModelScope.launch(ioDispatcher) {
+            withContext(ioDispatcher) {
                 safeImage.setFilter(getFilters(sharpness = sharpness))
                 updateState {
                     copy(
@@ -114,9 +133,9 @@ class EditPhotoViewModel @Inject constructor(
         }
     }
 
-    fun onHeatChanged(heat: Float) {
+    private suspend fun onHeatChanged(heat: Float) {
         uiState.value.gpuImage?.let { safeImage ->
-            viewModelScope.launch(ioDispatcher) {
+            withContext(ioDispatcher) {
                 safeImage.setFilter(getFilters(heat = heat))
                 updateState {
                     copy(
@@ -128,8 +147,8 @@ class EditPhotoViewModel @Inject constructor(
         }
     }
 
-    fun initImage(context: Context) {
-        viewModelScope.launch(ioDispatcher) {
+    private suspend fun initImage(context: Context) {
+        withContext(ioDispatcher) {
             val gpuImage = GPUImage(context)
             gpuImage.setImage(uiState.value.initialPhoto)
             gpuImage.applyFilters(getFilters())
@@ -151,8 +170,8 @@ class EditPhotoViewModel @Inject constructor(
         return GPUImageFilterGroup(filters)
     }
 
-    fun onRemoveBackground(remove: Boolean) {
-        viewModelScope.launch(ioDispatcher) {
+    private suspend fun onRemoveBackground(remove: Boolean) {
+        withContext(ioDispatcher) {
             if (remove) {
                 uiState.value.updatedPhoto?.let { safePhoto ->
                     updateState { copy(loading = true) }
@@ -173,8 +192,8 @@ class EditPhotoViewModel @Inject constructor(
         }
     }
 
-    fun savePhoto() {
-        viewModelScope.launch(ioDispatcher) {
+    private suspend fun savePhoto() {
+        withContext(ioDispatcher) {
             uiState.value.updatedPhoto?.let {
                 savePhotoToCache(photoBitmap = it, photoPath = uiState.value.savedPhotoPath).asResource()
                     .onEach { result ->
@@ -204,8 +223,8 @@ class EditPhotoViewModel @Inject constructor(
         }
     }
 
-    fun navigateToBasket() {
-        viewModelScope.launch(ioDispatcher) {
+    private suspend fun navigateToBasket() {
+        withContext(ioDispatcher) {
             uiState.value.updatedPhoto?.let {
                 saveImageToTempFile(photoBitmap = it).asResource()
                     .onEach { result ->
@@ -237,22 +256,6 @@ class EditPhotoViewModel @Inject constructor(
             }
         }
     }
-
-    fun onPhotoReadCompletedConsumed() {
-        updateState { copy(photoReadCompleted = consumed) }
-    }
-
-    fun onResetImageConsumed() {
-        updateState { copy(resetImage = consumed) }
-    }
-
-    fun onNavigateToBasketConsumed() {
-        updateState { copy(navigateToBasket = consumed()) }
-    }
-
-    fun onErrorDialogDismiss() {
-        updateState { copy(exception = null) }
-    }
 }
 
 data class EditPhotoViewState(
@@ -270,3 +273,17 @@ data class EditPhotoViewState(
     val navigateToBasket: StateEventWithContent<String> = consumed(),
     val exception: ExceptionModel? = null
 ) : IViewState
+
+sealed interface EditPhotoViewEvent {
+    data class OnSharpnessChange(val sharpness: Float) : EditPhotoViewEvent
+    data class OnHeatChange(val heat: Float) : EditPhotoViewEvent
+    data class OnBrightnessChange(val brightness: Float) : EditPhotoViewEvent
+    data class InitImage(val context: Context) : EditPhotoViewEvent
+    data class OnRemoveBackground(val remove: Boolean) : EditPhotoViewEvent
+    data object OnSavePhoto : EditPhotoViewEvent
+    data object OnNavigateToBasket : EditPhotoViewEvent
+    data object OnErrorDialogDismissed : EditPhotoViewEvent
+    data object OnPhotoReadConsumed : EditPhotoViewEvent
+    data object OnResetImageConsumed : EditPhotoViewEvent
+    data object OnNavigateToBasketConsumed : EditPhotoViewEvent
+}

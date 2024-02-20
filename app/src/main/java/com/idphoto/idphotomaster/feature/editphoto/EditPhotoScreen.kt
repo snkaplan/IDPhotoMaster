@@ -69,17 +69,23 @@ fun EditPhotoScreen(
     val viewState by viewModel.uiState.collectAsStateWithLifecycle()
     EventEffect(
         event = viewState.photoReadCompleted,
-        onConsumed = viewModel::onPhotoReadCompletedConsumed,
-        action = { viewModel.initImage(context) }
+        onConsumed = {
+            viewModel.onTriggerViewEvent(EditPhotoViewEvent.OnPhotoReadConsumed)
+        },
+        action = { viewModel.onTriggerViewEvent(EditPhotoViewEvent.InitImage(context)) }
     )
     EventEffect(
         event = viewState.resetImage,
-        onConsumed = viewModel::onResetImageConsumed,
-        action = { viewModel.initImage(context) }
+        onConsumed = {
+            viewModel.onTriggerViewEvent(EditPhotoViewEvent.OnResetImageConsumed)
+        },
+        action = { viewModel.onTriggerViewEvent(EditPhotoViewEvent.InitImage(context)) }
     )
     NavigationEventEffect(
         event = viewState.navigateToBasket,
-        onConsumed = viewModel::onNavigateToBasketConsumed,
+        onConsumed = {
+            viewModel.onTriggerViewEvent(EditPhotoViewEvent.OnNavigateToBasketConsumed)
+        },
         action = navigateToBasket
     )
 
@@ -87,23 +93,18 @@ fun EditPhotoScreen(
     ErrorDialog(
         exception = viewState.exception,
         onDismissRequest = {
-            viewModel.onErrorDialogDismiss()
+            viewModel.onTriggerViewEvent(EditPhotoViewEvent.OnErrorDialogDismissed)
         },
         onPrimaryButtonClick = {
-            viewModel.onErrorDialogDismiss()
-        },
+            viewModel.onTriggerViewEvent(EditPhotoViewEvent.OnErrorDialogDismissed)
+        }
     )
     viewState.updatedPhoto?.let {
         ScreenContent(
             viewState = viewState,
             modifier = modifier.fillMaxSize(),
             onBackClick = onBackClick,
-            onBrightnessChanged = viewModel::onBrightnessChanged,
-            onSharpnessChanged = viewModel::onSharpnessChanged,
-            onHeatChanged = viewModel::onHeatChanged,
-            onRemoveBackground = viewModel::onRemoveBackground,
-            onSaveImage = viewModel::savePhoto,
-            onContinue = viewModel::navigateToBasket
+            onViewEvent = viewModel::onTriggerViewEvent
         )
     }
 }
@@ -113,12 +114,7 @@ private fun ScreenContent(
     viewState: EditPhotoViewState,
     modifier: Modifier,
     onBackClick: () -> Unit,
-    onBrightnessChanged: (brightness: Float) -> Unit,
-    onSharpnessChanged: (brightness: Float) -> Unit,
-    onHeatChanged: (brightness: Float) -> Unit,
-    onRemoveBackground: (remove: Boolean) -> Unit,
-    onSaveImage: () -> Unit,
-    onContinue: () -> Unit
+    onViewEvent: (EditPhotoViewEvent) -> Unit
 ) {
     AppScaffold(
         modifier = modifier.fillMaxSize(),
@@ -161,27 +157,22 @@ private fun ScreenContent(
                         viewState.sharpness,
                         viewState.heat,
                         viewState.loading,
-                        {
-                            onBrightnessChanged.invoke(it)
-                        },
-                        {
-                            onSharpnessChanged.invoke(it)
-                        },
-                        {
-                            onHeatChanged(it)
-                        },
-                        onRemoveBackground
+                        onViewEvent
                     )
                     Spacer(modifier = Modifier.height(15.dp))
                     ScreenButton(
                         text = stringResource(id = R.string.continue_text),
-                        onAction = onContinue,
+                        onAction = {
+                            onViewEvent.invoke(EditPhotoViewEvent.OnNavigateToBasket)
+                        },
                         enabled = viewState.loading.not()
                     )
                     Spacer(modifier = Modifier.height(15.dp))
                     ScreenButton(
                         text = stringResource(id = R.string.save_changes),
-                        onAction = onSaveImage,
+                        onAction = {
+                            onViewEvent.invoke(EditPhotoViewEvent.OnSavePhoto)
+                        },
                         enabled = viewState.loading.not()
                     )
                     Spacer(modifier = Modifier.height(10.dp))
@@ -197,10 +188,7 @@ fun EditField(
     contrast: Float,
     heat: Float,
     loading: Boolean,
-    onBrightnessChanged: (brightness: Float) -> Unit,
-    onSharpnessChanged: (contrast: Float) -> Unit,
-    onHeatChanged: (heat: Float) -> Unit,
-    onRemoveBackground: (remove: Boolean) -> Unit
+    onViewEvent: (EditPhotoViewEvent) -> Unit
 ) {
     var checked by remember { mutableStateOf(false) }
     Card(
@@ -211,9 +199,15 @@ fun EditField(
         shape = RoundedCornerShape(15.dp)
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
-            EditItem(stringResource(id = R.string.sharpness), loading, contrast, 0f, 4f, onSharpnessChanged)
-            EditItem(stringResource(id = R.string.brightness), loading, brightness, -1f, 1f, onBrightnessChanged)
-            EditItem(stringResource(id = R.string.heat), loading, heat, 4000f, 7000f, onHeatChanged)
+            EditItem(stringResource(id = R.string.sharpness), loading, contrast, 0f, 4f) {
+                onViewEvent.invoke(EditPhotoViewEvent.OnSharpnessChange(it))
+            }
+            EditItem(stringResource(id = R.string.brightness), loading, brightness, -1f, 1f) {
+                onViewEvent.invoke(EditPhotoViewEvent.OnBrightnessChange(it))
+            }
+            EditItem(stringResource(id = R.string.heat), loading, heat, 4000f, 7000f) {
+                onViewEvent.invoke(EditPhotoViewEvent.OnHeatChange(it))
+            }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -227,7 +221,7 @@ fun EditField(
                     checked = checked,
                     onCheckedChange = {
                         checked = it
-                        onRemoveBackground.invoke(checked)
+                        onViewEvent.invoke(EditPhotoViewEvent.OnRemoveBackground(checked))
                     },
                     colors = SwitchDefaults.colors(checkedTrackColor = Color.Green)
                 )
