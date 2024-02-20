@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.LightGrey
+import com.idphoto.idphotomaster.feature.login.LoginViewEvent
 import com.idphoto.idphotomaster.feature.login.LoginViewState
 import com.idphoto.idphotomaster.feature.login.components.PasswordTextField
 import com.idphoto.idphotomaster.feature.login.components.UserInputTextField
@@ -37,10 +38,7 @@ import de.palm.composestateevents.EventEffect
 @Composable
 fun LoginScreenContent(
     viewState: LoginViewState,
-    onMailValueChange: (String) -> Unit,
-    onPasswordValueChange: (String) -> Unit,
-    onSendResetPasswordMail: (String) -> Unit,
-    onResetMailSentConsumed: () -> Unit
+    onViewEvent: (LoginViewEvent) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -48,7 +46,9 @@ fun LoginScreenContent(
     val showForgotPasswordBottomSheet = remember { mutableStateOf(false) }
     EventEffect(
         event = viewState.passwordResetMailSent,
-        onConsumed = onResetMailSentConsumed,
+        onConsumed = {
+            onViewEvent.invoke(LoginViewEvent.OnResetPasswordMailConsumed)
+        },
         action = {
             Toast.makeText(context, context.getString(R.string.mail_error), Toast.LENGTH_LONG).show()
         }
@@ -59,7 +59,7 @@ fun LoginScreenContent(
             onDismissRequest = { showForgotPasswordBottomSheet.value = false },
             onConfirm = {
                 showForgotPasswordBottomSheet.value = false
-                onSendResetPasswordMail.invoke(it)
+                onViewEvent.invoke(LoginViewEvent.OnSendResetPasswordMail(it))
             }
         )
     }
@@ -77,7 +77,7 @@ fun LoginScreenContent(
             value = viewState.mail,
             modifier = Modifier.padding(horizontal = 16.dp),
             errorMessageRes = viewState.mailErrorMessage,
-            onValueChange = onMailValueChange,
+            onValueChange = { onViewEvent.invoke(LoginViewEvent.OnChangeMail(it)) },
             placeholder = R.string.mail_hint,
             keyboardActions = KeyboardActions {
                 focusManager.moveFocus(FocusDirection.Down)
@@ -87,7 +87,7 @@ fun LoginScreenContent(
         PasswordTextField(
             value = viewState.password,
             errorMessageRes = viewState.passwordErrorMessage,
-            onValueChange = onPasswordValueChange,
+            onValueChange = { onViewEvent.invoke(LoginViewEvent.OnPasswordChange(it)) },
             placeholder = R.string.password_hint,
             enabled = viewState.loading.not(),
             keyboardActions = KeyboardActions { keyboardController?.hide() }

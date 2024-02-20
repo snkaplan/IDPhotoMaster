@@ -23,9 +23,11 @@ import de.palm.composestateevents.StateEvent
 import de.palm.composestateevents.consumed
 import de.palm.composestateevents.triggered
 import getExceptionModel
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,8 +42,29 @@ class LoginViewModel @Inject constructor(
 
     override fun createInitialState(): LoginViewState = LoginViewState()
 
-    fun onLoginClick() {
+    fun onTriggerViewEvent(viewEvent: LoginViewEvent) {
         viewModelScope.launch {
+            when (viewEvent) {
+                LoginViewEvent.OnLoginClick -> onLoginClick()
+                LoginViewEvent.OnSignupClick -> onSignupClick()
+                is LoginViewEvent.OnLoginWithGoogle -> loginWithGoogle(viewEvent.token)
+                is LoginViewEvent.OnChangeLastname -> onLastnameChange(viewEvent.lastname)
+                is LoginViewEvent.OnChangeMail -> onMailChange(viewEvent.mail)
+                is LoginViewEvent.OnChangeName -> onNameChange(viewEvent.name)
+                is LoginViewEvent.OnPasswordChange -> onPasswordChange(viewEvent.password)
+                is LoginViewEvent.OnPageStateChange -> onPageStateChange(viewEvent.state)
+                is LoginViewEvent.OnSendResetPasswordMail -> onSendResetPasswordMail(viewEvent.mail)
+                LoginViewEvent.OnDismissErrorDialog -> updateState { copy(exception = null) }
+                LoginViewEvent.OnLoginSuccessfulConsumed -> updateState { copy(loginSuccessful = consumed) }
+                LoginViewEvent.OnResetPasswordMailConsumed -> updateState { copy(passwordResetMailSent = consumed) }
+                LoginViewEvent.OnCloseClick -> updateState { copy(closeClicked = triggered) }
+                LoginViewEvent.OnCloseClickConsumed -> updateState { copy(closeClicked = consumed) }
+            }
+        }
+    }
+
+    private suspend fun onLoginClick() {
+        withContext(currentCoroutineContext()) {
             validateAuthUseCase.invoke(currentState.mail, currentState.password)
                 .onEach { result ->
                     when (result) {
@@ -95,8 +118,8 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun onSignupClick() {
-        viewModelScope.launch {
+    private suspend fun onSignupClick() {
+        withContext(currentCoroutineContext()) {
             validateSignupUseCase.invoke(
                 currentState.name,
                 currentState.lastName,
@@ -159,7 +182,7 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun loginWithGoogle(idToken: String) {
+    private fun loginWithGoogle(idToken: String) {
         viewModelScope.launch {
             googleLoginUseCase.invoke(idToken).asResource().onEach { result ->
                 when (result) {
@@ -188,24 +211,53 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    fun onMailChange(mail: String) {
+    private fun onMailChange(mail: String) {
         updateState { copy(mail = mail, mailErrorMessage = null) }
     }
 
-    fun onPasswordChange(password: String) {
+    private fun onPasswordChange(password: String) {
         updateState { copy(password = password, passwordErrorMessage = null) }
     }
 
-    fun onNameChange(name: String) {
+    private fun onNameChange(name: String) {
         updateState { copy(name = name, nameErrorMessage = null) }
     }
 
-    fun onLastnameChange(lastName: String) {
+    private fun onLastnameChange(lastName: String) {
         updateState { copy(lastName = lastName, lastNameErrorMessage = null) }
     }
 
-    fun onPageStateChange(newPageState: PageState) {
+    private fun onPageStateChange(newPageState: PageState) {
         updateState { LoginViewState(pageState = newPageState) }
+    }
+
+    private suspend fun onSendResetPasswordMail(mail: String) {
+        withContext(currentCoroutineContext()) {
+            forgotPasswordUseCase.invoke(mail).asResource().onEach { result ->
+                when (result) {
+                    Resource.Loading -> {
+                        updateState { copy(loading = true) }
+                    }
+
+                    is Resource.Error -> {
+                        updateState {
+                            copy(
+                                loading = false, exception = result.exception?.getExceptionModel(
+                                    descriptionResId = R.string.exception_send_password_reset_email,
+                                    primaryButtonTextResId = null
+                                )
+                            )
+                        }
+                    }
+
+                    is Resource.Success -> {
+                        updateState {
+                            copy(loading = false, passwordResetMailSent = triggered)
+                        }
+                    }
+                }
+            }.launchIn(this)
+        }
     }
 
     private fun handleError(th: Throwable) {
@@ -255,47 +307,6 @@ class LoginViewModel @Inject constructor(
             }
         }
     }
-
-    fun onLoginSuccessfulConsumed() {
-        updateState { copy(loginSuccessful = consumed) }
-    }
-
-    fun onErrorDialogDismiss() {
-        updateState { copy(exception = null) }
-    }
-
-    fun onResetPasswordMailConsumed() {
-        updateState { copy(passwordResetMailSent = consumed) }
-    }
-
-    fun onSendResetPasswordMail(mail: String) {
-        viewModelScope.launch {
-            forgotPasswordUseCase.invoke(mail).asResource().onEach { result ->
-                when (result) {
-                    Resource.Loading -> {
-                        updateState { copy(loading = true) }
-                    }
-
-                    is Resource.Error -> {
-                        updateState {
-                            copy(
-                                loading = false, exception = result.exception?.getExceptionModel(
-                                    descriptionResId = R.string.exception_send_password_reset_email,
-                                    primaryButtonTextResId = null
-                                )
-                            )
-                        }
-                    }
-
-                    is Resource.Success -> {
-                        updateState {
-                            copy(loading = false, passwordResetMailSent = triggered)
-                        }
-                    }
-                }
-            }.launchIn(this)
-        }
-    }
 }
 
 data class LoginViewState(
@@ -311,10 +322,28 @@ data class LoginViewState(
     val pageState: PageState = PageState.LOGIN,
     val loginSuccessful: StateEvent = consumed,
     val passwordResetMailSent: StateEvent = consumed,
+    val closeClicked: StateEvent = consumed,
     val exception: ExceptionModel? = null
 ) : IViewState
 
 enum class PageState {
     LOGIN,
     SIGNUP
+}
+
+sealed interface LoginViewEvent {
+    data object OnLoginClick : LoginViewEvent
+    data object OnSignupClick : LoginViewEvent
+    data class OnLoginWithGoogle(val token: String) : LoginViewEvent
+    data class OnChangeMail(val mail: String) : LoginViewEvent
+    data class OnChangeName(val name: String) : LoginViewEvent
+    data class OnChangeLastname(val lastname: String) : LoginViewEvent
+    data class OnPasswordChange(val password: String) : LoginViewEvent
+    data class OnPageStateChange(val state: PageState) : LoginViewEvent
+    data class OnSendResetPasswordMail(val mail: String) : LoginViewEvent
+    data object OnLoginSuccessfulConsumed : LoginViewEvent
+    data object OnDismissErrorDialog : LoginViewEvent
+    data object OnResetPasswordMailConsumed : LoginViewEvent
+    data object OnCloseClick : LoginViewEvent
+    data object OnCloseClickConsumed : LoginViewEvent
 }

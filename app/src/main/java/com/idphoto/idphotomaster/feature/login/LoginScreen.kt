@@ -67,49 +67,41 @@ fun LoginScreen(
     val viewState by viewModel.uiState.collectAsStateWithLifecycle()
     NavigationEventEffect(
         event = viewState.loginSuccessful,
-        onConsumed = viewModel::onLoginSuccessfulConsumed,
+        onConsumed = {
+            viewModel.onTriggerViewEvent(LoginViewEvent.OnLoginSuccessfulConsumed)
+        },
+        action = onCloseClick
+    )
+
+    NavigationEventEffect(
+        event = viewState.closeClicked,
+        onConsumed = {
+            viewModel.onTriggerViewEvent(LoginViewEvent.OnCloseClickConsumed)
+        },
         action = onCloseClick
     )
 
     ErrorDialog(
         exception = viewState.exception,
         onDismissRequest = {
-            viewModel.onErrorDialogDismiss()
+            viewModel.onTriggerViewEvent(LoginViewEvent.OnDismissErrorDialog)
         },
         onPrimaryButtonClick = {
-            viewModel.onErrorDialogDismiss()
+            viewModel.onTriggerViewEvent(LoginViewEvent.OnDismissErrorDialog)
         },
     )
     ScreenContent(
         viewState = viewState,
         modifier = modifier.fillMaxSize(),
-        onMailValueChange = viewModel::onMailChange,
-        onPasswordValueChange = viewModel::onPasswordChange,
-        onStateChange = viewModel::onPageStateChange,
-        onNameValueChange = viewModel::onNameChange,
-        onLastnameValueChange = viewModel::onLastnameChange,
-        onAction = if (viewState.pageState == PageState.LOGIN) viewModel::onLoginClick else viewModel::onSignupClick,
-        onCloseClick = onCloseClick,
-        onGoogleSignInClicked = viewModel::loginWithGoogle,
-        onSendResetPasswordMail = viewModel::onSendResetPasswordMail,
-        onResetMailSentConsumed = viewModel::onResetPasswordMailConsumed
+        onViewEvent = viewModel::onTriggerViewEvent
     )
 }
 
 @Composable
 fun ScreenContent(
     viewState: LoginViewState,
-    onMailValueChange: (String) -> Unit,
-    onPasswordValueChange: (String) -> Unit,
-    onStateChange: (PageState) -> Unit,
-    onNameValueChange: (String) -> Unit,
-    onLastnameValueChange: (String) -> Unit,
-    onAction: () -> Unit,
-    onCloseClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onGoogleSignInClicked: (String) -> Unit,
-    onSendResetPasswordMail: (String) -> Unit,
-    onResetMailSentConsumed: () -> Unit
+    onViewEvent: (LoginViewEvent) -> Unit,
 ) {
     val titleTextId = remember { mutableIntStateOf(-1) }
     val descriptionTextId = remember { mutableIntStateOf(-1) }
@@ -157,7 +149,7 @@ fun ScreenContent(
                         .size(40.dp)
                         .clip(RoundedCornerShape(10.dp))
                         .background(Blue)
-                        .clickable { onCloseClick() }
+                        .clickable { onViewEvent.invoke(LoginViewEvent.OnCloseClick) }
                         .padding(5.dp),
                     imageVector = Icons.Filled.Close,
                     contentDescription = "",
@@ -188,24 +180,23 @@ fun ScreenContent(
             if (viewState.pageState == PageState.LOGIN) {
                 LoginScreenContent(
                     viewState,
-                    onMailValueChange,
-                    onPasswordValueChange,
-                    onSendResetPasswordMail,
-                    onResetMailSentConsumed
+                    onViewEvent = onViewEvent
                 )
             } else {
                 SignupScreenContent(
                     viewState,
-                    onMailValueChange,
-                    onPasswordValueChange,
-                    onNameValueChange,
-                    onLastnameValueChange
+                    onViewEvent = onViewEvent
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
             Button(
                 colors = ButtonDefaults.buttonColors(containerColor = Blue),
-                onClick = { onAction.invoke() }, modifier = Modifier
+                onClick = {
+                    if (viewState.pageState == PageState.LOGIN) {
+                        onViewEvent.invoke(LoginViewEvent.OnLoginClick)
+                    } else onViewEvent.invoke(LoginViewEvent.OnSignupClick)
+                },
+                modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp),
                 shape = RoundedCornerShape(10.dp),
@@ -246,7 +237,13 @@ fun ScreenContent(
                 }
             }) {
                 if (viewState.loading.not()) {
-                    onStateChange(if (viewState.pageState == PageState.LOGIN) PageState.SIGNUP else PageState.LOGIN)
+                    onViewEvent.invoke(
+                        LoginViewEvent.OnPageStateChange(
+                            if (viewState.pageState == PageState.LOGIN) {
+                                PageState.SIGNUP
+                            } else PageState.LOGIN
+                        )
+                    )
                 }
             }
             Spacer(modifier = Modifier.height(5.dp))
@@ -254,9 +251,9 @@ fun ScreenContent(
                 text = stringResource(id = R.string.sign_in_with_google),
                 modifier = Modifier.fillMaxWidth(),
                 onSuccess = { idToken ->
-                    onGoogleSignInClicked.invoke(idToken)
+                    onViewEvent.invoke(LoginViewEvent.OnLoginWithGoogle(idToken))
                 },
-                onError = { errorMessage ->
+                onError = {
                     // The user failed to sign in with Google
                 }
             )
