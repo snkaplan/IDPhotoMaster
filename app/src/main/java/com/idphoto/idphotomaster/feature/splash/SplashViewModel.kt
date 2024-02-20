@@ -18,13 +18,6 @@ class SplashViewModel @Inject constructor(
     private val localDataStore: LocalDataStore,
 ) : BaseViewModel<SplashViewState>() {
     override fun createInitialState(): SplashViewState = SplashViewState()
-    fun onNavigateToHomeConsumed() {
-        updateState { copy(navigateToHome = consumed) }
-    }
-
-    fun onNavigateToTutorialConsumed() {
-        updateState { copy(navigateToTutorial = consumed) }
-    }
 
     init {
         viewModelScope.launch {
@@ -40,6 +33,21 @@ class SplashViewModel @Inject constructor(
             }
         }
     }
+
+    fun onTriggerViewEvent(event: SplashViewEvent) {
+        when (event) {
+            SplashViewEvent.OnNavigateToHomeConsumed -> onNavigateToHomeConsumed()
+            SplashViewEvent.OnNavigateToTutorialConsumed -> onNavigateToTutorialConsumed()
+        }
+    }
+
+    private fun onNavigateToHomeConsumed() {
+        updateState { copy(navigateToHome = consumed) }
+    }
+
+    private fun onNavigateToTutorialConsumed() {
+        updateState { copy(navigateToTutorial = consumed) }
+    }
 }
 
 data class SplashViewState(
@@ -48,3 +56,8 @@ data class SplashViewState(
     val navigateToHome: StateEvent = consumed,
     val navigateToTutorial: StateEvent = consumed
 ) : IViewState
+
+sealed interface SplashViewEvent {
+    data object OnNavigateToHomeConsumed : SplashViewEvent
+    data object OnNavigateToTutorialConsumed : SplashViewEvent
+}

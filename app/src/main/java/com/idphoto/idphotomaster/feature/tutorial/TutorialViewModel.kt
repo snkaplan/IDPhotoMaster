@@ -20,14 +20,21 @@ class TutorialViewModel @Inject constructor(
 ) : BaseViewModel<TutorialViewState>() {
     override fun createInitialState(): TutorialViewState = TutorialViewState()
 
-    fun onSkipClicked() {
+    fun onTriggerViewEvent(event: TutorialViewEvent) {
+        when (event) {
+            TutorialViewEvent.OnNavigateHomeConsumed -> onNavigateToHomeConsumed()
+            TutorialViewEvent.OnSkipClicked -> onSkipClicked()
+        }
+    }
+
+    private fun onSkipClicked() {
         viewModelScope.launch {
             localDataStore.setUserSawTutorial(true)
             updateState { copy(navigateToHome = triggered) }
         }
     }
 
-    fun onNavigateToHomeConsumed() {
+    private fun onNavigateToHomeConsumed() {
         updateState { copy(navigateToHome = consumed) }
     }
 }
@@ -54,3 +61,8 @@ data class TutorialPageItem(
     @StringRes val titleId: Int,
     @StringRes val descriptionId: Int
 )
+
+sealed interface TutorialViewEvent {
+    data object OnSkipClicked : TutorialViewEvent
+    data object OnNavigateHomeConsumed : TutorialViewEvent
+}

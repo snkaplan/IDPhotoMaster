@@ -50,12 +50,14 @@ fun TutorialScreen(
     val viewState by viewModel.uiState.collectAsStateWithLifecycle()
     NavigationEventEffect(
         event = viewState.navigateToHome,
-        onConsumed = viewModel::onNavigateToHomeConsumed,
+        onConsumed = {
+            viewModel.onTriggerViewEvent(TutorialViewEvent.OnNavigateHomeConsumed)
+        },
         action = navigateToHome
     )
     ScreenContent(
         viewState = viewState,
-        onSkipClicked = viewModel::onSkipClicked,
+        onViewEvent = viewModel::onTriggerViewEvent,
         modifier = modifier.fillMaxSize()
     )
 }
@@ -64,7 +66,7 @@ fun TutorialScreen(
 @Composable
 private fun ScreenContent(
     viewState: TutorialViewState,
-    onSkipClicked: () -> Unit,
+    onViewEvent: (TutorialViewEvent) -> Unit,
     modifier: Modifier
 ) {
     Column(
@@ -102,14 +104,14 @@ private fun ScreenContent(
                             append(stringResource(id = R.string.skip))
                         }
                     }) {
-                    onSkipClicked.invoke()
+                    onViewEvent.invoke(TutorialViewEvent.OnSkipClicked)
                 }
             }
             Button(
                 colors = ButtonDefaults.buttonColors(containerColor = Blue),
                 onClick = {
                     if (isLastPage) {
-                        onSkipClicked.invoke()
+                        onViewEvent.invoke(TutorialViewEvent.OnSkipClicked)
                     } else {
                         coroutineScope.launch {
                             pagerState.animateScrollToPage(pagerState.currentPage + 1)

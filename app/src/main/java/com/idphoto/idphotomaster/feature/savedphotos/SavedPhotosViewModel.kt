@@ -38,13 +38,19 @@ class SavedPhotosViewModel @Inject constructor(
     private val getUserPurchases: GetUserPurchases,
     @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
     private val saveImageToTempFile: SaveImageToTempFile
-) :
-    BaseViewModel<SavedPhotosViewState>() {
+) : BaseViewModel<SavedPhotosViewState>() {
     override fun createInitialState(): SavedPhotosViewState = SavedPhotosViewState()
 
     fun init() {
         userRepository.currentUser?.let {
             getUserPurchases(it.uid)
+        }
+    }
+
+    fun onTriggerViewEvent(event: SavedPhotosViewEvent) {
+        when (event) {
+            is SavedPhotosViewEvent.OnSavedPhotoClicked -> onSavedPhotoClicked(event.path)
+            is SavedPhotosViewEvent.OnBoughtPhotoClicked -> onBoughtPhotoClicked(event.context, event.url)
         }
     }
 
@@ -74,12 +80,12 @@ class SavedPhotosViewModel @Inject constructor(
         }
     }
 
-    fun onSavedPhotoClicked(photoPath: String) {
+    private fun onSavedPhotoClicked(photoPath: String) {
         val uri = Uri.fromFile(File(photoPath))
         updateState { copy(navigateToEditPhoto = triggered(uri.toString())) }
     }
 
-    fun onBoughtPhotoClicked(context: Context, url: String) {
+    private fun onBoughtPhotoClicked(context: Context, url: String) {
         viewModelScope.launch(ioDispatcher) {
             updateState { copy(loading = true) }
             val bitmap: Bitmap
@@ -135,3 +141,8 @@ data class SavedPhotosViewState(
     val navigateToEditPhoto: StateEventWithContent<String> = consumed(),
     val exception: ExceptionModel? = null
 ) : IViewState
+
+sealed interface SavedPhotosViewEvent {
+    data class OnBoughtPhotoClicked(val url: String, val context: Context) : SavedPhotosViewEvent
+    data class OnSavedPhotoClicked(val path: String) : SavedPhotosViewEvent
+}

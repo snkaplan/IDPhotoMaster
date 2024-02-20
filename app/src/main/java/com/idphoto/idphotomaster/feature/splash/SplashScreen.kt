@@ -22,12 +22,16 @@ fun SplashScreen(
     val splashUiState by viewModel.uiState.collectAsStateWithLifecycle()
     NavigationEventEffect(
         event = splashUiState.navigateToHome,
-        onConsumed = viewModel::onNavigateToHomeConsumed,
+        onConsumed = {
+            viewModel.onTriggerViewEvent(SplashViewEvent.OnNavigateToHomeConsumed)
+        },
         action = navigateToHome
     )
     NavigationEventEffect(
         event = splashUiState.navigateToTutorial,
-        onConsumed = viewModel::onNavigateToTutorialConsumed,
+        onConsumed = {
+            viewModel.onTriggerViewEvent(SplashViewEvent.OnNavigateToTutorialConsumed)
+        },
         action = navigateToTutorial
     )
     ScreenContent()

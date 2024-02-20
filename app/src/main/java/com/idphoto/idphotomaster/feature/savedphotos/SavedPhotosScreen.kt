@@ -1,6 +1,5 @@
 package com.idphoto.idphotomaster.feature.savedphotos
 
-import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -74,9 +73,8 @@ fun SavedPhotosScreen(
     ScreenContent(
         viewState = uiState,
         modifier = modifier.fillMaxSize(),
-        onBackClick = onBackClick,
-        onSavedPhotoClicked = viewModel::onSavedPhotoClicked,
-        onBoughtPhotoClicked = viewModel::onBoughtPhotoClicked
+        onViewEvent = viewModel::onTriggerViewEvent,
+        onBackClick = onBackClick
     )
 }
 
@@ -84,9 +82,8 @@ fun SavedPhotosScreen(
 private fun ScreenContent(
     viewState: SavedPhotosViewState,
     modifier: Modifier,
-    onSavedPhotoClicked: (String) -> Unit,
-    onBoughtPhotoClicked: (Context, String) -> Unit,
-    onBackClick: () -> Unit,
+    onViewEvent: (SavedPhotosViewEvent) -> Unit,
+    onBackClick: () -> Unit
 ) {
     AppScaffold(
         modifier = modifier.fillMaxSize(),
@@ -116,16 +113,7 @@ private fun ScreenContent(
             viewState.savedPhotos?.let {
                 PhotoList(
                     it,
-                    onSavedPhotoClicked = { safePath ->
-                        if (viewState.loading.not()) {
-                            onSavedPhotoClicked.invoke(safePath)
-                        }
-                    },
-                    onBoughtPhotoClicked = { ctx, url ->
-                        if (viewState.loading.not()) {
-                            onBoughtPhotoClicked.invoke(ctx, url)
-                        }
-                    }
+                    onViewEvent = onViewEvent
                 )
             }
         }
@@ -135,8 +123,7 @@ private fun ScreenContent(
 @Composable
 fun PhotoList(
     photos: List<UserSavedPhoto>,
-    onSavedPhotoClicked: (String) -> Unit,
-    onBoughtPhotoClicked: (Context, String) -> Unit
+    onViewEvent: (SavedPhotosViewEvent) -> Unit
 ) {
     LazyVerticalGrid(
         modifier = Modifier
@@ -149,8 +136,7 @@ fun PhotoList(
         itemsIndexed(photos) { _, item ->
             PhotoItem(
                 savedPhoto = item,
-                onSavedPhotoClicked = onSavedPhotoClicked,
-                onBoughtPhotoClicked = onBoughtPhotoClicked
+                onViewEvent = onViewEvent
             )
         }
     }
@@ -159,8 +145,7 @@ fun PhotoList(
 @Composable
 fun PhotoItem(
     savedPhoto: UserSavedPhoto,
-    onSavedPhotoClicked: (String) -> Unit,
-    onBoughtPhotoClicked: (Context, String) -> Unit
+    onViewEvent: (SavedPhotosViewEvent) -> Unit
 ) {
     val context = LocalContext.current
     Box(
@@ -173,9 +158,9 @@ fun PhotoItem(
             .clickable {
                 // TODO We removed this feature for now.
                 /* if (savedPhoto.bought.not()) {
-                    onSavedPhotoClicked.invoke(savedPhoto.cdnUrl)
+                    onViewEvent.invoke(SavedPhotosViewEvent.OnSavedPhotoClicked(savedPhoto.cdnUrl))
                 } else {
-                    onBoughtPhotoClicked(context, savedPhoto.cdnUrl)
+                    onViewEvent.invoke(SavedPhotosViewEvent.OnBoughtPhotoClicked(savedPhoto.cdnUrl, context))
                 } */
             }
     ) {
