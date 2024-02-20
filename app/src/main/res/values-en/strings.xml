@@ -45,6 +45,7 @@
     <string name="general_settings">General Settings</string>
     <string name="language">Language</string>
     <string name="saved_photos">Saved Photos</string>
+    <string name="saved_photos_desc">Your saved and purchased photos will appear here.</string>
     <string name="information">Information</string>
     <string name="about">About App</string>
     <string name="terms_and_conditions">Terms and Conditions</string>

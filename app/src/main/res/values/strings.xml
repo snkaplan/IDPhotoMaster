@@ -44,6 +44,7 @@
     <string name="general_settings">Genel Ayarlar</string>
     <string name="language">Dil</string>
     <string name="saved_photos">Kayıtlı Fotoğraflar</string>
+    <string name="saved_photos_desc">Kaydedilen ve satın aldığın fotoğraflar burada gözükecek.</string>
     <string name="information">Bilgi</string>
     <string name="about">Uygulama Hakkında</string>
     <string name="terms_and_conditions">Şartlar ve Koşullar</string>
