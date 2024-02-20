@@ -34,10 +34,11 @@ class BasketRemoteDataSourceImpl @Inject constructor(
         }
     }
 
-    override suspend fun deletePurchase(userId: String, id: String): Result<Unit> {
+    override suspend fun deletePurchase(userId: String, fileName: String, docId: String): Result<Unit> {
         return runCatching {
-            val storageRef = firebaseStorage.reference.child("$IMAGES_FOLDER/$userId").child(id)
-            firebaseFirestore.collection(USERS_TABLE_NAME).document(userId).collection(PURCHASE_TABLE_NAME).document(id)
+            val storageRef = firebaseStorage.reference.child("$IMAGES_FOLDER/$userId").child(fileName)
+            firebaseFirestore.collection(USERS_TABLE_NAME).document(userId).collection(PURCHASE_TABLE_NAME)
+                .document(docId)
                 .delete().await(networkMonitor)
             storageRef.delete().await(networkMonitor)
         }

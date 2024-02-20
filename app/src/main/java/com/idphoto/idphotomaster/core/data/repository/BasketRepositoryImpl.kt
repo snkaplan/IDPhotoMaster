@@ -16,11 +16,11 @@ class BasketRepositoryImpl @Inject constructor(private val basketRemoteDataSourc
         return basketRemoteDataSource.purchase(uid, purchase.toFirebaseMap(), documentReference)
     }
 
-    override suspend fun uploadPhoto(uid:String, fileName: String, image: ByteArray): Result<Uri> {
+    override suspend fun uploadPhoto(uid: String, fileName: String, image: ByteArray): Result<Uri> {
         return basketRemoteDataSource.uploadPhoto(uid, fileName, image)
     }
 
-    override suspend fun deletePurchase(userId: String, id: String): Result<Unit> {
-        return basketRemoteDataSource.deletePurchase(userId, id)
+    override suspend fun deletePurchase(userId: String, fileName: String, docId: String): Result<Unit> {
+        return basketRemoteDataSource.deletePurchase(userId, fileName, docId)
     }
 }

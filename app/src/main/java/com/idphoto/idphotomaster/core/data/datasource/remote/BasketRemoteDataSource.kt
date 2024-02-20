@@ -9,5 +9,5 @@ interface BasketRemoteDataSource {
     ): Result<Unit>
 
     suspend fun uploadPhoto(uid: String, fileName: String, image: ByteArray): Result<Uri>
-    suspend fun deletePurchase(userId: String, id: String): Result<Unit>
+    suspend fun deletePurchase(userId: String, fileName: String, docId: String): Result<Unit>
 }
