@@ -65,19 +65,19 @@ class ProfileViewModel @Inject constructor(
                                 event.title,
                                 description = when (event.type) {
                                     GeneralInfoType.About -> {
-                                        val key = if (event.currentLanguage == "en") "about_app" else "about_app_tr"
+                                        val key = if (event.currentLanguage == "en") "about_app_" else "about_app_tr"
                                         config?.getString(key).orEmpty()
                                     }
 
                                     GeneralInfoType.PrivacyPolicy -> {
                                         val key =
-                                            if (event.currentLanguage == "en") "privacy_policy" else "privacy_policy_tr"
+                                            if (event.currentLanguage == "en") "privacy_policy_" else "privacy_policy_tr"
                                         config?.getString(key).orEmpty()
                                     }
 
                                     GeneralInfoType.TermsAndConditions -> {
                                         val key =
-                                            if (event.currentLanguage == "en") "terms_and_conditions" else "terms_and_conditions_tr"
+                                            if (event.currentLanguage == "en") "terms_and_conditions_" else "terms_and_conditions_tr"
                                         config?.getString(key).orEmpty()
                                     }
                                 }
