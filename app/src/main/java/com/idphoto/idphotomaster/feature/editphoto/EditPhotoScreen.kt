@@ -29,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -157,6 +156,7 @@ private fun ScreenContent(
                         viewState.sharpness,
                         viewState.heat,
                         viewState.loading,
+                        viewState.backgroundRemoved,
                         onViewEvent
                     )
                     Spacer(modifier = Modifier.height(15.dp))
@@ -188,9 +188,9 @@ fun EditField(
     contrast: Float,
     heat: Float,
     loading: Boolean,
+    backgroundRemoved: Boolean,
     onViewEvent: (EditPhotoViewEvent) -> Unit
 ) {
-    var checked by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -218,10 +218,9 @@ fun EditField(
                 Text(text = stringResource(id = R.string.remove_background))
                 Switch(
                     enabled = loading.not(),
-                    checked = checked,
+                    checked = backgroundRemoved,
                     onCheckedChange = {
-                        checked = it
-                        onViewEvent.invoke(EditPhotoViewEvent.OnRemoveBackground(checked))
+                        onViewEvent.invoke(EditPhotoViewEvent.OnRemoveBackground(backgroundRemoved.not()))
                     },
                     colors = SwitchDefaults.colors(checkedTrackColor = Color.Green)
                 )

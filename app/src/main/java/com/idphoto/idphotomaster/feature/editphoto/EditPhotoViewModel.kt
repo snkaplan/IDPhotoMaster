@@ -175,19 +175,27 @@ class EditPhotoViewModel @Inject constructor(
             if (remove) {
                 uiState.value.updatedPhoto?.let { safePhoto ->
                     updateState { copy(loading = true) }
-                    val output = ImageSegmentationHelper.getResult(safePhoto)
+                    val output = try {
+                        ImageSegmentationHelper.getResult(safePhoto)
+                    } catch (e: Exception) {
+                        updateState {
+                            copy(loading = false, backgroundRemoved = false)
+                        }
+                        return@withContext
+                    }
                     val gpuImage = uiState.value.gpuImage
                     gpuImage?.setImage(output)
                     updateState {
                         copy(
                             updatedPhoto = gpuImage?.bitmapWithFilterApplied,
                             gpuImage = gpuImage,
-                            loading = false
+                            loading = false,
+                            backgroundRemoved = true
                         )
                     }
                 }
             } else {
-                updateState { copy(resetImage = triggered) }
+                updateState { copy(resetImage = triggered, backgroundRemoved = false) }
             }
         }
     }
@@ -271,6 +279,7 @@ data class EditPhotoViewState(
     val photoReadCompleted: StateEvent = consumed,
     val resetImage: StateEvent = consumed,
     val navigateToBasket: StateEventWithContent<String> = consumed(),
+    val backgroundRemoved: Boolean = false,
     val exception: ExceptionModel? = null
 ) : IViewState
 
