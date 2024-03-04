@@ -26,13 +26,38 @@ android {
     }
 
     buildTypes {
-        release {
-            isMinifyEnabled = false
-            isDebuggable = true
+        getByName("release") {
+            isDebuggable = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+
+        getByName("debug") {
+            isMinifyEnabled = false
+            isDebuggable = true
+            isShrinkResources = false
+            versionNameSuffix = "a"
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+    }
+    flavorDimensions += "version"
+    productFlavors {
+        create("dev") {
+            dimension = "version"
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+            resValue("string", "app_name", "IDPhotoMaster-Dev")
+        }
+        create("prod") {
+            dimension = "version"
+            resValue("string", "app_name", "IDPhotoMaster")
         }
     }
     compileOptions {

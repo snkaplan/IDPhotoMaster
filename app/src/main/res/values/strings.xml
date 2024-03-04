@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">IDPhotoMaster</string>
     <string name="empty" />
     <string name="no_connection">İnternet bağlantın yok :/</string>
     <string name="mail_hint">Mail Adresi</string>

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">IDPhotoMaster</string>
     <string name="empty" />
     <string name="no_connection">You have no internet connection :/</string>
     <string name="mail_hint">E-Mail</string>
