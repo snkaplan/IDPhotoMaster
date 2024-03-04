@@ -7,4 +7,6 @@ interface LocalDataStore {
     suspend fun setUserSawTutorial(seen: Boolean)
     fun isUserSawCameraTutorial(): Flow<Boolean>
     suspend fun setUserSawCameraTutorial(seen: Boolean)
+    fun isAppOpenedBefore(): Flow<Boolean>
+    suspend fun setIsAppOpenedBefore(isFirstOpen: Boolean)
 }

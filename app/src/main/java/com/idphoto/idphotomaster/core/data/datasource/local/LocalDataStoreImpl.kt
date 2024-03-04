@@ -16,8 +16,10 @@ class LocalDataStoreImpl @Inject constructor(private val dataStore: DataStore<Pr
         const val DATA = "Data"
         private const val IsUserSawTutorial = "IsUserSawTutorial"
         private const val IsUserSawCameraTutorial = "IsUserSawCameraTutorial"
+        private const val IsAppOpenedBefore = "IsAppOpenedBefore"
         val isUserSawTutorial = booleanPreferencesKey(IsUserSawTutorial)
         val isUserSawCameraTutorial = booleanPreferencesKey(IsUserSawCameraTutorial)
+        val isAppOpenedBefore = booleanPreferencesKey(IsAppOpenedBefore)
     }
 
     override fun isUserSawTutorial(): Flow<Boolean> {
@@ -45,6 +47,20 @@ class LocalDataStoreImpl @Inject constructor(private val dataStore: DataStore<Pr
     override suspend fun setUserSawCameraTutorial(seen: Boolean) {
         dataStore.edit { preference ->
             preference[isUserSawCameraTutorial] = seen
+        }
+    }
+
+    override fun isAppOpenedBefore(): Flow<Boolean> {
+        return dataStore.data.catch {
+            emit(emptyPreferences())
+        }.map { preference ->
+            preference[isAppOpenedBefore] ?: false
+        }
+    }
+
+    override suspend fun setIsAppOpenedBefore(isFirstOpen: Boolean) {
+        dataStore.edit { preference ->
+            preference[isAppOpenedBefore] = isFirstOpen
         }
     }
 }
