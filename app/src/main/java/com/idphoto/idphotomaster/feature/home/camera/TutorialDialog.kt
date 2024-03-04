@@ -37,7 +37,7 @@ fun TutorialDialog(onViewEvent: (CameraViewEvent) -> Unit) {
         ) {
             Icon(
                 modifier = Modifier
-                    .padding(top = 10.dp, end = 10.dp)
+                    .padding(top = 12.dp, end = 12.dp)
                     .clip(CircleShape)
                     .background(Color.Black)
                     .clickable {

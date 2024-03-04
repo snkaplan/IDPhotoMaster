@@ -152,7 +152,7 @@ fun ScreenContent(
                         .clickable { onViewEvent.invoke(LoginViewEvent.OnCloseClick) }
                         .padding(5.dp),
                     imageVector = Icons.Filled.Close,
-                    contentDescription = "",
+                    contentDescription = "Close",
                     tint = Color.White
                 )
                 Image(

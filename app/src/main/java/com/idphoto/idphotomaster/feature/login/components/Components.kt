@@ -72,7 +72,7 @@ fun UserInputTextField(
                             onValueChange("")
                         },
                     imageVector = Icons.Outlined.Cancel,
-                    contentDescription = "",
+                    contentDescription = "Cancel",
                 )
             }
         },
@@ -123,7 +123,7 @@ fun PasswordTextField(
                             isPasswordVisible = !isPasswordVisible
                         },
                     imageVector = if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                    contentDescription = "",
+                    contentDescription = "Password",
                 )
             }
         },
@@ -202,7 +202,7 @@ fun GoogleSignInButton(
     ) {
         Image(
             imageVector = ImageVector.vectorResource(id = R.drawable.ic_logo_google),
-            contentDescription = null,
+            contentDescription = "Google Sign In",
             modifier = Modifier.size(20.dp),
         )
         Spacer(modifier = Modifier.width(10.dp))

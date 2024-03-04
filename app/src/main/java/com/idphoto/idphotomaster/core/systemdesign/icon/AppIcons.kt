@@ -19,6 +19,6 @@ object AppIcons {
 
 @Stable
 sealed class Icon {
-    data class ImageVectorIcon(val imageVector: ImageVector) : Icon()
-    data class DrawableResourceIcon(@DrawableRes val id: Int) : Icon()
+    data class ImageVectorIcon(val imageVector: ImageVector, val contentDescription: String) : Icon()
+    data class DrawableResourceIcon(@DrawableRes val id: Int, val contentDescription: String) : Icon()
 }

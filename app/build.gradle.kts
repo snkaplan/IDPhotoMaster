@@ -16,7 +16,7 @@ android {
         applicationId = "com.idphoto.idphotomaster"
         minSdk = 24
         targetSdk = 34
-        versionCode = 7
+        versionCode = 9
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -28,7 +28,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            isDebuggable = false
+            isDebuggable = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

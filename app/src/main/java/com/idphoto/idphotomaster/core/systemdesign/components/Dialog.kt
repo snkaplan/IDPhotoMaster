@@ -79,7 +79,7 @@ fun Dialog(
             Box(
                 modifier = Modifier
                     .background(Color.White)
-                    .padding(vertical = 16.dp, horizontal = 10.dp)
+                    .padding(vertical = 18.dp, horizontal = 12.dp)
             ) {
                 CloseButtonContainer(
                     hasCloseButton = dismissible,

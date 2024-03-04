@@ -97,7 +97,7 @@ fun LoginScreenContent(
             style = TextStyle(color = LightGrey, fontSize = 12.sp),
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 40.dp)
+                .padding(horizontal = 48.dp)
                 .clickable {
                     showForgotPasswordBottomSheet.value = true
                 },

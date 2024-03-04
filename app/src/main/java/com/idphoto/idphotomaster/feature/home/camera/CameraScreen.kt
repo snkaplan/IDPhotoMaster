@@ -122,7 +122,7 @@ private fun CameraContent(
             )
             Image(
                 painter = painterResource(id = R.drawable.ic_camera_overlay),
-                contentDescription = "",
+                contentDescription = "Camera Overlay",
                 modifier = Modifier
                     .align(Center)
                     .fillMaxWidth()

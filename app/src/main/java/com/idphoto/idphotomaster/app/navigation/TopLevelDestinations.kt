@@ -12,12 +12,12 @@ enum class TopLevelDestinations(
 ) {
     HOME(
         route = HomeNavigationRoute,
-        selectedIcon = Icon.ImageVectorIcon(AppIcons.Camera),
-        unselectedIcon = Icon.ImageVectorIcon(AppIcons.CameraOutlined)
+        selectedIcon = Icon.ImageVectorIcon(AppIcons.Camera, "Camera"),
+        unselectedIcon = Icon.ImageVectorIcon(AppIcons.CameraOutlined, "Camera")
     ),
     PROFILE(
         route = ProfileNavigationRoute,
-        selectedIcon = Icon.DrawableResourceIcon(AppIcons.ProfileSelected),
-        unselectedIcon = Icon.DrawableResourceIcon(AppIcons.ProfileUnselected)
+        selectedIcon = Icon.DrawableResourceIcon(AppIcons.ProfileSelected, "Profile"),
+        unselectedIcon = Icon.DrawableResourceIcon(AppIcons.ProfileUnselected, "Profile")
     )
 }

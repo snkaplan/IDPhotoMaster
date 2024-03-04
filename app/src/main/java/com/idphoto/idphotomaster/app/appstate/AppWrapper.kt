@@ -31,7 +31,6 @@ import com.idphoto.idphotomaster.core.data.util.NetworkMonitor
 import com.idphoto.idphotomaster.core.systemdesign.animation.slideIn
 import com.idphoto.idphotomaster.core.systemdesign.animation.slideOut
 import com.idphoto.idphotomaster.core.systemdesign.components.AppScaffold
-import com.idphoto.idphotomaster.core.systemdesign.components.TitleMedium
 import com.idphoto.idphotomaster.core.systemdesign.icon.Icon
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 
@@ -91,12 +90,12 @@ internal fun AppIcon(icon: Icon) {
     when (icon) {
         is Icon.ImageVectorIcon -> Icon(
             imageVector = icon.imageVector,
-            contentDescription = null,
+            contentDescription = icon.contentDescription,
         )
 
         is Icon.DrawableResourceIcon -> Icon(
             painter = painterResource(id = icon.id),
-            contentDescription = null,
+            contentDescription = icon.contentDescription,
         )
     }
 }

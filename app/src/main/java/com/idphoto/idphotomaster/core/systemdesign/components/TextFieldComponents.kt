@@ -69,7 +69,7 @@ private fun CustomTextFieldPreview() {
         onValueChange = {},
         label = { Text(text = "Label") },
         placeholder = { Text(text = "Placeholder") },
-        trailingIcon = { Icon(Icons.Filled.Favorite, contentDescription = null) },
+        trailingIcon = { Icon(Icons.Filled.Favorite, contentDescription = "Favorite") },
     )
 }
 

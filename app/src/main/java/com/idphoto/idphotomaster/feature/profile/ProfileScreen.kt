@@ -131,7 +131,7 @@ private fun ScreenContent(
                     .align(Alignment.CenterHorizontally)
                     .verticalScroll(scrollState),
                 imageVector = Icons.Filled.Camera,
-                contentDescription = "",
+                contentDescription = "Camera",
                 tint = Pink
             )
             Spacer(modifier = Modifier.height(10.dp))
@@ -319,13 +319,13 @@ fun ProfileSectionItem(icon: ImageVector, title: String, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick.invoke() }
-            .padding(vertical = 10.dp),
+            .padding(vertical = 15.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
             modifier = Modifier.padding(horizontal = 30.dp),
             imageVector = icon,
-            contentDescription = ""
+            contentDescription = "Profile Item Icon"
         )
         Text(
             text = title,
@@ -340,7 +340,7 @@ fun ProfileSectionItem(icon: ImageVector, title: String, onClick: () -> Unit) {
         Icon(
             modifier = Modifier.padding(horizontal = 30.dp),
             imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
-            contentDescription = "",
+            contentDescription = "Go",
             tint = SectionTextColor
         )
     }
