@@ -86,4 +86,5 @@
     <string name="save_to_gallery">Save to Gallery</string>
     <string name="save_to_gallery_desc">Save photo to gallery?</string>
     <string name="photo_saved_to_gallery">Photo Saved to Gallery</string>
+    <string name="terms_and_conditions_read">I have read and agree to the terms of use.</string>
 </resources>

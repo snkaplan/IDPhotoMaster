@@ -1,6 +1,7 @@
 package com.idphoto.idphotomaster.feature.login
 
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.common.BaseViewModel
 import com.idphoto.idphotomaster.core.common.IViewState
@@ -11,7 +12,10 @@ import com.idphoto.idphotomaster.core.domain.exceptions.MailRequiredException
 import com.idphoto.idphotomaster.core.domain.exceptions.NameRequiredException
 import com.idphoto.idphotomaster.core.domain.exceptions.PasswordLengthException
 import com.idphoto.idphotomaster.core.domain.exceptions.PasswordRequiredException
+import com.idphoto.idphotomaster.core.domain.exceptions.TermsAndConditionsNotAcceptedException
+import com.idphoto.idphotomaster.core.domain.model.InfoBottomSheetItem
 import com.idphoto.idphotomaster.core.domain.model.base.ExceptionModel
+import com.idphoto.idphotomaster.core.domain.usecase.config.GetConfigUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.login.ForgotPasswordUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.login.GoogleLoginUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.login.LoginUseCase
@@ -37,10 +41,15 @@ class LoginViewModel @Inject constructor(
     private val signupUseCase: SignupUseCase,
     private val forgotPasswordUseCase: ForgotPasswordUseCase,
     private val validateAuthUseCase: ValidateAuthUseCase,
-    private val validateSignupUseCase: ValidateSignupUseCase
+    private val validateSignupUseCase: ValidateSignupUseCase,
+    private val getConfigUseCase: GetConfigUseCase,
 ) : BaseViewModel<LoginViewState>() {
 
     override fun createInitialState(): LoginViewState = LoginViewState()
+
+    init {
+        getConfig()
+    }
 
     fun onTriggerViewEvent(viewEvent: LoginViewEvent) {
         viewModelScope.launch {
@@ -59,7 +68,56 @@ class LoginViewModel @Inject constructor(
                 LoginViewEvent.OnResetPasswordMailConsumed -> updateState { copy(passwordResetMailSent = consumed) }
                 LoginViewEvent.OnCloseClick -> updateState { copy(closeClicked = triggered) }
                 LoginViewEvent.OnCloseClickConsumed -> updateState { copy(closeClicked = consumed) }
+                is LoginViewEvent.OnTermsAndConditionsCheckChanged -> updateState {
+                    copy(
+                        isTermsAndConditionsChecked = viewEvent.isChecked,
+                        termsAndConditionsError = false
+                    )
+                }
+
+                is LoginViewEvent.OnClickTermsAndConditions -> getTermsAndConditions(
+                    viewEvent.title,
+                    viewEvent.currentLanguage
+                )
+
+                LoginViewEvent.OnDismissTermsAndConditionsDialog -> updateState { copy(showTermsAndConditions = null) }
             }
+        }
+    }
+
+    private fun getConfig() {
+        viewModelScope.launch {
+            getConfigUseCase.invoke().asResource().onEach { result ->
+                when (result) {
+                    is Resource.Error -> {
+                        updateState {
+                            copy(
+                                exception = result.exception?.getExceptionModel(
+                                    descriptionResId = R.string.exception_fetch_config
+                                )
+                            )
+                        }
+                    }
+
+                    Resource.Loading -> {}
+                    is Resource.Success -> {
+                        updateState { copy(config = result.data) }
+                    }
+                }
+            }.launchIn(this)
+        }
+    }
+
+    private fun getTermsAndConditions(title: String, currentLanguage: String) {
+        val key = if (currentLanguage == "en") "terms_and_conditions_" else "terms_and_conditions_tr"
+        val value = currentState.config?.getString(key).orEmpty()
+        updateState {
+            copy(
+                showTermsAndConditions = InfoBottomSheetItem(
+                    title,
+                    value
+                )
+            )
         }
     }
 
@@ -124,7 +182,8 @@ class LoginViewModel @Inject constructor(
                 currentState.name,
                 currentState.lastName,
                 currentState.mail,
-                currentState.password
+                currentState.password,
+                currentState.isTermsAndConditionsChecked
             ).onEach { result ->
                 when (result) {
                     Resource.Loading -> {
@@ -228,7 +287,7 @@ class LoginViewModel @Inject constructor(
     }
 
     private fun onPageStateChange(newPageState: PageState) {
-        updateState { LoginViewState(pageState = newPageState) }
+        updateState { LoginViewState(pageState = newPageState, config = currentState.config) }
     }
 
     private suspend fun onSendResetPasswordMail(mail: String) {
@@ -297,6 +356,15 @@ class LoginViewModel @Inject constructor(
                 }
             }
 
+            is TermsAndConditionsNotAcceptedException -> {
+                updateState {
+                    copy(
+                        loading = false,
+                        termsAndConditionsError = true
+                    )
+                }
+            }
+
             else -> {
                 updateState {
                     copy(
@@ -323,8 +391,13 @@ data class LoginViewState(
     val loginSuccessful: StateEvent = consumed,
     val passwordResetMailSent: StateEvent = consumed,
     val closeClicked: StateEvent = consumed,
-    val exception: ExceptionModel? = null
-) : IViewState
+    val exception: ExceptionModel? = null,
+    val isTermsAndConditionsChecked: Boolean = false,
+    val termsAndConditionsError: Boolean = false,
+    val config: FirebaseRemoteConfig? = null,
+    val showTermsAndConditions: InfoBottomSheetItem? = null
+) : IViewState {
+}
 
 enum class PageState {
     LOGIN,
@@ -346,4 +419,7 @@ sealed interface LoginViewEvent {
     data object OnResetPasswordMailConsumed : LoginViewEvent
     data object OnCloseClick : LoginViewEvent
     data object OnCloseClickConsumed : LoginViewEvent
+    data class OnClickTermsAndConditions(val title: String, val currentLanguage: String) : LoginViewEvent
+    data class OnTermsAndConditionsCheckChanged(val isChecked: Boolean) : LoginViewEvent
+    data object OnDismissTermsAndConditionsDialog : LoginViewEvent
 }

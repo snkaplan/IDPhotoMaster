@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
@@ -21,6 +22,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Text
@@ -48,6 +51,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.systemdesign.components.AppScaffold
 import com.idphoto.idphotomaster.core.systemdesign.components.ErrorDialog
+import com.idphoto.idphotomaster.core.systemdesign.components.InformationBottomSheet
 import com.idphoto.idphotomaster.core.systemdesign.ui.LocalDim
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.BackgroundColor
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.Blue
@@ -56,6 +60,7 @@ import com.idphoto.idphotomaster.core.systemdesign.ui.theme.White
 import com.idphoto.idphotomaster.feature.login.components.GoogleSignInButton
 import com.idphoto.idphotomaster.feature.login.contents.LoginScreenContent
 import com.idphoto.idphotomaster.feature.login.contents.SignupScreenContent
+import com.idphoto.idphotomaster.feature.profile.getLocale
 import de.palm.composestateevents.NavigationEventEffect
 
 @Composable
@@ -128,6 +133,12 @@ fun ScreenContent(
             }
         )
     }
+    if (viewState.showTermsAndConditions != null) {
+        InformationBottomSheet(
+            onDismissRequest = { onViewEvent.invoke(LoginViewEvent.OnDismissTermsAndConditionsDialog) },
+            infoBottomSheetItem = viewState.showTermsAndConditions
+        )
+    }
     AppScaffold(
         modifier = modifier.fillMaxSize(),
         topBar = {},
@@ -189,12 +200,21 @@ fun ScreenContent(
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))
+            if (viewState.pageState == PageState.SIGNUP) {
+                TermsAndConditionsRow(
+                    isChecked = viewState.isTermsAndConditionsChecked,
+                    termsAndConditionsError = viewState.termsAndConditionsError,
+                    onViewEvent = onViewEvent
+                )
+            }
             Button(
                 colors = ButtonDefaults.buttonColors(containerColor = Blue),
                 onClick = {
                     if (viewState.pageState == PageState.LOGIN) {
                         onViewEvent.invoke(LoginViewEvent.OnLoginClick)
-                    } else onViewEvent.invoke(LoginViewEvent.OnSignupClick)
+                    } else {
+                        onViewEvent.invoke(LoginViewEvent.OnSignupClick)
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -258,5 +278,29 @@ fun ScreenContent(
                 }
             )
         }
+    }
+}
+
+@Composable
+fun TermsAndConditionsRow(isChecked: Boolean, termsAndConditionsError: Boolean, onViewEvent: (LoginViewEvent) -> Unit) {
+    val title = stringResource(id = R.string.terms_and_conditions)
+    val currentLanguage = getLocale().language
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Checkbox(checked = isChecked, onCheckedChange = {
+            onViewEvent.invoke(LoginViewEvent.OnTermsAndConditionsCheckChanged(it))
+        }, colors = CheckboxDefaults.colors(checkedColor = Blue))
+        Spacer(modifier = Modifier.width(5.dp))
+        Text(
+            modifier = Modifier.clickable {
+                onViewEvent.invoke(LoginViewEvent.OnClickTermsAndConditions(title, currentLanguage))
+            },
+            text = stringResource(id = R.string.terms_and_conditions_read),
+            style = TextStyle(
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
+                textDecoration = TextDecoration.Underline,
+                color = if (termsAndConditionsError) Color.Red else Color.Black
+            )
+        )
     }
 }

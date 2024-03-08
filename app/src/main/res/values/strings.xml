@@ -85,4 +85,5 @@
     <string name="save_to_gallery">Galeriye Kaydet</string>
     <string name="save_to_gallery_desc">Fotoğraf galeriye kaydedilsin mi?</string>
     <string name="photo_saved_to_gallery">Fotoğraf Galeriye Kaydedildi</string>
+    <string name="terms_and_conditions_read">Kullanım Koşullarını okudum ve kabul ediyorum</string>
 </resources>
