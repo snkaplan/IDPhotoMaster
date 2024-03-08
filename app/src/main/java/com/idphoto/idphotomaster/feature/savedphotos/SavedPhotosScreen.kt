@@ -130,10 +130,14 @@ private fun ScreenContent(
                 )
             }
             viewState.savedPhotos?.let {
-                PhotoList(
-                    it,
-                    onViewEvent = onViewEvent
-                )
+                if (it.isEmpty() && viewState.loading.not()) {
+                    EmptySavedPhotosScreen()
+                } else {
+                    PhotoList(
+                        it,
+                        onViewEvent = onViewEvent
+                    )
+                }
             } ?: runCatching {
                 if (viewState.loading.not()) {
                     EmptySavedPhotosScreen()
