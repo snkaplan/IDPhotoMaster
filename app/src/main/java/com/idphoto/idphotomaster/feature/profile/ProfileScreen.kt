@@ -115,7 +115,7 @@ private fun ScreenContent(
     onViewEvent: (ProfileViewTriggeredEvent) -> Unit,
 ) {
     val scrollState = rememberScrollState()
-    Column(modifier = modifier, verticalArrangement = Arrangement.Top) {
+    Column(modifier = modifier.verticalScroll(scrollState), verticalArrangement = Arrangement.Top) {
         if (viewState.loading) {
             LoadingView(
                 modifier = Modifier
@@ -128,8 +128,7 @@ private fun ScreenContent(
             Icon(
                 modifier = Modifier
                     .size(120.dp)
-                    .align(Alignment.CenterHorizontally)
-                    .verticalScroll(scrollState),
+                    .align(Alignment.CenterHorizontally),
                 imageVector = Icons.Filled.Camera,
                 contentDescription = "Camera",
                 tint = Pink
@@ -319,7 +318,7 @@ fun ProfileSectionItem(icon: ImageVector, title: String, onClick: () -> Unit) {
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onClick.invoke() }
-            .padding(vertical = 15.dp),
+            .padding(vertical = 11.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
