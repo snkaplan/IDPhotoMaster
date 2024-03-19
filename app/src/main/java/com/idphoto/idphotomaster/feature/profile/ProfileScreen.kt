@@ -51,6 +51,7 @@ import androidx.core.os.ConfigurationCompat
 import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.idphoto.idphotomaster.BuildConfig
 import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.domain.model.AppLanguageItem
 import com.idphoto.idphotomaster.core.domain.model.base.ExceptionType
@@ -356,7 +357,7 @@ fun VersionContent() {
                 .fillMaxWidth()
                 .padding(end = 20.dp),
             textAlign = TextAlign.End,
-            text = stringResource(id = R.string.version, "1.1.0")
+            text = stringResource(id = R.string.version, BuildConfig.VERSION_NAME)
         )
     }
 }

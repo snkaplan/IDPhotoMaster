@@ -11,4 +11,5 @@ object Constants {
     const val USER_ID = "USER_ID"
     const val PHOTO_PATH = "PHOTO_PATH"
     const val PRODUCT_ID = "id_photo"
+    const val CLIENT_TYPE = "Android"
 }
