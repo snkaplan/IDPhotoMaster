@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.os.ConfigurationCompat
@@ -159,6 +160,8 @@ private fun ScreenContent(
                 Spacer(modifier = Modifier.height(20.dp))
                 ProfileOtherSection(onViewEvent = onViewEvent)
             }
+            Spacer(modifier = Modifier.height(20.dp))
+            VersionContent()
         }
     }
 }
@@ -341,6 +344,19 @@ fun ProfileSectionItem(icon: ImageVector, title: String, onClick: () -> Unit) {
             imageVector = Icons.AutoMirrored.Default.KeyboardArrowRight,
             contentDescription = "Go",
             tint = SectionTextColor
+        )
+    }
+}
+
+@Composable
+fun VersionContent() {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 20.dp),
+            textAlign = TextAlign.End,
+            text = stringResource(id = R.string.version, "1.1.0")
         )
     }
 }
