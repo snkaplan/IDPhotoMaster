@@ -1,4 +1,4 @@
-package com.idphoto.idphotomaster.core.data.worker
+package com.idphoto.idphotomaster.core.domain.worker
 
 import android.content.Context
 import android.util.Log

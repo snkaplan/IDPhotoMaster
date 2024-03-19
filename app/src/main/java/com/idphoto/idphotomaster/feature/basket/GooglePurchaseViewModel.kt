@@ -16,7 +16,9 @@ import com.android.billingclient.api.QueryPurchasesParams
 import com.android.billingclient.api.consumePurchase
 import com.google.common.collect.ImmutableList
 import com.idphoto.idphotomaster.core.common.BaseViewModel
+import com.idphoto.idphotomaster.core.common.Constants
 import com.idphoto.idphotomaster.core.common.IViewState
+import com.idphoto.idphotomaster.core.data.repository.UserRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.palm.composestateevents.StateEvent
 import de.palm.composestateevents.consumed
@@ -25,7 +27,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class GooglePurchaseViewModel @Inject constructor() : BaseViewModel<GooglePurchaseViewState>() {
+class GooglePurchaseViewModel @Inject constructor(private val userRepository: UserRepository) :
+    BaseViewModel<GooglePurchaseViewState>() {
 
     private val purchaseUpdateListener = PurchasesUpdatedListener { result, purchases ->
         if (result.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
@@ -43,6 +46,28 @@ class GooglePurchaseViewModel @Inject constructor() : BaseViewModel<GooglePurcha
     }
 
     private lateinit var billingClient: BillingClient
+
+    fun onTriggerViewEvent(event: GooglePurchaseViewEvent) {
+        viewModelScope.launch {
+            when (event) {
+                is GooglePurchaseViewEvent.OnCompletePurchase -> onCompletePurchase(event.productId, event.activity)
+                GooglePurchaseViewEvent.OnNavigateLoginConsumed -> updateState { copy(navigateToLogin = consumed) }
+                GooglePurchaseViewEvent.OnPurchaseSuccessConsumed -> updateState { copy(purchaseSuccess = consumed) }
+                GooglePurchaseViewEvent.OnPurchaseFailedConsumed -> updateState { copy(purchaseFailed = consumed) }
+                GooglePurchaseViewEvent.OnUserCancelledPurchaseConsumed -> updateState { copy(userCancelledPurchase = consumed) }
+            }
+        }
+    }
+
+    private fun onCompletePurchase(productId: String, activity: Activity) {
+        if (userRepository.currentUser == null) {
+            updateState { copy(navigateToLogin = triggered) }
+        } else {
+            purchase(productId, activity)
+        }
+    }
+
+
     fun billingSetup(context: Context) {
         billingClient = BillingClient.newBuilder(context)
             .setListener(purchaseUpdateListener)
@@ -76,7 +101,7 @@ class GooglePurchaseViewModel @Inject constructor() : BaseViewModel<GooglePurcha
         }
     }
 
-    fun purchase(productId: String, activity: Activity) {
+    private fun purchase(productId: String, activity: Activity) {
         val queryProductDetailsParams =
             QueryProductDetailsParams.newBuilder()
                 .setProductList(
@@ -137,7 +162,7 @@ class GooglePurchaseViewModel @Inject constructor() : BaseViewModel<GooglePurcha
                 .setProductList(
                     ImmutableList.of(
                         QueryProductDetailsParams.Product.newBuilder()
-                            .setProductId("id_photo")
+                            .setProductId(Constants.PRODUCT_ID)
                             .setProductType(BillingClient.ProductType.INAPP)
                             .build()
                     )
@@ -147,7 +172,7 @@ class GooglePurchaseViewModel @Inject constructor() : BaseViewModel<GooglePurcha
             println("Billing-> ${productDetailsList}")
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                 val productDetails = productDetailsList.firstOrNull { productDetails ->
-                    productDetails.productId == "id_photo"
+                    productDetails.productId == Constants.PRODUCT_ID
                 }
                 productDetails?.let {
                     updateState { copy(photoPrice = it.oneTimePurchaseOfferDetails?.formattedPrice) }
@@ -159,23 +184,24 @@ class GooglePurchaseViewModel @Inject constructor() : BaseViewModel<GooglePurcha
     override fun createInitialState(): GooglePurchaseViewState {
         return GooglePurchaseViewState()
     }
-
-    fun onPurchaseSuccessConsumed() {
-        updateState { copy(purchaseSuccess = consumed) }
-    }
-
-    fun onPurchaseFailedConsumed() {
-        updateState { copy(purchaseFailed = consumed) }
-    }
-
-    fun onUserCancelledPurchaseConsumed() {
-        updateState { copy(userCancelledPurchase = consumed) }
-    }
 }
 
 data class GooglePurchaseViewState(
     val purchaseSuccess: StateEvent = consumed,
     val purchaseFailed: StateEvent = consumed,
     val userCancelledPurchase: StateEvent = consumed,
+    val navigateToLogin: StateEvent = consumed,
     val photoPrice: String? = null
 ) : IViewState
+
+sealed interface GooglePurchaseViewEvent {
+    data class OnCompletePurchase(
+        val productId: String,
+        val activity: Activity
+    ) : GooglePurchaseViewEvent
+
+    data object OnPurchaseSuccessConsumed : GooglePurchaseViewEvent
+    data object OnPurchaseFailedConsumed : GooglePurchaseViewEvent
+    data object OnUserCancelledPurchaseConsumed : GooglePurchaseViewEvent
+    data object OnNavigateLoginConsumed : GooglePurchaseViewEvent
+}

@@ -17,7 +17,7 @@ import com.idphoto.idphotomaster.app.appstate.AppWrapper
 import com.idphoto.idphotomaster.core.common.Constants
 import com.idphoto.idphotomaster.core.common.Constants.KEY_TEMP_FILE_START_PREFIX
 import com.idphoto.idphotomaster.core.data.util.NetworkMonitor
-import com.idphoto.idphotomaster.core.data.worker.DeleteTempFilesWorker
+import com.idphoto.idphotomaster.core.domain.worker.DeleteTempFilesWorker
 import com.idphoto.idphotomaster.core.domain.model.base.DialogModel
 import com.idphoto.idphotomaster.core.systemdesign.components.Dialog
 import com.idphoto.idphotomaster.core.systemdesign.ui.theme.IDPhotoMasterTheme

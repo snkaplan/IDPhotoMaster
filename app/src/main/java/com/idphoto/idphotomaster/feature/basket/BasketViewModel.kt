@@ -1,22 +1,26 @@
 package com.idphoto.idphotomaster.feature.basket
 
+import android.content.Context
 import android.graphics.Bitmap
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.work.Constraints
+import androidx.work.Data
+import androidx.work.NetworkType
+import androidx.work.OneTimeWorkRequest
+import androidx.work.WorkManager
 import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.core.common.BaseViewModel
+import com.idphoto.idphotomaster.core.common.Constants
 import com.idphoto.idphotomaster.core.common.IViewState
 import com.idphoto.idphotomaster.core.common.Resource
 import com.idphoto.idphotomaster.core.common.asResource
 import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
 import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
-import com.idphoto.idphotomaster.core.common.safeLet
-import com.idphoto.idphotomaster.core.data.repository.UserRepository
 import com.idphoto.idphotomaster.core.domain.model.base.ExceptionModel
-import com.idphoto.idphotomaster.core.domain.usecase.basket.RollbackPurchaseUseCase
-import com.idphoto.idphotomaster.core.domain.usecase.basket.StartPurchaseUseCase
 import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromDevice
 import com.idphoto.idphotomaster.core.domain.usecase.home.SavePhotoToGalleryUseCase
+import com.idphoto.idphotomaster.core.domain.worker.SuccessPurchaseWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.palm.composestateevents.StateEvent
 import de.palm.composestateevents.consumed
@@ -35,10 +39,7 @@ class BasketViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val readImageFromDevice: ReadImageFromDevice,
     @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
-    private val userRepository: UserRepository,
     private val savePhotoToGalleryUseCase: SavePhotoToGalleryUseCase,
-    private val startPurchaseUseCase: StartPurchaseUseCase,
-    private val rollbackPurchaseUseCase: RollbackPurchaseUseCase
 ) : BaseViewModel<BasketViewState>() {
     private val photoArgs: BasketArgs = BasketArgs(savedStateHandle)
     override fun createInitialState(): BasketViewState = BasketViewState()
@@ -50,13 +51,12 @@ class BasketViewModel @Inject constructor(
     fun onTriggerViewEvent(event: BasketViewEvent) {
         viewModelScope.launch {
             when (event) {
-                BasketViewEvent.OnCompletePurchase -> onCompletePurchase()
-                BasketViewEvent.OnPurchaseSuccess -> purchaseSuccess()
-                BasketViewEvent.RollbackPurchase -> rollbackPurchase()
+                BasketViewEvent.OnPurchaseSuccess -> {
+                    //uploadPhoto()
+                    purchaseSuccess()
+                }
                 BasketViewEvent.OnErrorDialogDismiss -> updateState { copy(exception = null) }
-                BasketViewEvent.OnNavigateToLoginConsumed -> updateState { copy(navigateToLogin = consumed) }
                 BasketViewEvent.OnPurchaseCompletedConsumed -> updateState { copy(purchaseCompleted = consumed) }
-                BasketViewEvent.OnStartGooglePurchaseConsumed -> updateState { copy(startGooglePurchase = consumed) }
             }
         }
     }
@@ -94,13 +94,6 @@ class BasketViewModel @Inject constructor(
         }
     }
 
-    private fun onCompletePurchase() {
-        if (userRepository.currentUser == null) {
-            updateState { copy(navigateToLogin = triggered) }
-        } else {
-            startPurchase()
-        }
-    }
 
     private suspend fun purchaseSuccess() {
         withContext(currentCoroutineContext()) {
@@ -130,71 +123,34 @@ class BasketViewModel @Inject constructor(
         }
     }
 
-    private suspend fun rollbackPurchase() {
-        withContext(currentCoroutineContext()) {
-            safeLet(userRepository.currentUser?.uid, uiState.value.lastPurchasedPhotoId) { uid, photoId ->
-                rollbackPurchaseUseCase.invoke(uid, photoId).asResource().onEach {
-                    when (it) {
-                        is Resource.Error -> updateState { copy(lastPurchasedPhotoId = null) }
-                        Resource.Loading -> {}
-                        is Resource.Success -> updateState { copy(lastPurchasedPhotoId = null) }
-                    }
-                }.launchIn(this)
-            }
-        }
-    }
-
-    private fun startPurchase() {
-        viewModelScope.launch {
-            safeLet(userRepository.currentUser?.uid, uiState.value.photo) { uid, photo ->
-                startPurchaseUseCase(uid, photo).asResource().onEach { result ->
-                    when (result) {
-                        is Resource.Error -> {
-                            updateState {
-                                copy(
-                                    loading = false, exception = result.exception?.getExceptionModel(
-                                        descriptionResId = R.string.exception_start_purchase,
-                                        primaryButtonTextResId = null
-                                    )
-                                )
-                            }
-                        }
-
-                        Resource.Loading -> {
-                            updateState { copy(loading = true) }
-                        }
-
-                        is Resource.Success -> {
-                            updateState {
-                                copy(
-                                    loading = false, startGooglePurchase = triggered,
-                                    lastPurchasedPhotoId = result.data
-                                )
-                            }
-                        }
-                    }
-                }.launchIn(this)
-            }
-        }
+    private fun uploadPhoto(applicationContext: Context, userId: String, photoPath: String) {
+        val constraints = Constraints.Builder()
+            .setRequiresCharging(false)
+            .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
+            .build()
+        val data: Data = Data.Builder()
+            .putString(Constants.USER_ID, "")
+            .putString(Constants.PHOTO_PATH, "")
+            .build()
+        val uploadRequest =
+            OneTimeWorkRequest.Builder(SuccessPurchaseWorker::class.java)
+                .setConstraints(constraints)
+                .setInputData(data)
+                .build()
+        val workManager = WorkManager.getInstance(applicationContext)
+        workManager.enqueue(uploadRequest)
     }
 }
 
 data class BasketViewState(
     val loading: Boolean = false,
     val photo: Bitmap? = null,
-    val navigateToLogin: StateEvent = consumed,
-    val startGooglePurchase: StateEvent = consumed,
-    val purchaseCompleted: StateEvent = consumed,
     val exception: ExceptionModel? = null,
-    val lastPurchasedPhotoId: String? = null
+    val purchaseCompleted: StateEvent = consumed
 ) : IViewState
 
 sealed interface BasketViewEvent {
-    data object OnCompletePurchase : BasketViewEvent
     data object OnPurchaseSuccess : BasketViewEvent
-    data object RollbackPurchase : BasketViewEvent
-    data object OnNavigateToLoginConsumed : BasketViewEvent
-    data object OnStartGooglePurchaseConsumed : BasketViewEvent
     data object OnPurchaseCompletedConsumed : BasketViewEvent
     data object OnErrorDialogDismiss : BasketViewEvent
 }

@@ -48,6 +48,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.idphoto.idphotomaster.R
 import com.idphoto.idphotomaster.app.MainViewModel
 import com.idphoto.idphotomaster.app.handler.BackHandler
+import com.idphoto.idphotomaster.core.common.Constants.PRODUCT_ID
 import com.idphoto.idphotomaster.core.systemdesign.components.AppScaffold
 import com.idphoto.idphotomaster.core.systemdesign.components.AppTopBar
 import com.idphoto.idphotomaster.core.systemdesign.components.DrawLineWithDot
@@ -81,21 +82,13 @@ fun BasketScreen(
         googlePurchaseViewModel.checkProducts()
     }
     NavigationEventEffect(
-        event = viewState.navigateToLogin,
+        event = googleViewState.navigateToLogin,
         onConsumed = {
-            viewModel.onTriggerViewEvent(BasketViewEvent.OnNavigateToLoginConsumed)
+            googlePurchaseViewModel.onTriggerViewEvent(GooglePurchaseViewEvent.OnNavigateLoginConsumed)
         },
         action = navigateToLogin
     )
-    EventEffect(
-        event = viewState.startGooglePurchase,
-        onConsumed = {
-            viewModel.onTriggerViewEvent(BasketViewEvent.OnStartGooglePurchaseConsumed)
-        },
-        action = {
-            googlePurchaseViewModel.purchase("id_photo", context as Activity)
-        }
-    )
+
     EventEffect(
         event = viewState.purchaseCompleted,
         onConsumed = {
@@ -114,12 +107,18 @@ fun BasketScreen(
     )
     EventEffect(
         event = googleViewState.purchaseSuccess,
-        onConsumed = googlePurchaseViewModel::onPurchaseSuccessConsumed,
-        action = { viewModel.onTriggerViewEvent(BasketViewEvent.OnPurchaseSuccess) }
+        onConsumed = {
+            googlePurchaseViewModel.onTriggerViewEvent(GooglePurchaseViewEvent.OnPurchaseSuccessConsumed)
+        },
+        action = {
+            viewModel.onTriggerViewEvent(BasketViewEvent.OnPurchaseSuccess)
+        }
     )
     EventEffect(
         event = googleViewState.purchaseFailed,
-        onConsumed = googlePurchaseViewModel::onPurchaseFailedConsumed,
+        onConsumed = {
+            googlePurchaseViewModel.onTriggerViewEvent(GooglePurchaseViewEvent.OnPurchaseFailedConsumed)
+        },
         action = {
             mainViewModel.showCustomDialog(
                 title = context.getString(R.string.exception_title),
@@ -127,12 +126,13 @@ fun BasketScreen(
                 icon = Icons.Default.WarningAmber,
                 confirmText = context.getString(R.string.ok)
             )
-            viewModel.onTriggerViewEvent(BasketViewEvent.RollbackPurchase)
         }
     )
     EventEffect(
         event = googleViewState.userCancelledPurchase,
-        onConsumed = googlePurchaseViewModel::onUserCancelledPurchaseConsumed,
+        onConsumed = {
+            googlePurchaseViewModel.onTriggerViewEvent(GooglePurchaseViewEvent.OnUserCancelledPurchaseConsumed)
+        },
         action = {
             mainViewModel.showCustomDialog(
                 title = context.getString(R.string.exception_title),
@@ -140,7 +140,6 @@ fun BasketScreen(
                 icon = Icons.Default.WarningAmber,
                 confirmText = context.getString(R.string.ok)
             )
-            viewModel.onTriggerViewEvent(BasketViewEvent.RollbackPurchase)
         }
     )
     DisableScreenshot(activity)
@@ -164,7 +163,7 @@ fun BasketScreen(
         modifier = modifier.fillMaxSize(),
         price = googleViewState.photoPrice,
         onBackClick = onBackClick,
-        viewEvent = viewModel::onTriggerViewEvent
+        purchaseViewEvent = googlePurchaseViewModel::onTriggerViewEvent
     )
 }
 
@@ -174,8 +173,9 @@ private fun ScreenContent(
     modifier: Modifier,
     price: String?,
     onBackClick: () -> Unit,
-    viewEvent: (BasketViewEvent) -> Unit
+    purchaseViewEvent: (GooglePurchaseViewEvent) -> Unit
 ) {
+    val context = LocalContext.current
     if (viewState.loading) {
         BackHandler {}
     }
@@ -231,7 +231,12 @@ private fun ScreenContent(
                     ScreenButton(
                         text = price ?: stringResource(id = R.string.complete_purchase),
                         onAction = {
-                            viewEvent.invoke(BasketViewEvent.OnCompletePurchase)
+                            purchaseViewEvent.invoke(
+                                GooglePurchaseViewEvent.OnCompletePurchase(
+                                    PRODUCT_ID,
+                                    context as Activity
+                                )
+                            )
                         }
                     )
                     Spacer(modifier = Modifier.height(10.dp))
