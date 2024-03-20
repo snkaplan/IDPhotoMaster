@@ -87,4 +87,8 @@
     <string name="photo_saved_to_gallery">Fotoğraf Galeriye Kaydedildi</string>
     <string name="terms_and_conditions_read">Kullanım Koşullarını okudum ve kabul ediyorum</string>
     <string name="version">V%1s</string>
+    <string name="notification_channel_id">UploadPhotoChannel</string>
+    <string name="notification_channel_description">Satın alınan fotoğraflar için kullanılan kanal.</string>
+    <string name="notification_title">Fotoğraf Yükleniyor…</string>
+    <string name="notification_content_text">Fotoğraf yüklenirken lütfen bekleyiniz</string>
 </resources>
