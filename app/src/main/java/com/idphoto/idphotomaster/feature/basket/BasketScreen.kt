@@ -76,6 +76,7 @@ fun BasketScreen(
     val viewState by viewModel.uiState.collectAsStateWithLifecycle()
     val googleViewState by googlePurchaseViewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val appContext = context.applicationContext
     val activity = context.findActivity()
     LaunchedEffect(key1 = true) {
         googlePurchaseViewModel.billingSetup(context)
@@ -111,7 +112,7 @@ fun BasketScreen(
             googlePurchaseViewModel.onTriggerViewEvent(GooglePurchaseViewEvent.OnPurchaseSuccessConsumed)
         },
         action = {
-            viewModel.onTriggerViewEvent(BasketViewEvent.OnPurchaseSuccess)
+            viewModel.onTriggerViewEvent(BasketViewEvent.OnPurchaseSuccess(appContext))
         }
     )
     EventEffect(

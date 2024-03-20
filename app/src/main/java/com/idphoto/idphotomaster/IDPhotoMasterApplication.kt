@@ -2,7 +2,8 @@ package com.idphoto.idphotomaster
 
 import android.app.Application
 import android.content.Context
-import android.content.res.Configuration
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import com.idphoto.idphotomaster.core.data.datasource.local.LocalDataStore
 import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.MainScope
@@ -12,10 +13,13 @@ import java.util.Locale
 import javax.inject.Inject
 
 @HiltAndroidApp
-class IDPhotoMasterApplication : Application() {
+class IDPhotoMasterApplication : Application(), Configuration.Provider {
 
     @Inject
     lateinit var localDataStore: LocalDataStore
+
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
 
     override fun onCreate() {
         setAppLocale(this)
@@ -32,7 +36,7 @@ class IDPhotoMasterApplication : Application() {
                 }
 
                 Locale.setDefault(locale)
-                val config = Configuration()
+                val config = android.content.res.Configuration()
                 config.setLocale(locale)
                 context.createConfigurationContext(config)
                 localDataStore.setIsAppOpenedBefore(true)
@@ -40,4 +44,9 @@ class IDPhotoMasterApplication : Application() {
             return@launch
         }
     }
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
 }

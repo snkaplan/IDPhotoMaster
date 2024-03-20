@@ -9,7 +9,6 @@ object Constants {
     const val PURCHASE_TABLE_NAME = "saved_purchase"
     const val USERS_TABLE_NAME = "users"
     const val USER_ID = "USER_ID"
-    const val PHOTO_PATH = "PHOTO_PATH"
     const val PRODUCT_ID = "id_photo"
     const val CLIENT_TYPE = "Android"
 }
