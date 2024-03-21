@@ -92,4 +92,7 @@
     <string name="notification_channel_description">Channel for uploading purchased photo</string>
     <string name="notification_title">Uploading Photo…</string>
     <string name="notification_content_text">Please wait while uploading photo</string>
+    <string name="notification_permission_title">We need notification permission</string>
+    <string name="notification_permission_description">You need to enable notification permissions for the features to work smoothly.</string>
+    <string name="allow">Allow</string>
 </resources>

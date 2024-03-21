@@ -91,4 +91,8 @@
     <string name="notification_channel_description">Satın alınan fotoğraflar için kullanılan kanal.</string>
     <string name="notification_title">Fotoğraf Yükleniyor…</string>
     <string name="notification_content_text">Fotoğraf yüklenirken lütfen bekleyiniz</string>
+    <string name="notification_permission_title">Bildirim iznine ihtiyacımız var</string>
+    <string name="notification_permission_description">Özelliklerin sorunsuz çalışması için bildirim iznini açmalısın.</string>
+    <string name="allow">İzin ver</string>
+
 </resources>
