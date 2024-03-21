@@ -16,7 +16,7 @@ android {
         applicationId = "com.idphoto.idphotomaster"
         minSdk = 24
         targetSdk = 34
-        versionCode = 10
+        versionCode = 11
         versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -168,4 +168,6 @@ dependencies {
     implementation("androidx.compose.material3:material3:1.2.0")
 
     implementation("com.github.leonard-palm:compose-state-events:2.2.0")
+
+    implementation("com.google.accompanist:accompanist-permissions:0.32.0")
 }
