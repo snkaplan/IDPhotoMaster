@@ -5,7 +5,7 @@ package idphoto
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.api.dsl.ApplicationProductFlavor
 import com.android.build.api.dsl.CommonExtension
-import org.gradle.api.Project
+import org.gradle.kotlin.dsl.support.uppercaseFirstChar
 
 enum class FlavorDimension {
     CONTENT_TYPE
@@ -15,13 +15,14 @@ enum class FlavorDimension {
 // purposes, or from a production backend server which supplies up-to-date, real content.
 // These two product flavors reflect this behaviour.
 enum class Flavor(val dimension: FlavorDimension, val applicationIdSuffix: String? = null) {
-    DEMO(FlavorDimension.CONTENT_TYPE, ".demo"),
-    PROD(FlavorDimension.CONTENT_TYPE, ".prod")
+    DEV(FlavorDimension.CONTENT_TYPE, ".dev"),
+    PROD(FlavorDimension.CONTENT_TYPE)
 }
 
-fun Project.configureFlavors(
+fun configureFlavors(
     commonExtension: CommonExtension<*, *, *, *, *, *>
 ) {
+    val appName = "IDPhotoMaster"
     commonExtension.apply {
         flavorDimensions += FlavorDimension.CONTENT_TYPE.name
         productFlavors {
@@ -30,7 +31,15 @@ fun Project.configureFlavors(
                     dimension = it.dimension.name
                     if (this@apply is ApplicationExtension && this is ApplicationProductFlavor) {
                         if (it.applicationIdSuffix != null) {
-                            this.applicationIdSuffix = it.applicationIdSuffix
+                            applicationIdSuffix = it.applicationIdSuffix
+                            versionNameSuffix = it.applicationIdSuffix
+                            resValue(
+                                "string",
+                                "app_name",
+                                appName + "${applicationIdSuffix?.removePrefix(".")?.uppercaseFirstChar()}"
+                            )
+                        } else {
+                            resValue("string", "app_name", appName)
                         }
                     }
                 }

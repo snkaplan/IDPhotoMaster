@@ -25,9 +25,3 @@ plugins {
 tasks.register("clean", Delete::class) {
     delete(rootProject.buildDir)
 }
-
-afterEvaluate {
-    tasks.named("clean") {
-        dependsOn(":installGitHooks")
-    }
-}
