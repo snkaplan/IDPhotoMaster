@@ -2,23 +2,21 @@ package com.idphoto.idphotomaster.core.systemdesign.icon
 
 import androidx.annotation.DrawableRes
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.Camera
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.outlined.Camera
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.idphoto.idphotomaster.R
 
 object AppIcons {
     val Camera = Icons.Default.Camera
-    val CameraOutlined = Icons.Outlined.Camera
-    val BackIcon = Icons.Default.KeyboardArrowLeft
-    val ProfileSelected = R.drawable.ic_profile_selected
-    val ProfileUnselected = R.drawable.ic_profile
+    val BackIcon = Icons.AutoMirrored.Default.KeyboardArrowLeft
 }
 
 @Stable
 sealed class Icon {
-    data class ImageVectorIcon(val imageVector: ImageVector, val contentDescription: String) : Icon()
-    data class DrawableResourceIcon(@DrawableRes val id: Int, val contentDescription: String) : Icon()
+    data class ImageVectorIcon(val imageVector: ImageVector, val contentDescription: String) :
+        Icon()
+
+    data class DrawableResourceIcon(@DrawableRes val id: Int, val contentDescription: String) :
+        Icon()
 }

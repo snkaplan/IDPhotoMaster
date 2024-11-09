@@ -28,7 +28,6 @@ internal class BasketArgs(val selectedPhotoPath: String) {
 
 fun NavGraphBuilder.basketScreen(
     onBackClick: () -> Unit,
-    navigateToLogin: () -> Unit,
     onCompletePurchase: () -> Unit,
     mainViewModel: MainViewModel
 ) {
@@ -40,7 +39,6 @@ fun NavGraphBuilder.basketScreen(
     ) {
         BasketScreen(
             onBackClick = onBackClick,
-            navigateToLogin = navigateToLogin,
             onCompletePurchase = onCompletePurchase,
             mainViewModel = mainViewModel
         )

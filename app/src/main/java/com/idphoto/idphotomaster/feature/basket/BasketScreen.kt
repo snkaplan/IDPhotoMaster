@@ -67,7 +67,6 @@ import de.palm.composestateevents.NavigationEventEffect
 fun BasketScreen(
     modifier: Modifier = Modifier,
     onBackClick: () -> Unit,
-    navigateToLogin: () -> Unit,
     onCompletePurchase: () -> Unit,
     viewModel: BasketViewModel = hiltViewModel(),
     googlePurchaseViewModel: GooglePurchaseViewModel = hiltViewModel(),
@@ -82,13 +81,6 @@ fun BasketScreen(
         googlePurchaseViewModel.billingSetup(context)
         googlePurchaseViewModel.checkProducts()
     }
-    NavigationEventEffect(
-        event = googleViewState.navigateToLogin,
-        onConsumed = {
-            googlePurchaseViewModel.onTriggerViewEvent(GooglePurchaseViewEvent.OnNavigateLoginConsumed)
-        },
-        action = navigateToLogin
-    )
 
     EventEffect(
         event = viewState.purchaseCompleted,

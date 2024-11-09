@@ -21,7 +21,7 @@ fun ScreenButton(modifier: Modifier = Modifier, text: String, onAction: () -> Un
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(containerColor = Blue),
         onClick = { onAction.invoke() },
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         shape = RoundedCornerShape(10.dp),

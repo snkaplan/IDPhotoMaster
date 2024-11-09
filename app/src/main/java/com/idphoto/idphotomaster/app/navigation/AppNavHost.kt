@@ -13,11 +13,6 @@ import com.idphoto.idphotomaster.feature.editphoto.navigateToEditPhoto
 import com.idphoto.idphotomaster.feature.home.HomeNavigationRoute
 import com.idphoto.idphotomaster.feature.home.homeScreen
 import com.idphoto.idphotomaster.feature.home.navigateToHome
-import com.idphoto.idphotomaster.feature.login.loginScreen
-import com.idphoto.idphotomaster.feature.login.navigateLogin
-import com.idphoto.idphotomaster.feature.profile.profileScreen
-import com.idphoto.idphotomaster.feature.savedphotos.navigateToSavedPhotos
-import com.idphoto.idphotomaster.feature.savedphotos.savedPhotosScreen
 import com.idphoto.idphotomaster.feature.splash.SplashNavigationRoute
 import com.idphoto.idphotomaster.feature.splash.splashScreen
 import com.idphoto.idphotomaster.feature.tutorial.TutorialNavigationRoute
@@ -56,12 +51,6 @@ fun AppNavHost(
                 )
             }
         )
-        homeScreen(navigateToEditPhoto = {
-            navController.navigateToEditPhoto(capturedImagePath = it)
-        })
-        loginScreen(
-            onCloseClick = navController::popBackStack
-        )
         tutorialScreen(navigateToHome = {
             navController.navigateToHome(
                 navOptions = navOptions {
@@ -71,19 +60,14 @@ fun AppNavHost(
                 }
             )
         })
+        homeScreen(navigateToEditPhoto = {
+            navController.navigateToEditPhoto(capturedImagePath = it)
+        })
         editPhotoScreen(navController::popBackStack) {
             navController.navigateToBasket(capturedImagePath = it)
         }
-        basketScreen(navController::popBackStack, navigateToLogin = {
-            navController.navigateLogin()
-        }, onCompletePurchase = {
+        basketScreen(navController::popBackStack, onCompletePurchase = {
             navController.popBackStack(route = HomeNavigationRoute, inclusive = false)
         }, mainViewModel = mainViewModel)
-        profileScreen(navigateToLogin = {
-            navController.navigateLogin()
-        }, navigateToSavedPhotos = {
-            navController.navigateToSavedPhotos()
-        })
-        savedPhotosScreen(onBackClick = navController::popBackStack)
     }
 }

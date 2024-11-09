@@ -10,7 +10,6 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import com.idphoto.idphotomaster.R
-import com.idphoto.idphotomaster.core.Session
 import com.idphoto.idphotomaster.core.common.BaseViewModel
 import com.idphoto.idphotomaster.core.common.Constants
 import com.idphoto.idphotomaster.core.common.IViewState
@@ -19,11 +18,9 @@ import com.idphoto.idphotomaster.core.common.asResource
 import com.idphoto.idphotomaster.core.common.dispatchers.AppDispatchers
 import com.idphoto.idphotomaster.core.common.dispatchers.Dispatcher
 import com.idphoto.idphotomaster.core.common.suspendSafeLet
-import com.idphoto.idphotomaster.core.data.repository.UserRepository
 import com.idphoto.idphotomaster.core.domain.model.base.ExceptionModel
 import com.idphoto.idphotomaster.core.domain.usecase.home.ReadImageFromDevice
 import com.idphoto.idphotomaster.core.domain.usecase.home.SavePhotoToGalleryUseCase
-import com.idphoto.idphotomaster.core.domain.worker.SuccessPurchaseWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.palm.composestateevents.StateEvent
 import de.palm.composestateevents.consumed
@@ -41,7 +38,6 @@ import javax.inject.Inject
 class BasketViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val readImageFromDevice: ReadImageFromDevice,
-    private val userRepository: UserRepository,
     @Dispatcher(AppDispatchers.IO) private val ioDispatcher: CoroutineDispatcher,
     private val savePhotoToGalleryUseCase: SavePhotoToGalleryUseCase,
 ) : BaseViewModel<BasketViewState>() {
@@ -56,9 +52,6 @@ class BasketViewModel @Inject constructor(
         viewModelScope.launch {
             when (event) {
                 is BasketViewEvent.OnPurchaseSuccess -> {
-                    suspendSafeLet(userRepository.currentUser?.uid, uiState.value.photo) { uid, photo ->
-                        uploadPhoto(applicationContext = event.context, userId = uid, photo = photo)
-                    }
                     purchaseSuccess()
                 }
 
@@ -128,24 +121,6 @@ class BasketViewModel @Inject constructor(
                 }.launchIn(this)
             }
         }
-    }
-
-    private fun uploadPhoto(applicationContext: Context, userId: String, photo: Bitmap) {
-        Session.uploadPhoto = photo
-        val constraints = Constraints.Builder()
-            .setRequiresCharging(false)
-            .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
-            .build()
-        val data: Data = Data.Builder()
-            .putString(Constants.USER_ID, userId)
-            .build()
-        val uploadRequest =
-            OneTimeWorkRequest.Builder(SuccessPurchaseWorker::class.java)
-                .setConstraints(constraints)
-                .setInputData(data)
-                .build()
-        val workManager = WorkManager.getInstance(applicationContext)
-        workManager.enqueue(uploadRequest)
     }
 }
 

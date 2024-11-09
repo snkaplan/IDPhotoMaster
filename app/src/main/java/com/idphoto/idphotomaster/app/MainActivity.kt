@@ -82,12 +82,12 @@ class MainActivity : ComponentActivity() {
         val data: Data = Data.Builder()
             .putString(KEY_TEMP_FILE_START_PREFIX, Constants.TempFileName)
             .build()
-        val uploadRequest =
+        val deleteRequest =
             OneTimeWorkRequest.Builder(DeleteTempFilesWorker::class.java)
                 .setConstraints(constraints)
                 .setInputData(data)
                 .build()
         val workManager = WorkManager.getInstance(applicationContext)
-        workManager.enqueue(uploadRequest)
+        workManager.enqueue(deleteRequest)
     }
 }
