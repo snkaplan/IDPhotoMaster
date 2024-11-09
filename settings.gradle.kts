@@ -1,8 +1,10 @@
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google()
         mavenCentral()
         gradlePluginPortal()
+        maven(url = "https://plugins.gradle.org/m2/")
     }
 }
 dependencyResolutionManagement {
@@ -16,4 +18,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "IDPhotoMaster"
 include(":app")
- 

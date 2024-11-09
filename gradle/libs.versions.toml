@@ -3,20 +3,29 @@ accompanistVersion = "0.32.0"
 activityCompose = "1.9.3"
 billingVersion = "7.1.1"
 cameraxVersion = "1.4.0"
+androidDesugarJdkLibs = "2.1.3"
 coilComposeVersion = "2.5.0"
 compose = "1.0.0-beta01"
+composeCompiler = "1.5.7"
 composeBom = "2024.10.01"
+gradleVersionsPlugin = "0.46.0"
 composeStateEventsVersion = "2.2.0"
 converterGson = "2.9.0"
 coreKtx = "1.15.0"
+secrets = "2.0.1"
 datastorePreferences = "1.1.1"
 espressoCore = "3.6.1"
+gmsPlugin = "4.4.2"
 firebaseBomVersion = "33.5.1"
 firebaseStorage = "21.0.1"
 gpuimageVersion = "2.1.0"
 gson = "2.10.1"
 hiltAndroid = "2.50"
+compileSdk = "35"
 hiltAndroidCompiler = "2.49"
+targetSdk = "35"
+minSdk = "24"
+com-android-test = "8.3.2"
 hiltCommon = "1.2.0"
 hiltWork = "1.2.0"
 junit = "4.13.2"
@@ -35,9 +44,19 @@ playServicesAuth = "21.2.0"
 playServicesMlkitSubjectSegmentationVersion = "16.0.0-beta1"
 retrofit = "2.9.0"
 workManagerVersion = "2.10.0"
+agpVersion = "8.3.2"
+kotlinVersion = "1.9.10"
+appcompatVersion = "1.7.0"
+materialVersion = "1.12.0"
+kotlin = "1.9.21"
+firebaseCrashlyticsPlugin = "3.0.2"
+ksp = "1.9.10-1.0.13"
+kotlinter = "3.14.0"
+jacoco = "0.8.7"
 # initialize the versions number of the libraries and plugins
 
 [libraries]
+android-desugarJdkLibs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "androidDesugarJdkLibs" }
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistVersion" }
 androidx-camera-camera2 = { module = "androidx.camera:camera-camera2", version.ref = "cameraxVersion" }
 androidx-camera-extensions = { module = "androidx.camera:camera-extensions", version.ref = "cameraxVersion" }
@@ -91,7 +110,44 @@ logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", ver
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 play-services-mlkit-subject-segmentation = { module = "com.google.android.gms:play-services-mlkit-subject-segmentation", version.ref = "playServicesMlkitSubjectSegmentationVersion" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompatVersion" }
+material = { group = "com.google.android.material", name = "material", version.ref = "materialVersion" }
 # initialize the libraries group, name and version number
 
+android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agpVersion" }
+kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+firebase-crashlytics-gradlePlugin = { group = "com.google.firebase", name = "firebase-crashlytics-gradle", version.ref = "firebaseCrashlyticsPlugin" }
+ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "ksp" }
+
+[bundles]
+# Bundle with retrofit dependencies needed to compile.
+network-retrofit = ["converter-gson", "retrofit", "logging-interceptor"]
+
+
 [plugins]
+android-application = { id = "com.android.application", version.ref = "agpVersion" }
+android-library = { id = "com.android.library", version.ref = "agpVersion" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlinVersion" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+kotlinter = { id = "org.jmailen.kotlinter", version.ref = "kotlinter" }
+# Plugins defined by this project
+idphoto-android-application = { id = "idphoto.android.application", version = "unspecified" }
+idphoto-android-application-compose = { id = "idphoto.android.application.compose", version = "unspecified" }
+idphoto-android-application-firebase = { id = "idphoto.android.application.firebase", version = "unspecified" }
+idphoto-android-application-flavors = { id = "idphoto.android.application.flavors", version = "unspecified" }
+idphoto-android-application-jacoco = { id = "idphoto.android.application.jacoco", version = "unspecified" }
+idphoto-android-feature = { id = "idphoto.android.feature", version = "unspecified" }
+idphoto-android-hilt = { id = "idphoto.android.hilt", version = "unspecified" }
+idphoto-android-library = { id = "idphoto.android.library", version = "unspecified" }
+idphoto-android-library-compose = { id = "idphoto.android.library.compose", version = "unspecified" }
+idphoto-android-library-jacoco = { id = "idphoto.android.library.jacoco", version = "unspecified" }
+idphoto-android-test = { id = "idphoto.android.test", version = "unspecified" }
+dagger-hilt-android = { id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+google-services = { id = "com.google.gms.google-services", version.ref = "gmsPlugin" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
+com-android-test = { id = "com.android.test", version.ref = "com-android-test" }
+gradle-versions = { id = "com.github.ben-manes.versions", version.ref = "gradleVersionsPlugin" }
+secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secrets" }
+
 # initialize the plugins id, and version number
